@@ -1,7 +1,4 @@
 import * as Tauri from '@tauri-apps/api';
-import { unknown } from 'zod';
-import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
-import { $ErrorReport } from '../utils/ErrorReport';
 
 interface Process {
   code: number | null;
