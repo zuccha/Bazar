@@ -38,5 +38,7 @@ export const $Shell = {
 
     command.stderr.on('data', (data) => onStderr?.(data));
     command.stdout.on('data', (data) => onStdout?.(data));
+
+    command.spawn();
   },
 };

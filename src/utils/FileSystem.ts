@@ -145,9 +145,9 @@ export const $FileSystem = {
       .map((dir) => dir.name ?? '');
   },
 
-  getDataDirPath: async (): Promise<string> => {
+  getDataPath: async (subPath: string): Promise<string> => {
     const localDataDir = await Path.localDataDir();
-    return Path.join(localDataDir, 'Bazar');
+    return Path.join(localDataDir, 'Bazar', subPath);
   },
 
   getFileNames: async (directoryPath: string): Promise<string[]> => {
