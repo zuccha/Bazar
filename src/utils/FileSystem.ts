@@ -36,16 +36,22 @@ export const $FileSystem = {
       // Copy files.
       const fileNames = await $FileSystem.getFileNames(sourceDirPath);
       for (const fileName of fileNames) {
-        const sourceFilePath = await Path.join(sourceDirPath, fileName);
-        const targetFilePath = await Path.join(targetDirPath, fileName);
+        const sourceFilePath = await $FileSystem.join(sourceDirPath, fileName);
+        const targetFilePath = await $FileSystem.join(targetDirPath, fileName);
         await FS.copyFile(sourceFilePath, targetFilePath);
       }
 
       if (isRecursive) {
         const subDirNames = await $FileSystem.getDirNames(sourceDirPath);
         for (const subDirName of subDirNames) {
-          const sourceSubDirPath = await Path.join(sourceDirPath, subDirName);
-          const targetSubDirPath = await Path.join(targetDirPath, subDirName);
+          const sourceSubDirPath = await $FileSystem.join(
+            sourceDirPath,
+            subDirName,
+          );
+          const targetSubDirPath = await $FileSystem.join(
+            targetDirPath,
+            subDirName,
+          );
           const maybeError = $FileSystem.copyDirectory(
             sourceSubDirPath,
             targetSubDirPath,
@@ -147,7 +153,8 @@ export const $FileSystem = {
 
   getDataPath: async (subPath: string): Promise<string> => {
     const localDataDir = await Path.localDataDir();
-    return Path.join(localDataDir, 'Bazar', subPath);
+    const dataPath = await $FileSystem.join(localDataDir, 'Bazar', subPath);
+    return dataPath;
   },
 
   getFileNames: async (directoryPath: string): Promise<string[]> => {
@@ -157,8 +164,13 @@ export const $FileSystem = {
       .map((file) => file.name ?? '');
   },
 
-  join: (...paths: string[]): Promise<string> => {
-    return Path.join(...paths);
+  join: async (...paths: string[]): Promise<string> => {
+    // TODO: Use Path.join() once the it'll no longer check for path existence.
+    // return await Path.join(...paths);
+    const path = paths
+      .join(Path.sep)
+      .replace(new RegExp(`${Path.sep}{2,}`, 'g'), Path.sep);
+    return path;
   },
 
   loadJson: async (path: string): Promise<EitherErrorOr<unknown>> => {
