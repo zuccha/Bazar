@@ -1,9 +1,14 @@
+import { z, ZodType } from 'zod';
+
 export interface PriorityList<T> {
   readonly size: number;
   readonly items: T[];
 }
 
 export const $PriorityList = {
+  schema: <T>(itemsSchema: ZodType<T>) =>
+    z.object({ size: z.number(), items: z.array(itemsSchema) }),
+
   create: <T>(items: T[], size: number): PriorityList<T> => ({
     items,
     size,
