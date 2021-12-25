@@ -269,7 +269,22 @@ const makeDownloadEmbedded = (
 export const $Toolchain = {
   // #region Constructors
 
-  create: async (): Promise<Toolchain> => ({
+  createEmpty: (): Toolchain => ({
+    custom: {
+      editor: { exePath: '' },
+      emulator: { exePath: '' },
+    },
+    embedded: {
+      lunarMagic: { status: 'not-installed' },
+      asar: { status: 'not-installed' },
+      flips: { status: 'not-installed' },
+      gps: { status: 'not-installed' },
+      pixi: { status: 'not-installed' },
+      uberAsm: { status: 'not-installed' },
+    },
+  }),
+
+  createByLoad: async (): Promise<Toolchain> => ({
     custom: {
       editor: await getCustom(EDITOR_OPTIONS),
       emulator: await getCustom(EMULATOR_OPTIONS),
