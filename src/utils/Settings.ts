@@ -3,7 +3,7 @@ import { $ErrorReport, ErrorReport } from '../utils/ErrorReport';
 import { $EitherErrorOr, EitherErrorOr } from './EitherErrorOr';
 import { $FileSystem } from './FileSystem';
 
-type Serializable = boolean | number | string;
+type Serializable = any;
 
 export const $Settings = {
   create: <Schema extends Record<string, Serializable>>({
@@ -18,9 +18,7 @@ export const $Settings = {
     get: <Key extends keyof Schema>(
       key: Key,
     ) => Promise<EitherErrorOr<Schema[Key]>>;
-    getAll: <Key extends keyof Schema>(
-      key: Key,
-    ) => Promise<EitherErrorOr<Schema>>;
+    getAll: () => Promise<EitherErrorOr<Schema>>;
     set: <Key extends keyof Schema>(
       key: Key,
       value: Schema[Key],
@@ -39,6 +37,10 @@ export const $Settings = {
       key: Key,
     ): Promise<EitherErrorOr<Schema[Key]>> => {
       const settingsFilePath = await getSettingsFilePath();
+
+      if (!(await $FileSystem.exists(settingsFilePath))) {
+        return $EitherErrorOr.value(cache[key]);
+      }
 
       const maybeSettingsOrError = await $FileSystem.loadJson(settingsFilePath);
       if (maybeSettingsOrError.isError) {
@@ -62,6 +64,10 @@ export const $Settings = {
 
     const getAll = async (): Promise<EitherErrorOr<Schema>> => {
       const settingsFilePath = await getSettingsFilePath();
+
+      if (!(await $FileSystem.exists(settingsFilePath))) {
+        return $EitherErrorOr.value(cache);
+      }
 
       const maybeSettingsOrError = await $FileSystem.loadJson(settingsFilePath);
       if (maybeSettingsOrError.isError) {
