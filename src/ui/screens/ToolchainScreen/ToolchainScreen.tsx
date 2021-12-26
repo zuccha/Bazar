@@ -16,14 +16,6 @@ import Toolchain from '../../../core2/Toolchain';
 import { useGet, useSetAsync } from '../../../hooks/useAccessors';
 import useAsyncCallback from '../../../hooks/useAsyncCallback';
 import useHandleError from '../../../hooks/useHandleError';
-import {
-  downloadAsar,
-  downloadFlips,
-  downloadGps,
-  downloadLunarMagic,
-  downloadPixi,
-  downloadUberAsm,
-} from '../../../store/slices/core/slices/toolchain';
 import useColorScheme from '../../../theme/useColorScheme';
 import ToolCustom from './ToolCustom';
 import ToolEmbedded from './ToolEmbedded';
@@ -78,36 +70,66 @@ export default function ToolchainScreen(): ReactElement {
     [editEmulator],
   );
 
+  const downloadLunarMagic = useSetAsync(
+    toolchain,
+    toolchain.downloadLunarMagic,
+    Toolchain.downloadLunarMagicTriggers,
+  );
   const [handleDownloadLunarMagic, lunarMagicStatus] = useDownloadToolEmbedded({
     name: 'Lunar Magic',
     key: 'lunarMagic',
     download: downloadLunarMagic,
   });
 
+  const downloadAsar = useSetAsync(
+    toolchain,
+    toolchain.downloadAsar,
+    Toolchain.downloadAsarTriggers,
+  );
   const [handleDownloadAsar, asarStatus] = useDownloadToolEmbedded({
     name: 'Asar',
     key: 'asar',
     download: downloadAsar,
   });
 
+  const downloadFlips = useSetAsync(
+    toolchain,
+    toolchain.downloadFlips,
+    Toolchain.downloadFlipsTriggers,
+  );
   const [handleDownloadFlips, flipsStatus] = useDownloadToolEmbedded({
     name: 'Flips',
     key: 'flips',
     download: downloadFlips,
   });
 
+  const downloadGps = useSetAsync(
+    toolchain,
+    toolchain.downloadGps,
+    Toolchain.downloadGpsTriggers,
+  );
   const [handleDownloadGps, gpsStatus] = useDownloadToolEmbedded({
     name: 'GPS',
     key: 'gps',
     download: downloadGps,
   });
 
+  const downloadPixi = useSetAsync(
+    toolchain,
+    toolchain.downloadPixi,
+    Toolchain.downloadPixiTriggers,
+  );
   const [handleDownloadPixi, pixiStatus] = useDownloadToolEmbedded({
     name: 'PIXI',
     key: 'pixi',
     download: downloadPixi,
   });
 
+  const downloadUberAsm = useSetAsync(
+    toolchain,
+    toolchain.downloadUberAsm,
+    Toolchain.downloadUberAsmTriggers,
+  );
   const [handleDownloadUberAsm, uberAsmStatus] = useDownloadToolEmbedded({
     name: 'UberASM',
     key: 'uberAsm',

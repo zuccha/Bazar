@@ -1,11 +1,8 @@
 import { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch } from '../../../store';
-import {
-  getSetting,
-  setSetting,
-  SettingsState,
-} from '../../../store/slices/settings';
+import { useCore } from '../../../contexts/CoreContext';
+import Core from '../../../core2/Core';
+import { GenericSetting, GenericSettingsStore } from '../../../core2/Settings';
+import { useGet, useSetAsync } from '../../../hooks/useAccessors';
 import {
   FormField,
   FormFieldParams,
@@ -13,22 +10,28 @@ import {
 } from '../../../ui-atoms/input/FormControl';
 import { ErrorReport } from '../../../utils/ErrorReport';
 
-export default function useSettingField<S extends keyof SettingsState>(
+export default function useSettingField<S extends GenericSetting>(
   setting: S,
-  params: Omit<FormFieldParams<SettingsState[S]>, 'initialValue'>,
+  params: Omit<FormFieldParams<GenericSettingsStore[S]>, 'initialValue'>,
 ): {
-  field: FormField<SettingsState[S]>;
+  field: FormField<GenericSettingsStore[S]>;
   save: () => Promise<ErrorReport | undefined>;
   reset: () => void;
 } {
-  const initialValue = useSelector(getSetting(setting));
-  const field = useFormField<SettingsState[S]>({ initialValue, ...params });
+  const core = useCore();
+  const settings = useGet(core, core.getSettings, Core.getSettingsDeps);
 
-  const dispatch = useDispatch<AppDispatch>();
+  const initialValue = useGet(settings, () => settings.get(setting), [setting]);
+  const field = useFormField<GenericSettingsStore[S]>({
+    initialValue,
+    ...params,
+  });
+
+  const setSetting = useSetAsync(settings, settings.set, [setting]);
 
   const save = useCallback(() => {
-    return dispatch(setSetting(setting, field.value));
-  }, [dispatch, field.value, setting]);
+    return setSetting(setting, field.value);
+  }, [field.value, setting]);
 
   const reset = useCallback(() => {
     return field.handleChange(initialValue);

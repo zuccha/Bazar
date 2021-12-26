@@ -1,9 +1,9 @@
-import { useDispatch, useSelector } from 'react-redux';
-import { Toolchain } from '../../../core/Toolchain';
+import { useCore } from '../../../contexts/CoreContext';
+import Core from '../../../core2/Core';
+import { ToolchainEmbedded } from '../../../core2/Toolchain';
+import { useGet } from '../../../hooks/useAccessors';
 import useAsyncCallback from '../../../hooks/useAsyncCallback';
 import useHandleError from '../../../hooks/useHandleError';
-import { AppDispatch, AppState } from '../../../store';
-import { getToolchain } from '../../../store/slices/core/slices/toolchain';
 import { ErrorReport } from '../../../utils/ErrorReport';
 
 export default function useDownloadToolEmbedded({
@@ -12,25 +12,22 @@ export default function useDownloadToolEmbedded({
   download,
 }: {
   name: string;
-  key: keyof Toolchain['embedded'];
-  download: () => (
-    dispatch: AppDispatch,
-    getState: () => AppState,
-  ) => Promise<ErrorReport | undefined>;
+  key: ToolchainEmbedded;
+  download: () => Promise<ErrorReport | undefined>;
 }): [() => void, 'downloading' | 'installed' | 'not-installed' | 'deprecated'] {
   const handleError = useHandleError();
-  const dispatch = useDispatch<AppDispatch>();
-  const toolchain = useSelector(getToolchain());
+
+  const core = useCore();
+  const toolchain = useGet(core, core.getToolchain, Core.getToolchainDeps);
+  const tool = useGet(toolchain, () => toolchain.getEmbedded(key), [key]);
 
   const handleDownload = useAsyncCallback(async () => {
-    const error = await dispatch(download());
+    const error = await download();
     handleError(error, `Failed to download  ${name}`);
     return error;
-  }, [dispatch, handleError, name, download]);
+  }, [handleError, name, download]);
 
-  const status = handleDownload.isLoading
-    ? 'downloading'
-    : toolchain.embedded[key].status;
+  const status = handleDownload.isLoading ? 'downloading' : tool.status;
 
   return [handleDownload.call, status];
 }

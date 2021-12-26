@@ -1,6 +1,6 @@
 import { Flex, VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../store';
 import { AppRouteName, setAppRoute } from '../../store/slices/navigation';
 import BrowserInput from '../../ui-atoms/input/BrowserInput';
@@ -10,17 +10,13 @@ import FormControl, {
   useFormField,
 } from '../../ui-atoms/input/FormControl';
 import TextInput from '../../ui-atoms/input/TextInput';
-import {
-  getSetting,
-  prioritizeRecentProject,
-} from '../../store/slices/settings';
 import Drawer from '../../ui-atoms/overlay/Drawer';
 import FormError from '../../ui-atoms/input/FormError';
 import Alert from '../../ui-atoms/display/Alert';
 import { $FileSystem } from '../../utils/FileSystem';
 import useAsyncCallback from '../../hooks/useAsyncCallback';
 import Project from '../../core2/Project';
-import { useSet } from '../../hooks/useAccessors';
+import { useGet, useSet, useSetAsync } from '../../hooks/useAccessors';
 import Core from '../../core2/Core';
 import { useCore } from '../../contexts/CoreContext';
 
@@ -32,6 +28,7 @@ export default function ProjectCreationFromSourceDrawer({
   onClose,
 }: ProjectCreationFromSourceProps): ReactElement {
   const core = useCore();
+  const settings = useGet(core, core.getSettings, Core.getSettingsDeps);
 
   const nameField = useFormField({
     infoMessage: 'This will be the name fo the project directory.',
@@ -41,7 +38,11 @@ export default function ProjectCreationFromSourceDrawer({
     onValidate: $FileSystem.validateIsValidName,
   });
 
-  const defaultAuthor = useSelector(getSetting('newProjectDefaultAuthor'));
+  const defaultAuthor = useGet(
+    settings,
+    () => settings.get('newProjectDefaultAuthor'),
+    ['newProjectDefaultAuthor'],
+  );
   const authorField = useFormField({
     infoMessage: 'Author of the project.',
     initialValue: defaultAuthor,
@@ -49,8 +50,10 @@ export default function ProjectCreationFromSourceDrawer({
     label: 'Author',
   });
 
-  const defaultLocationDirPath = useSelector(
-    getSetting('newProjectDefaultLocationDirPath'),
+  const defaultLocationDirPath = useGet(
+    settings,
+    () => settings.get('newProjectDefaultLocationDirPath'),
+    ['newProjectDefaultLocationDirPath'],
   );
   const locationDirPathField = useFormField({
     infoMessage: 'The project will be created in this directory.',
@@ -60,8 +63,10 @@ export default function ProjectCreationFromSourceDrawer({
     onValidate: $FileSystem.validateExistsDir,
   });
 
-  const defaultRomFilePath = useSelector(
-    getSetting('newProjectDefaultRomFilePath'),
+  const defaultRomFilePath = useGet(
+    settings,
+    () => settings.get('newProjectDefaultRomFilePath'),
+    ['newProjectDefaultRomFilePath'],
   );
   const romFilePathField = useFormField({
     infoMessage: 'ROM used for the project (a copy will be made).',
@@ -76,6 +81,12 @@ export default function ProjectCreationFromSourceDrawer({
   const dispatch = useDispatch<AppDispatch>();
 
   const setProject = useSet(core, core.setProject, Core.setProjectTriggers);
+
+  const prioritizeRecentProject = useSetAsync(
+    settings,
+    settings.prioritizeRecentProject,
+    ['recentProjects'],
+  );
 
   const form = useForm({
     fields: [nameField, romFilePathField, locationDirPathField],
@@ -93,7 +104,7 @@ export default function ProjectCreationFromSourceDrawer({
         locationDirPathField.value,
         nameField.value,
       );
-      await dispatch(prioritizeRecentProject(projectDirPath));
+      await prioritizeRecentProject(projectDirPath);
     },
   });
 

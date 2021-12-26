@@ -1,11 +1,11 @@
 import { ZodType } from 'zod';
-import { $ErrorReport, ErrorReport } from '../utils/ErrorReport';
+import { $ErrorReport, ErrorReport } from './ErrorReport';
 import { $EitherErrorOr, EitherErrorOr } from './EitherErrorOr';
 import { $FileSystem } from './FileSystem';
 
 type Serializable = any;
 
-export const $Settings = {
+export const $SettingsStore = {
   create: <Schema extends Record<string, Serializable>>({
     defaults,
     fileName,
@@ -19,6 +19,7 @@ export const $Settings = {
       key: Key,
     ) => Promise<EitherErrorOr<Schema[Key]>>;
     getAll: () => Promise<EitherErrorOr<Schema>>;
+    getCache: <Key extends keyof Schema>(key: Key) => Schema[Key];
     set: <Key extends keyof Schema>(
       key: Key,
       value: Schema[Key],
@@ -60,6 +61,10 @@ export const $Settings = {
 
       cache = settingsOrError.data;
       return $EitherErrorOr.value(cache[key]);
+    };
+
+    const getCache = <Key extends keyof Schema>(key: Key): Schema[Key] => {
+      return cache[key];
     };
 
     const getAll = async (): Promise<EitherErrorOr<Schema>> => {
@@ -107,6 +112,7 @@ export const $Settings = {
     return {
       get,
       getAll,
+      getCache,
       set,
     };
   },

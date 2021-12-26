@@ -4,12 +4,11 @@ import { useDispatch } from 'react-redux';
 import { useCore } from '../../../contexts/CoreContext';
 import Core from '../../../core2/Core';
 import Project from '../../../core2/Project';
-import { useSet } from '../../../hooks/useAccessors';
+import { useGet, useSet, useSetAsync } from '../../../hooks/useAccessors';
 import useAsyncCallback from '../../../hooks/useAsyncCallback';
 import useSafeState from '../../../hooks/usSafeState';
 import { AppDispatch } from '../../../store';
 import { AppRouteName, setAppRoute } from '../../../store/slices/navigation';
-import { prioritizeRecentProject } from '../../../store/slices/settings';
 import Button from '../../../ui-atoms/input/Button';
 import FormError from '../../../ui-atoms/input/FormError';
 import { $Dialog } from '../../../utils/Dialog';
@@ -17,6 +16,7 @@ import ProjectCreationFromSourceDrawer from '../../drawers/ProjectCreationFromSo
 
 export default function HomeScreenActions(): ReactElement {
   const core = useCore();
+  const settings = useGet(core, core.getSettings, Core.getSettingsDeps);
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -29,6 +29,12 @@ export default function HomeScreenActions(): ReactElement {
 
   const setProject = useSet(core, core.setProject, Core.setProjectTriggers);
 
+  const prioritizeRecentProject = useSetAsync(
+    settings,
+    settings.prioritizeRecentProject,
+    ['recentProjects'],
+  );
+
   const handleOpenProject = useAsyncCallback(async () => {
     const pathOrError = await $Dialog.open({ type: 'directory' });
     if (pathOrError.isError) return pathOrError.error;
@@ -40,7 +46,7 @@ export default function HomeScreenActions(): ReactElement {
     const maybeError = setProject(errorOrProject.value);
     if (maybeError) return maybeError;
     dispatch(setAppRoute({ name: AppRouteName.Project }));
-    dispatch(prioritizeRecentProject(pathOrError.value));
+    prioritizeRecentProject(pathOrError.value);
   }, [dispatch]);
 
   return (

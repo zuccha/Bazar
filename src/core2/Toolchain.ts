@@ -2,24 +2,26 @@ import { z } from 'zod';
 import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
 import { ErrorReport } from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
-import { $Settings } from '../utils/Settings';
+import { $SettingsStore } from '../utils/SettingsStore';
 
 // #region Settings
 
-const ToolchainSettingsSchema = z.object({
+const ToolchainSettingsStoreSchema = z.object({
   editorExePath: z.string(),
   emulatorExePath: z.string(),
 });
 
-export type ToolchainSettings = z.infer<typeof ToolchainSettingsSchema>;
+export type ToolchainSettingsStore = z.infer<
+  typeof ToolchainSettingsStoreSchema
+>;
 
-const $ToolchainSettings = $Settings.create({
+const $ToolchainSettingsStore = $SettingsStore.create({
   defaults: {
     editorExePath: '',
     emulatorExePath: '',
   },
   fileName: 'toolchain.json',
-  schema: ToolchainSettingsSchema,
+  schema: ToolchainSettingsStoreSchema,
 });
 
 // #endregion Settings
@@ -32,7 +34,7 @@ interface ToolCustom {
 
 interface ToolCustomOptions {
   name: string;
-  settingKey: keyof ToolchainSettings;
+  settingKey: keyof ToolchainSettingsStore;
 }
 
 type ToolEmbedded =
@@ -125,7 +127,7 @@ const getToolchainDirPath = (): Promise<string> =>
 const readCustom = async (
   options: ToolCustomOptions,
 ): Promise<EitherErrorOr<ToolCustom>> => {
-  const exePathOrError = await $ToolchainSettings.get(options.settingKey);
+  const exePathOrError = await $ToolchainSettingsStore.get(options.settingKey);
   if (exePathOrError.isError) return $EitherErrorOr.error(exePathOrError.error);
   return $EitherErrorOr.value({ exePath: exePathOrError.value });
 };
@@ -149,8 +151,8 @@ const readEmbedded = async ({
 
 // #endregion Utils
 
-type ToolchainCustom = 'editor' | 'emulator';
-type ToolchainEmbedded =
+export type ToolchainCustom = 'editor' | 'emulator';
+export type ToolchainEmbedded =
   | 'lunarMagic'
   | 'asar'
   | 'flips'
@@ -239,8 +241,6 @@ export default class Toolchain {
     const uberAsmOrError = await readEmbedded(UBER_ASM_OPTIONS);
     if (uberAsmOrError.isError) return uberAsmOrError.error;
 
-    console.log('Toolchain loaded', editorOrError, emulatorOrError);
-
     this.editor = editorOrError.value;
     this.emulator = emulatorOrError.value;
     this.lunarMagic = lunarMagicOrError.value;
@@ -259,7 +259,7 @@ export default class Toolchain {
   ): Promise<ErrorReport | undefined> => {
     let error: ErrorReport | undefined;
     const errorMessage = `Toolchain.${methodName}: Failed to set path`;
-    error = await $ToolchainSettings.set(settingKey, exePath);
+    error = await $ToolchainSettingsStore.set(settingKey, exePath);
     if (error) return error.extend(errorMessage);
     this[propertyName].exePath = exePath;
   };
@@ -297,6 +297,14 @@ export default class Toolchain {
     await $FileSystem.removeFile(zipPath);
 
     this[propertyName] = { status: 'installed', exePath, directoryPath };
+  };
+
+  getCustom = (propertyName: ToolchainCustom): ToolCustom => {
+    return this[propertyName];
+  };
+
+  getEmbedded = (propertyName: ToolchainEmbedded): ToolEmbedded => {
+    return this[propertyName];
   };
 
   static getEditorDeps = ['editor'];

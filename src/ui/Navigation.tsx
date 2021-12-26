@@ -9,7 +9,6 @@ import {
 import { Flex, VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { hasProject } from '../store/slices/core/slices/project';
 import {
   AppRouteName,
   selectAppRoute,
@@ -22,6 +21,9 @@ import HomeScreen from './screens/HomeScreen';
 import ProjectScreen from './screens/ProjectScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import ToolsScreen from './screens/ToolchainScreen';
+import { useCore } from '../contexts/CoreContext';
+import Core from '../core2/Core';
+import { useGet } from '../hooks/useAccessors';
 
 const ScreenByAppRouteName: Record<AppRouteName, () => ReactElement> = {
   [AppRouteName.About]: AboutScreen,
@@ -36,7 +38,8 @@ export default function Navigation(): ReactElement {
   const appRoute = useSelector(selectAppRoute);
   const dispatch = useDispatch();
   const Screen = ScreenByAppRouteName[appRoute.name];
-  const projectExists = useSelector(hasProject);
+  const core = useCore();
+  const project = useGet(core, core.getProject, Core.getProjectDeps);
 
   return (
     <Flex h='100%'>
@@ -50,7 +53,7 @@ export default function Navigation(): ReactElement {
         <SidebarButton
           icon={<CopyIcon />}
           isActive={appRoute.name === AppRouteName.Project}
-          isDisabled={!projectExists}
+          isDisabled={!project}
           label='Project'
           onClick={() => dispatch(setAppRoute({ name: AppRouteName.Project }))}
         />

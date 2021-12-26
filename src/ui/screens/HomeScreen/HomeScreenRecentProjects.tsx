@@ -1,48 +1,61 @@
 import { Flex, Heading, Text, VStack } from '@chakra-ui/layout';
 import { Box } from '@chakra-ui/react';
 import { ReactElement } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useCore } from '../../../contexts/CoreContext';
 import Core from '../../../core2/Core';
 import Project from '../../../core2/Project';
-import { useSet } from '../../../hooks/useAccessors';
+import { useGet, useSet, useSetAsync } from '../../../hooks/useAccessors';
 import useAsyncCallback from '../../../hooks/useAsyncCallback';
 import { AppDispatch } from '../../../store';
 import { AppRouteName, setAppRoute } from '../../../store/slices/navigation';
-import {
-  getSetting,
-  prioritizeRecentProject,
-  removeRecentProject,
-} from '../../../store/slices/settings';
 import Button from '../../../ui-atoms/input/Button';
 import FormError from '../../../ui-atoms/input/FormError';
 import { $FileSystem } from '../../../utils/FileSystem';
 
 export default function HomeScreenRecentProjects(): ReactElement {
   const core = useCore();
+  const settings = useGet(core, core.getSettings, Core.getSettingsDeps);
+
   const setProject = useSet(core, core.setProject, Core.setProjectTriggers);
 
   const dispatch = useDispatch<AppDispatch>();
 
-  const recentProjectDirPaths = useSelector(getSetting('recentProjects'));
+  const recentProjectDirPaths = useGet(
+    settings,
+    () => settings.get('recentProjects'),
+    ['recentProjects'],
+  );
+
+  const prioritizeRecentProject = useSetAsync(
+    settings,
+    settings.prioritizeRecentProject,
+    ['recentProjects'],
+  );
+
+  const removeRecentProject = useSetAsync(
+    settings,
+    settings.removeRecentProject,
+    ['recentProjects'],
+  );
 
   const handleOpenRecentProject = useAsyncCallback(
     async (path: string) => {
       const errorOrProject = await Project.open({ directoryPath: path });
       if (errorOrProject.isError) {
-        await dispatch(removeRecentProject(path));
+        await removeRecentProject(path);
         return errorOrProject.error;
       }
       const maybeError = setProject(errorOrProject.value);
       if (maybeError) return maybeError;
       dispatch(setAppRoute({ name: AppRouteName.Project }));
-      dispatch(prioritizeRecentProject(path));
+      prioritizeRecentProject(path);
     },
     [dispatch],
   );
 
   const handleRemoveRecentProject = useAsyncCallback(
-    (path: string) => dispatch(removeRecentProject(path)),
+    (path: string) => removeRecentProject(path),
     [dispatch],
   );
 

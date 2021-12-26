@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
 import { ErrorReport } from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
-import { $Settings } from '../utils/Settings';
+import { $SettingsStore } from '../utils/SettingsStore';
 
 // #region Settings
 
@@ -13,7 +13,7 @@ const ToolchainSettingsSchema = z.object({
 
 export type ToolchainSettings = z.infer<typeof ToolchainSettingsSchema>;
 
-const $ToolchainSettings = $Settings.create({
+const $ToolchainSettings = $SettingsStore.create({
   defaults: {
     editorExePath: '',
     emulatorExePath: '',
