@@ -2,10 +2,8 @@ import { z } from 'zod';
 import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
 import { ErrorReport } from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
-import Patch from './Patch';
 import ProjectSnapshot from './ProjectSnapshot';
 import Resource from './Resource';
-import { Toolchain } from './Toolchain';
 
 // #region Info
 
@@ -158,60 +156,4 @@ export default class Project {
   };
 
   // #endregion Info
-
-  // #region Generic
-
-  // async openInLunarMagic(
-  //   toolchain: Toolchain,
-  // ): Promise<ErrorReport | undefined> {
-  //   const errorMessage = 'Could not open project in Lunar Magic';
-  //   const maybeError = await this.latest.openInLunarMagic(toolchain);
-  //   return maybeError ? maybeError.extend(errorMessage) : undefined;
-  // }
-
-  // async launchInEmulator(
-  //   toolchain: Toolchain,
-  // ): Promise<ErrorReport | undefined> {
-  //   const errorMessage = 'Could not open project in emulator';
-  //   const maybeError = await this.latest.launchInEmulator(toolchain);
-  //   return maybeError ? maybeError.extend(errorMessage) : undefined;
-  // }
-
-  // #endregion Generic
-
-  // #region Patches
-
-  // static getPatchesDeps = ['Project.patches'];
-  // getPatches(): Patch[] {
-  //   return this.latest.getPatches();
-  // }
-
-  // static addPatchFromDirectoryTriggers = ['Project.patches'];
-  // async addPatchFromDirectory(
-  //   ...args: Parameters<ProjectSnapshot['addPatchFromDirectory']>
-  // ): Promise<ErrorReport | undefined> {
-  //   const errorMessage = `Project.addPatchFromDirectory: failed to create patch for latest snapshot`;
-  //   const maybeError = await this.latest.addPatchFromDirectory(...args);
-  //   return maybeError ? maybeError.extend(errorMessage) : undefined;
-  // }
-
-  // static addPatchFromFileTriggers = ['Project.patches'];
-  // async addPatchFromFile(
-  //   ...args: Parameters<ProjectSnapshot['addPatchFromFile']>
-  // ): Promise<ErrorReport | undefined> {
-  //   const errorMessage = `Project.addPatchFromFile: failed to create patch for latest snapshot`;
-  //   const maybeError = await this.latest.addPatchFromFile(...args);
-  //   return maybeError ? maybeError.extend(errorMessage) : undefined;
-  // }
-
-  // static removePatchTriggers = ['Project.patches'];
-  // async removePatch(
-  //   ...args: Parameters<ProjectSnapshot['removePatch']>
-  // ): Promise<ErrorReport | undefined> {
-  //   const errorMessage = `Project.removePatch: failed to remove patch for latest snapshot`;
-  //   const maybeError = await this.latest.removePatch(...args);
-  //   return maybeError ? maybeError.extend(errorMessage) : undefined;
-  // }
-
-  // #endregion Patches
 }

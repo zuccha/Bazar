@@ -86,7 +86,6 @@ export const useSetAsync = <T, A extends unknown[]>(
     ): Promise<ErrorReport | undefined> {
       const error = await setter(...args);
       if (error) return error;
-      console.log(item, triggers);
       notify(item, triggers);
     },
     [item, setter, triggers],

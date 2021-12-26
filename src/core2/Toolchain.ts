@@ -51,21 +51,6 @@ interface ToolEmbeddedOptions {
   downloadUrl: string;
 }
 
-export interface Toolchain {
-  custom: {
-    editor: ToolCustom;
-    emulator: ToolCustom;
-  };
-  embedded: {
-    lunarMagic: ToolEmbedded;
-    asar: ToolEmbedded;
-    flips: ToolEmbedded;
-    gps: ToolEmbedded;
-    pixi: ToolEmbedded;
-    uberAsm: ToolEmbedded;
-  };
-}
-
 // #endregion Types
 
 // #region Constants
@@ -132,202 +117,267 @@ const UBER_ASM_OPTIONS: ToolEmbeddedOptions = {
 
 // #endregion Constants
 
+// #region Utils
+
 const getToolchainDirPath = (): Promise<string> =>
   $FileSystem.getDataPath('toolchain');
 
-const getCustom = async (options: ToolCustomOptions): Promise<ToolCustom> => {
-  const exePath = await $ToolchainSettings.get(options.settingKey);
-  return { exePath: exePath.isValue ? exePath.value : '' };
-};
-
-const makeSetCustom = (
-  key: keyof Toolchain['custom'],
+const readCustom = async (
   options: ToolCustomOptions,
-): ((
-  toolchain: Toolchain,
-  exePath: string,
-) => Promise<EitherErrorOr<Toolchain>>) => {
-  return async (
-    toolchain: Toolchain,
-    exePath: string,
-  ): Promise<EitherErrorOr<Toolchain>> => {
-    const toolCustom = toolchain.custom[key];
-    const error = await $ToolchainSettings.set(options.settingKey, exePath);
-    if (error) {
-      const errorMessage = `Failed set tool "${options.name}"`;
-      return $EitherErrorOr.error(error.extend(errorMessage));
-    }
-    return $EitherErrorOr.value({
-      ...toolchain,
-      custom: {
-        ...toolchain.custom,
-        [key]: {
-          ...toolCustom,
-          exePath,
-        },
-      },
-    });
-  };
+): Promise<EitherErrorOr<ToolCustom>> => {
+  const exePathOrError = await $ToolchainSettings.get(options.settingKey);
+  if (exePathOrError.isError) return $EitherErrorOr.error(exePathOrError.error);
+  return $EitherErrorOr.value({ exePath: exePathOrError.value });
 };
 
 const readEmbedded = async ({
   directoryName,
   exeName,
   version,
-}: ToolEmbeddedOptions): Promise<ToolEmbedded> => {
+}: ToolEmbeddedOptions): Promise<EitherErrorOr<ToolEmbedded>> => {
   const toolchainDirPath = await getToolchainDirPath();
   const directoryPath = await $FileSystem.join(toolchainDirPath, directoryName);
   if (await $FileSystem.validateExistsDir(directoryPath)) {
-    return { status: 'not-installed' };
+    return $EitherErrorOr.value({ status: 'not-installed' });
   }
   const exePath = await $FileSystem.join(directoryPath, version, exeName);
   if (await $FileSystem.validateExistsFile(exePath)) {
-    return { status: 'not-installed' };
+    return $EitherErrorOr.value({ status: 'not-installed' });
   }
-  return { status: 'installed', exePath, directoryPath };
+  return $EitherErrorOr.value({ status: 'installed', exePath, directoryPath });
 };
 
-const downloadEmbedded = async ({
-  directoryName,
-  exeName,
-  version,
-  downloadUrl,
-}: ToolEmbeddedOptions): Promise<EitherErrorOr<ToolEmbedded>> => {
-  let error: ErrorReport | undefined;
-  const toolchainDirPath = await getToolchainDirPath();
-  const directoryPath = await $FileSystem.join(toolchainDirPath, directoryName);
-  const versionPath = await $FileSystem.join(directoryPath, version);
-  const exePath = await $FileSystem.join(versionPath, exeName);
-  const zipPath = await $FileSystem.join(directoryPath, `${version}.zip`);
+// #endregion Utils
 
-  error = await $FileSystem.downloadFile(zipPath, downloadUrl);
-  if (error) {
-    const errorMessage = 'Failed to download';
-    return $EitherErrorOr.error(error.extend(errorMessage));
+type ToolchainCustom = 'editor' | 'emulator';
+type ToolchainEmbedded =
+  | 'lunarMagic'
+  | 'asar'
+  | 'flips'
+  | 'gps'
+  | 'pixi'
+  | 'uberAsm';
+
+export default class Toolchain {
+  private editor: ToolCustom;
+  private emulator: ToolCustom;
+
+  private lunarMagic: ToolEmbedded;
+  private asar: ToolEmbedded;
+  private flips: ToolEmbedded;
+  private gps: ToolEmbedded;
+  private pixi: ToolEmbedded;
+  private uberAsm: ToolEmbedded;
+
+  private constructor({
+    editor,
+    emulator,
+    lunarMagic,
+    asar,
+    flips,
+    gps,
+    pixi,
+    uberAsm,
+  }: {
+    editor: ToolCustom;
+    emulator: ToolCustom;
+    lunarMagic: ToolEmbedded;
+    asar: ToolEmbedded;
+    flips: ToolEmbedded;
+    gps: ToolEmbedded;
+    pixi: ToolEmbedded;
+    uberAsm: ToolEmbedded;
+  }) {
+    this.editor = editor;
+    this.emulator = emulator;
+    this.lunarMagic = lunarMagic;
+    this.asar = asar;
+    this.flips = flips;
+    this.gps = gps;
+    this.pixi = pixi;
+    this.uberAsm = uberAsm;
   }
 
-  error = await $FileSystem.unzip(zipPath, versionPath);
-  if (error) {
-    await $FileSystem.removeFile(zipPath);
-    const errorMessage = 'Failed to unzip';
-    return $EitherErrorOr.error(error.extend(errorMessage));
-  }
-
-  await $FileSystem.removeFile(zipPath);
-
-  return $EitherErrorOr.value({
-    status: 'installed',
-    exePath,
-    directoryPath,
-  });
-};
-
-const makeReadEmbedded = (
-  key: keyof Toolchain['embedded'],
-  options: ToolEmbeddedOptions,
-): ((toolchain: Toolchain) => EitherErrorOr<Toolchain>) => {
-  return (toolchain: Toolchain): EitherErrorOr<Toolchain> => {
-    const toolEmbedded = readEmbedded(options);
-    return $EitherErrorOr.value({
-      ...toolchain,
-      embedded: {
-        ...toolchain.embedded,
-        [key]: toolEmbedded,
-      },
-    });
-  };
-};
-
-const makeDownloadEmbedded = (
-  key: keyof Toolchain['embedded'],
-  options: ToolEmbeddedOptions,
-): ((toolchain: Toolchain) => Promise<EitherErrorOr<Toolchain>>) => {
-  return async (toolchain: Toolchain): Promise<EitherErrorOr<Toolchain>> => {
-    const toolEmbedded = toolchain.embedded[key];
-    if (toolEmbedded.status === 'installed') {
-      return $EitherErrorOr.value(toolchain);
-    }
-
-    const errorOrToolEmbedded = await downloadEmbedded(options);
-    if (errorOrToolEmbedded.isError) {
-      const errorMessage = `Failed to download ${options.name}`;
-      return $EitherErrorOr.error(
-        errorOrToolEmbedded.error.extend(errorMessage),
-      );
-    }
-
-    return $EitherErrorOr.value({
-      ...toolchain,
-      embedded: {
-        ...toolchain.embedded,
-        [key]: errorOrToolEmbedded.value,
-      },
-    });
-  };
-};
-
-export const $Toolchain = {
-  // #region Constructors
-
-  createEmpty: (): Toolchain => ({
-    custom: {
+  static create(): Toolchain {
+    return new Toolchain({
       editor: { exePath: '' },
       emulator: { exePath: '' },
-    },
-    embedded: {
       lunarMagic: { status: 'not-installed' },
       asar: { status: 'not-installed' },
       flips: { status: 'not-installed' },
       gps: { status: 'not-installed' },
       pixi: { status: 'not-installed' },
       uberAsm: { status: 'not-installed' },
-    },
-  }),
+    });
+  }
 
-  createByLoad: async (): Promise<Toolchain> => ({
-    custom: {
-      editor: await getCustom(EDITOR_OPTIONS),
-      emulator: await getCustom(EMULATOR_OPTIONS),
-    },
-    embedded: {
-      lunarMagic: await readEmbedded(LUNAR_MAGIC_OPTIONS),
-      asar: await readEmbedded(ASAR_OPTIONS),
-      flips: await readEmbedded(FLIPS_OPTIONS),
-      gps: await readEmbedded(GPS_OPTIONS),
-      pixi: await readEmbedded(PIXI_OPTIONS),
-      uberAsm: await readEmbedded(UBER_ASM_OPTIONS),
-    },
-  }),
+  static loadTriggers = [
+    'editor',
+    'emulator',
+    'lunarMagic',
+    'asar',
+    'flips',
+    'gps',
+    'pixi',
+    'uberAsm',
+  ];
+  load = async (): Promise<ErrorReport | undefined> => {
+    const editorOrError = await readCustom(EDITOR_OPTIONS);
+    if (editorOrError.isError) return editorOrError.error;
+    const emulatorOrError = await readCustom(EMULATOR_OPTIONS);
+    if (emulatorOrError.isError) return emulatorOrError.error;
+    const lunarMagicOrError = await readEmbedded(LUNAR_MAGIC_OPTIONS);
+    if (lunarMagicOrError.isError) return lunarMagicOrError.error;
+    const asarOrError = await readEmbedded(ASAR_OPTIONS);
+    if (asarOrError.isError) return asarOrError.error;
+    const flipsOrError = await readEmbedded(FLIPS_OPTIONS);
+    if (flipsOrError.isError) return flipsOrError.error;
+    const gpsOrError = await readEmbedded(GPS_OPTIONS);
+    if (gpsOrError.isError) return gpsOrError.error;
+    const pixiOrError = await readEmbedded(PIXI_OPTIONS);
+    if (pixiOrError.isError) return pixiOrError.error;
+    const uberAsmOrError = await readEmbedded(UBER_ASM_OPTIONS);
+    if (uberAsmOrError.isError) return uberAsmOrError.error;
 
-  // #endregion Constructors
+    console.log('Toolchain loaded', editorOrError, emulatorOrError);
 
-  // #region Custom
+    this.editor = editorOrError.value;
+    this.emulator = emulatorOrError.value;
+    this.lunarMagic = lunarMagicOrError.value;
+    this.asar = asarOrError.value;
+    this.flips = flipsOrError.value;
+    this.gps = gpsOrError.value;
+    this.pixi = pixiOrError.value;
+    this.uberAsm = uberAsmOrError.value;
+  };
 
-  setEditor: makeSetCustom('editor', EDITOR_OPTIONS),
+  private editCustom = async (
+    propertyName: ToolchainCustom,
+    methodName: string,
+    { settingKey }: ToolCustomOptions,
+    exePath: string,
+  ): Promise<ErrorReport | undefined> => {
+    let error: ErrorReport | undefined;
+    const errorMessage = `Toolchain.${methodName}: Failed to set path`;
+    error = await $ToolchainSettings.set(settingKey, exePath);
+    if (error) return error.extend(errorMessage);
+    this[propertyName].exePath = exePath;
+  };
 
-  setEmulator: makeSetCustom('emulator', EMULATOR_OPTIONS),
+  private downloadEmbedded = async (
+    propertyName: ToolchainEmbedded,
+    methodName: string,
+    { directoryName, exeName, version, downloadUrl }: ToolEmbeddedOptions,
+  ): Promise<ErrorReport | undefined> => {
+    const errorPrefix = `Toolchain.${methodName}`;
+    let error: ErrorReport | undefined;
 
-  // #endregion Custom
+    const toolchainDirPath = await getToolchainDirPath();
+    const directoryPath = await $FileSystem.join(
+      toolchainDirPath,
+      directoryName,
+    );
+    const versionPath = await $FileSystem.join(directoryPath, version);
+    const exePath = await $FileSystem.join(versionPath, exeName);
+    const zipPath = await $FileSystem.join(directoryPath, `${version}.zip`);
 
-  // #region Embedded
+    error = await $FileSystem.downloadFile(zipPath, downloadUrl);
+    if (error) {
+      const errorMessage = `${errorPrefix}: Failed to download`;
+      return error.extend(errorMessage);
+    }
 
-  readLunarMagic: makeReadEmbedded('lunarMagic', LUNAR_MAGIC_OPTIONS),
-  downloadLunarMagic: makeDownloadEmbedded('lunarMagic', LUNAR_MAGIC_OPTIONS),
+    error = await $FileSystem.unzip(zipPath, versionPath);
+    if (error) {
+      await $FileSystem.removeFile(zipPath);
+      const errorMessage = `${errorPrefix}: Failed to unzip`;
+      return error.extend(errorMessage);
+    }
 
-  readAsar: makeReadEmbedded('asar', ASAR_OPTIONS),
-  downloadAsar: makeDownloadEmbedded('asar', ASAR_OPTIONS),
+    await $FileSystem.removeFile(zipPath);
 
-  readFlips: makeReadEmbedded('flips', FLIPS_OPTIONS),
-  downloadFlips: makeDownloadEmbedded('flips', FLIPS_OPTIONS),
+    this[propertyName] = { status: 'installed', exePath, directoryPath };
+  };
 
-  readGps: makeReadEmbedded('gps', GPS_OPTIONS),
-  downloadGps: makeDownloadEmbedded('gps', GPS_OPTIONS),
+  static getEditorDeps = ['editor'];
+  getEditor = () => this.editor;
 
-  readPixi: makeReadEmbedded('pixi', PIXI_OPTIONS),
-  downloadPixi: makeDownloadEmbedded('pixi', PIXI_OPTIONS),
+  static editEditorTriggers = ['editor'];
+  editEditor = async (exePath: string): Promise<ErrorReport | undefined> => {
+    return await this.editCustom(
+      'editor',
+      'selectEditor',
+      EDITOR_OPTIONS,
+      exePath,
+    );
+  };
 
-  readUberAsm: makeReadEmbedded('uberAsm', UBER_ASM_OPTIONS),
-  downloadUberAsm: makeDownloadEmbedded('uberAsm', UBER_ASM_OPTIONS),
+  static getEmulatorDeps = ['emulator'];
+  getEmulator = () => this.emulator;
 
-  // #region Embedded
-};
+  static editEmulatorTriggers = ['emulator'];
+  editEmulator = async (exePath: string): Promise<ErrorReport | undefined> => {
+    return await this.editCustom(
+      'emulator',
+      'selectEmulator',
+      EMULATOR_OPTIONS,
+      exePath,
+    );
+  };
+
+  static getLunarMagicDeps = ['lunarMagic'];
+  getLunarMagic = () => this.lunarMagic;
+
+  static downloadLunarMagicTriggers = ['lunarMagic'];
+  downloadLunarMagic = async (): Promise<ErrorReport | undefined> => {
+    return await this.downloadEmbedded(
+      'lunarMagic',
+      'downloadLunarMagic',
+      LUNAR_MAGIC_OPTIONS,
+    );
+  };
+
+  static getAsarDeps = ['asar'];
+  getAsar = () => this.asar;
+
+  static downloadAsarTriggers = ['asar'];
+  downloadAsar = async (): Promise<ErrorReport | undefined> => {
+    return await this.downloadEmbedded('asar', 'downloadAsar', ASAR_OPTIONS);
+  };
+
+  static getFlipsDeps = ['flips'];
+  getFlips = () => this.flips;
+
+  static downloadFlipsTriggers = ['flips'];
+  downloadFlips = async (): Promise<ErrorReport | undefined> => {
+    return await this.downloadEmbedded('flips', 'downloadFlips', FLIPS_OPTIONS);
+  };
+
+  static getGpsDeps = ['gps'];
+  getGps = () => this.gps;
+
+  static downloadGpsTriggers = ['gps'];
+  downloadGps = async (): Promise<ErrorReport | undefined> => {
+    return await this.downloadEmbedded('gps', 'downloadGps', GPS_OPTIONS);
+  };
+
+  static getPixiDeps = ['pixi'];
+  getPixi = () => this.pixi;
+
+  static downloadPixiTriggers = ['pixi'];
+  downloadPixi = async (): Promise<ErrorReport | undefined> => {
+    return await this.downloadEmbedded('pixi', 'downloadPixi', PIXI_OPTIONS);
+  };
+
+  static getUberAsmDeps = ['uberAsm'];
+  getUberAsm = () => this.uberAsm;
+
+  static downloadUberAsmTriggers = ['uberAsm'];
+  downloadUberAsm = async (): Promise<ErrorReport | undefined> => {
+    return await this.downloadEmbedded(
+      'uberAsm',
+      'downloadUberAsm',
+      UBER_ASM_OPTIONS,
+    );
+  };
+}

@@ -75,9 +75,6 @@ export default function PatchesTab({
     return patches.map((patch) => patch.getInfo());
   }, [patches]);
 
-  console.log('patches', patches);
-  console.log('items', items);
-
   return (
     <>
       <Flex h='100%'>

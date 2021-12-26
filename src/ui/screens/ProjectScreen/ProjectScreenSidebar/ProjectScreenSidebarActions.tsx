@@ -1,12 +1,11 @@
 import { VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useCore } from '../../../../contexts/CoreContext';
+import Core from '../../../../core2/Core';
 import Project from '../../../../core2/Project';
 import { useGet, useSetAsync } from '../../../../hooks/useAccessors';
 import useAsyncCallback from '../../../../hooks/useAsyncCallback';
 import useHandleError from '../../../../hooks/useHandleError';
-import { AppDispatch } from '../../../../store';
-import { getToolchain } from '../../../../store/slices/core/slices/toolchain';
 import Button from '../../../../ui-atoms/input/Button';
 
 interface ProjectScreenSidebarActionsProps {
@@ -16,8 +15,8 @@ interface ProjectScreenSidebarActionsProps {
 export default function ProjectScreenSidebarActions({
   project,
 }: ProjectScreenSidebarActionsProps): ReactElement {
-  const dispatch = useDispatch<AppDispatch>();
-  const toolchain = useSelector(getToolchain());
+  const core = useCore();
+  const toolchain = useGet(core, core.getToolchain, Core.getToolchainDeps);
   const handleError = useHandleError();
 
   const snapshot = useGet(project, project.getLatest, Project.getLatestDeps);
@@ -26,19 +25,19 @@ export default function ProjectScreenSidebarActions({
 
   const handleOpenInLunarMagic = useAsyncCallback(
     () => openInLunarMagic(toolchain),
-    [dispatch, toolchain],
+    [toolchain],
   );
 
   const handleLaunchInEmulator = useAsyncCallback(
     () => launchInEmulator(toolchain),
-    [dispatch, toolchain],
+    [toolchain],
   );
 
   return (
     <VStack w='100%'>
       <Button
         isDisabled={
-          toolchain.embedded.lunarMagic.status !== 'installed' ||
+          toolchain.getLunarMagic().status !== 'installed' ||
           handleOpenInLunarMagic.isLoading
         }
         label='Open in Lunar Magic'
@@ -50,7 +49,7 @@ export default function ProjectScreenSidebarActions({
       />
       <Button
         isDisabled={
-          !toolchain.custom.emulator.exePath || handleLaunchInEmulator.isLoading
+          !toolchain.getEmulator().exePath || handleLaunchInEmulator.isLoading
         }
         label='Run on emulator'
         onClick={async () => {

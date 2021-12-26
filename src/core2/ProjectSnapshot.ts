@@ -6,7 +6,7 @@ import { $FileSystem } from '../utils/FileSystem';
 import { $Shell } from '../utils/Shell';
 import Patch from './Patch';
 import Resource from './Resource';
-import { Toolchain } from './Toolchain';
+import Toolchain from './Toolchain';
 
 // #region Info
 
@@ -151,25 +151,21 @@ export default class ProjectSnapshot {
   ): Promise<ErrorReport | undefined> => {
     const errorPrefix = 'ProjectSnapshot.openInLunarMagic';
     let error: ErrorReport | undefined;
+    const lunarMagic = toolchain.getLunarMagic();
 
-    if (toolchain.embedded.lunarMagic.status !== 'installed') {
+    if (lunarMagic.status !== 'installed') {
       const errorMessage = `${errorPrefix}: Lunar Magic is not installed`;
       return $ErrorReport.make(errorMessage);
     }
 
-    if (
-      (error = await $FileSystem.validateExistsFile(
-        toolchain.embedded.lunarMagic.exePath,
-      ))
-    ) {
+    if ((error = await $FileSystem.validateExistsFile(lunarMagic.exePath))) {
       const errorMessage = `${errorPrefix}: Lunar Magic is not available`;
       return error.extend(errorMessage);
     }
 
-    const process = await $Shell.execute(
-      toolchain.embedded.lunarMagic.exePath,
-      [await this.resource.path(ProjectSnapshot.ROM_FILE_NAME)],
-    );
+    const process = await $Shell.execute(lunarMagic.exePath, [
+      await this.resource.path(ProjectSnapshot.ROM_FILE_NAME),
+    ]);
     if (process.code !== 0) {
       const errorMessage = `${errorPrefix}: Could not open project snapshot in Lunar Magic`;
       return $ErrorReport.make(errorMessage);
@@ -181,17 +177,14 @@ export default class ProjectSnapshot {
   ): Promise<ErrorReport | undefined> => {
     const errorPrefix = 'ProjectSnapshot.launchInEmulator';
     let error: ErrorReport | undefined;
+    const emulator = toolchain.getEmulator();
 
-    if (
-      (error = await $FileSystem.validateExistsFile(
-        toolchain.custom.emulator.exePath,
-      ))
-    ) {
+    if ((error = await $FileSystem.validateExistsFile(emulator.exePath))) {
       const errorMessage = `${errorPrefix}: Emulator is not available`;
       return error.extend(errorMessage);
     }
 
-    const process = await $Shell.execute(toolchain.custom.emulator.exePath, [
+    const process = await $Shell.execute(emulator.exePath, [
       await this.resource.path(ProjectSnapshot.ROM_FILE_NAME),
     ]);
     if (process.code !== 0) {

@@ -10,8 +10,12 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { ReactElement } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch } from '../../../store';
+import { useCore } from '../../../contexts/CoreContext';
+import Core from '../../../core2/Core';
+import Toolchain from '../../../core2/Toolchain';
+import { useGet, useSetAsync } from '../../../hooks/useAccessors';
+import useAsyncCallback from '../../../hooks/useAsyncCallback';
+import useHandleError from '../../../hooks/useHandleError';
 import {
   downloadAsar,
   downloadFlips,
@@ -19,9 +23,6 @@ import {
   downloadLunarMagic,
   downloadPixi,
   downloadUberAsm,
-  getToolchain,
-  setEditor,
-  setEmulator,
 } from '../../../store/slices/core/slices/toolchain';
 import useColorScheme from '../../../theme/useColorScheme';
 import ToolCustom from './ToolCustom';
@@ -30,8 +31,52 @@ import useDownloadToolEmbedded from './useDownloadToolEmbedded';
 
 export default function ToolchainScreen(): ReactElement {
   const colorScheme = useColorScheme();
-  const dispatch = useDispatch<AppDispatch>();
-  const toolchain = useSelector(getToolchain());
+
+  const core = useCore();
+  const toolchain = useGet(core, core.getToolchain, Core.getToolchainDeps);
+
+  const editor = useGet(
+    toolchain,
+    toolchain.getEditor,
+    Toolchain.getEditorDeps,
+  );
+  const emulator = useGet(
+    toolchain,
+    toolchain.getEmulator,
+    Toolchain.getEmulatorDeps,
+  );
+
+  const editEditor = useSetAsync(
+    toolchain,
+    toolchain.editEditor,
+    Toolchain.editEditorTriggers,
+  );
+
+  const editEmulator = useSetAsync(
+    toolchain,
+    toolchain.editEmulator,
+    Toolchain.editEmulatorTriggers,
+  );
+
+  const handleError = useHandleError();
+
+  const handleEditEditor = useAsyncCallback(
+    async (exePath: string) => {
+      const maybeError = await editEditor(exePath);
+      handleError(maybeError, 'Failed to edit editor');
+      return maybeError;
+    },
+    [editEditor],
+  );
+
+  const handleEditEmulator = useAsyncCallback(
+    async (exePath: string) => {
+      const maybeError = await editEmulator(exePath);
+      handleError(maybeError, 'Failed to edit emulator');
+      return maybeError;
+    },
+    [editEmulator],
+  );
 
   const [handleDownloadLunarMagic, lunarMagicStatus] = useDownloadToolEmbedded({
     name: 'Lunar Magic',
@@ -132,14 +177,16 @@ export default function ToolchainScreen(): ReactElement {
                 blocks). The emulator will be used to run the game.
               </Text>
               <ToolCustom
-                exePath={toolchain.custom.editor.exePath}
+                exePath={editor.exePath}
+                isDisabled={handleEditEditor.isLoading}
                 name='Editor'
-                onChoose={(exePath) => dispatch(setEditor(exePath))}
+                onChoose={handleEditEditor.call}
               />
               <ToolCustom
-                exePath={toolchain.custom.emulator.exePath}
+                exePath={emulator.exePath}
+                isDisabled={handleEditEmulator.isLoading}
                 name='Emulator'
-                onChoose={(exePath) => dispatch(setEmulator(exePath))}
+                onChoose={handleEditEmulator.call}
               />
             </VStack>
           </TabPanel>

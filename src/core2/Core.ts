@@ -1,11 +1,14 @@
 import { ErrorReport } from '../utils/ErrorReport';
 import Project from './Project';
+import Toolchain from './Toolchain';
 
 export default class Core {
   private project: Project | undefined;
+  private toolchain: Toolchain;
 
   private constructor() {
     this.project = undefined;
+    this.toolchain = Toolchain.create();
   }
 
   static create(): Core {
@@ -21,5 +24,10 @@ export default class Core {
   setProject = (project: Project): ErrorReport | undefined => {
     this.project = project;
     return undefined;
+  };
+
+  static getToolchainDeps = ['Core.toolchain'];
+  getToolchain = (): Toolchain => {
+    return this.toolchain;
   };
 }
