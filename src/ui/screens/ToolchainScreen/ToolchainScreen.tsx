@@ -11,8 +11,8 @@ import {
 } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 import { useCore } from '../../../contexts/CoreContext';
-import Core from '../../../core2/Core';
-import Toolchain from '../../../core2/Toolchain';
+import Core from '../../../core/Core';
+import Toolchain from '../../../core/Toolchain';
 import { useGet, useSetAsync } from '../../../hooks/useAccessors';
 import useAsyncCallback from '../../../hooks/useAsyncCallback';
 import useHandleError from '../../../hooks/useHandleError';

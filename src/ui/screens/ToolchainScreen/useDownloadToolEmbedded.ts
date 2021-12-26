@@ -1,6 +1,6 @@
 import { useCore } from '../../../contexts/CoreContext';
-import Core from '../../../core2/Core';
-import { ToolchainEmbedded } from '../../../core2/Toolchain';
+import Core from '../../../core/Core';
+import { ToolchainEmbedded } from '../../../core/Toolchain';
 import { useGet } from '../../../hooks/useAccessors';
 import useAsyncCallback from '../../../hooks/useAsyncCallback';
 import useHandleError from '../../../hooks/useHandleError';

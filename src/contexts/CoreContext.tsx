@@ -5,7 +5,7 @@ import {
   useContext,
   useRef,
 } from 'react';
-import Core from '../core2/Core';
+import Core from '../core/Core';
 
 const CoreContext = createContext(Core.create());
 

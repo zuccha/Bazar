@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useCore } from '../../../contexts/CoreContext';
-import Core from '../../../core2/Core';
-import { GenericSetting, GenericSettingsStore } from '../../../core2/Settings';
+import Core from '../../../core/Core';
+import { GenericSetting, GenericSettingsStore } from '../../../core/Settings';
 import { useGet, useSetAsync } from '../../../hooks/useAccessors';
 import {
   FormField,

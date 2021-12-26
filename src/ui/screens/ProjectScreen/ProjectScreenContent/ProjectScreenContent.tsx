@@ -1,6 +1,6 @@
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
 import { ReactElement } from 'react';
-import Project from '../../../../core2/Project';
+import Project from '../../../../core/Project';
 import { useGet } from '../../../../hooks/useAccessors';
 import useColorScheme from '../../../../theme/useColorScheme';
 import ComingSoon from '../../../../ui-atoms/other/ComingSoon';

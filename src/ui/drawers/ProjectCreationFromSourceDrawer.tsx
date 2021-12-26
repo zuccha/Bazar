@@ -15,9 +15,9 @@ import FormError from '../../ui-atoms/input/FormError';
 import Alert from '../../ui-atoms/display/Alert';
 import { $FileSystem } from '../../utils/FileSystem';
 import useAsyncCallback from '../../hooks/useAsyncCallback';
-import Project from '../../core2/Project';
+import Project from '../../core/Project';
 import { useGet, useSet, useSetAsync } from '../../hooks/useAccessors';
-import Core from '../../core2/Core';
+import Core from '../../core/Core';
 import { useCore } from '../../contexts/CoreContext';
 
 interface ProjectCreationFromSourceProps {

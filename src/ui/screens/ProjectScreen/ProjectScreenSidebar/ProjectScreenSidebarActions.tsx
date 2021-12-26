@@ -1,8 +1,8 @@
 import { VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 import { useCore } from '../../../../contexts/CoreContext';
-import Core from '../../../../core2/Core';
-import Project from '../../../../core2/Project';
+import Core from '../../../../core/Core';
+import Project from '../../../../core/Project';
 import { useGet, useSetAsync } from '../../../../hooks/useAccessors';
 import useAsyncCallback from '../../../../hooks/useAsyncCallback';
 import useHandleError from '../../../../hooks/useHandleError';

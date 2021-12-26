@@ -1,6 +1,6 @@
 import { Alert, AlertIcon, Box, VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
-import Project from '../../core2/Project';
+import Project from '../../core/Project';
 import { useGet, useSetAsync } from '../../hooks/useAccessors';
 import useAsyncCallback from '../../hooks/useAsyncCallback';
 import Button from '../../ui-atoms/input/Button';

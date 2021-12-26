@@ -1,6 +1,6 @@
 import { Box, VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
-import Project from '../../../../core2/Project';
+import Project from '../../../../core/Project';
 import ProjectScreenSidebarActions from './ProjectScreenSidebarActions';
 import ProjectScreenSidebarInfo from './ProjectScreenSidebarInfo';
 

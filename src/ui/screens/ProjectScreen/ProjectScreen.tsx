@@ -1,7 +1,7 @@
 import { Center, Flex } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 import { useCore } from '../../../contexts/CoreContext';
-import Core from '../../../core2/Core';
+import Core from '../../../core/Core';
 import { useGet } from '../../../hooks/useAccessors';
 import ProjectScreenContent from './ProjectScreenContent';
 import ProjectScreenSidebar from './ProjectScreenSidebar';

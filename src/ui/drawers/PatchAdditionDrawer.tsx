@@ -8,7 +8,7 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { ReactElement, useState } from 'react';
-import ProjectSnapshot from '../../core2/ProjectSnapshot';
+import ProjectSnapshot from '../../core/ProjectSnapshot';
 import { useSetAsync } from '../../hooks/useAccessors';
 import useColorScheme from '../../theme/useColorScheme';
 import Alert from '../../ui-atoms/display/Alert';

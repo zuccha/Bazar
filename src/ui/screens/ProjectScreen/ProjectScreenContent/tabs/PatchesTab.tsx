@@ -1,8 +1,8 @@
 import { ArrowForwardIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import { Flex, HStack } from '@chakra-ui/react';
 import { ReactElement, useMemo, useState } from 'react';
-import Patch from '../../../../../core2/Patch';
-import ProjectSnapshot from '../../../../../core2/ProjectSnapshot';
+import Patch from '../../../../../core/Patch';
+import ProjectSnapshot from '../../../../../core/ProjectSnapshot';
 import { useGet, useSetAsync } from '../../../../../hooks/useAccessors';
 import useAsyncCallback from '../../../../../hooks/useAsyncCallback';
 import useHandleError from '../../../../../hooks/useHandleError';

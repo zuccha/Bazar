@@ -22,7 +22,7 @@ import ProjectScreen from './screens/ProjectScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import ToolsScreen from './screens/ToolchainScreen';
 import { useCore } from '../contexts/CoreContext';
-import Core from '../core2/Core';
+import Core from '../core/Core';
 import { useGet } from '../hooks/useAccessors';
 
 const ScreenByAppRouteName: Record<AppRouteName, () => ReactElement> = {
