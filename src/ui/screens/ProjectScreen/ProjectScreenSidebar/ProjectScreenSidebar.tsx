@@ -1,11 +1,6 @@
 import { Box, VStack } from '@chakra-ui/react';
-import { ReactElement, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { ProjectInfo } from '../../../../core/Project';
+import { ReactElement } from 'react';
 import Project from '../../../../core2/Project';
-import { useGet, useSet, useSetAsync } from '../../../../hooks/useAccessors';
-import useAsyncCallback from '../../../../hooks/useAsyncCallback';
-import { AppDispatch } from '../../../../store';
 import ProjectScreenSidebarActions from './ProjectScreenSidebarActions';
 import ProjectScreenSidebarInfo from './ProjectScreenSidebarInfo';
 

@@ -1,7 +1,6 @@
 import { ArrowForwardIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import { Flex, HStack } from '@chakra-ui/react';
 import { ReactElement, useMemo, useState } from 'react';
-import { PatchInfo } from '../../../../../core/Patch';
 import Patch from '../../../../../core2/Patch';
 import ProjectSnapshot from '../../../../../core2/ProjectSnapshot';
 import { useGet, useSetAsync } from '../../../../../hooks/useAccessors';
