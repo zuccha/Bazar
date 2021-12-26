@@ -109,7 +109,7 @@ export const $Patch = {
 
     // Resource
 
-    const mainFileRelativePath = await $FileSystem.basename(filePath);
+    const mainFileRelativePath = $FileSystem.basename(filePath);
     const info = { name, mainFileRelativePath };
     const resourceOrError = await $Resource.create(locationDirPath, name, info);
     if (resourceOrError.isError) {

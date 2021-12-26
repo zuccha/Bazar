@@ -248,6 +248,7 @@ const makeDownloadEmbedded = (
       return $EitherErrorOr.value(toolchain);
     }
 
+    console.log(`Downloading ${options.name}...`);
     const errorOrToolEmbedded = await downloadEmbedded(options);
     if (errorOrToolEmbedded.isError) {
       const errorMessage = `Failed to download ${options.name}`;

@@ -4,6 +4,10 @@ const makeScrollbarStyle = (color: string) => ({
 
 const styles = {
   global: {
+    'html, body, #root': {
+      height: '100%',
+    },
+
     '::-webkit-scrollbar': { width: '10px', height: '10px' },
     '::-webkit-scrollbar-track': makeScrollbarStyle('#E5E5E5'),
     '::-webkit-scrollbar-thumb': makeScrollbarStyle('#AAAAAA'),

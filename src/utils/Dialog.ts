@@ -1,6 +1,7 @@
 import * as Tauri from '@tauri-apps/api';
 import { $EitherErrorOr, EitherErrorOr } from './EitherErrorOr';
 import { $ErrorReport } from './ErrorReport';
+import { $FileSystem } from './FileSystem';
 
 interface OpenDialogOptions {
   defaultPath?: string;
@@ -16,21 +17,23 @@ export const $Dialog = {
     options: OpenDialogOptions,
   ): Promise<EitherErrorOr<string | undefined>> => {
     try {
-      // TODO: Check if defaultPath exists.
       const pathOrPaths = await Tauri.dialog.open({
-        defaultPath: options.defaultPath,
+        defaultPath:
+          options.defaultPath && (await $FileSystem.exists(options.defaultPath))
+            ? options.defaultPath
+            : undefined,
         filters: options.filters,
         directory: options.type === 'directory',
       });
       const path =
         typeof pathOrPaths === 'string'
           ? pathOrPaths
-          : pathOrPaths.length > 0
+          : Array.isArray(pathOrPaths) && pathOrPaths.length > 0
           ? pathOrPaths[0]
           : undefined;
       return $EitherErrorOr.value(path);
     } catch (error) {
-      const errorMessage = `Could not open ${options.type} dialog`;
+      const errorMessage = `Dialog.open: Could not open ${options.type} dialog`;
       return $EitherErrorOr.error($ErrorReport.make(errorMessage));
     }
   },

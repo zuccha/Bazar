@@ -3,12 +3,14 @@ import { ReactElement, useRef } from 'react';
 import Button from '../input/Button';
 
 interface AlertDeleteProps {
+  isDisabled?: boolean;
   onClose: () => void;
-  onDelete: () => void;
+  onDelete: () => Promise<unknown>;
   title: string;
 }
 
 export default function AlertDelete({
+  isDisabled,
   onClose,
   onDelete,
   title,
@@ -31,15 +33,17 @@ export default function AlertDelete({
 
           <Chakra.AlertDialogFooter>
             <Button
+              isDisabled={isDisabled}
               label='Cancel'
               onClick={onClose}
               ref={cancelRef}
               variant='outline'
             />
             <Button
+              isDisabled={isDisabled}
               label='Delete'
-              onClick={() => {
-                onDelete();
+              onClick={async () => {
+                await onDelete();
                 onClose();
               }}
               scheme='destructive'

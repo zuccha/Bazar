@@ -1,5 +1,12 @@
 import * as Chakra from '@chakra-ui/react';
-import { ReactElement, ReactNode, useCallback, useMemo, useState } from 'react';
+import {
+  ReactElement,
+  ReactNode,
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+} from 'react';
+import useSafeState from '../../hooks/usSafeState';
 import { ErrorReport } from '../../utils/ErrorReport';
 import FormError from './FormError';
 import FormLabel from './FormLabel';
@@ -50,7 +57,7 @@ export interface FormFieldParams<T> {
   initialValue: T;
   isRequired?: boolean;
   label: string;
-  onValidate?: (value: T) => ErrorReport | undefined;
+  onValidate?: (value: T) => Promise<ErrorReport | undefined>;
 }
 
 export interface FormField<T> {
@@ -72,17 +79,21 @@ export function useFormField<T>({
   initialValue,
   isRequired = false,
   label,
-  onValidate = () => undefined,
+  onValidate = async () => undefined,
 }: FormFieldParams<T>): FormField<T> {
-  const [value, setValue] = useState(initialValue);
-  const [isDirty, setIsDirty] = useState(!!initialValue);
-  const [errorReport, setErrorReport] = useState<ErrorReport | undefined>(
-    isDirty ? onValidate(value) : undefined,
+  const [value, setValue] = useSafeState(initialValue);
+  const [isDirty, setIsDirty] = useSafeState(!!initialValue);
+  const [errorReport, setErrorReport] = useSafeState<ErrorReport | undefined>(
+    undefined,
   );
 
+  useLayoutEffect(() => {
+    if (isDirty) onValidate(value).then(setErrorReport);
+  }, []);
+
   const handleChange = useCallback(
-    (newValue: T) => {
-      const newErrorReport = onValidate(newValue);
+    async (newValue: T) => {
+      const newErrorReport = await onValidate(newValue);
       setErrorReport(newErrorReport);
       setIsDirty(true);
       setValue(newValue);
@@ -90,8 +101,8 @@ export function useFormField<T>({
     [onValidate],
   );
 
-  const handleBlur = useCallback(() => {
-    const newErrorReport = onValidate(value);
+  const handleBlur = useCallback(async () => {
+    const newErrorReport = await onValidate(value);
     setErrorReport(newErrorReport);
     setIsDirty(true);
   }, [onValidate, value]);
@@ -121,7 +132,8 @@ export function useFormField<T>({
 
 interface Form {
   error: ErrorReport | undefined;
-  handleSubmit: () => ErrorReport | undefined;
+  handleSubmit: () => Promise<ErrorReport | undefined>;
+  isSubmitting: boolean;
   isValid: boolean;
 }
 
@@ -130,16 +142,19 @@ export function useForm({
   onSubmit,
 }: {
   fields: FormField<any>[];
-  onSubmit: () => ErrorReport | undefined;
+  onSubmit: () => Promise<ErrorReport | undefined>;
 }): Form {
-  const [error, setError] = useState<ErrorReport | undefined>();
+  const [isSubmitting, setIsSubmitting] = useSafeState(false);
+  const [error, setError] = useSafeState<ErrorReport | undefined>(undefined);
 
   const isValid = useMemo(() => {
     return fields.every((field) => !field.control.isRequired || field.isValid);
   }, [fields]);
 
-  const handleSubmit = useCallback(() => {
-    const maybeError = onSubmit();
+  const handleSubmit = useCallback(async () => {
+    setIsSubmitting(true);
+    const maybeError = await onSubmit();
+    setIsSubmitting(false);
     setError(maybeError);
     return maybeError;
   }, [onSubmit]);
@@ -147,6 +162,7 @@ export function useForm({
   return {
     error,
     handleSubmit,
+    isSubmitting,
     isValid,
   };
 }

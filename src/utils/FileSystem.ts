@@ -8,7 +8,12 @@ const FS = Tauri.fs;
 const Path = Tauri.path;
 
 export const $FileSystem = {
-  basename: Path.basename,
+  basename: (path: string): string => {
+    const basename = path.endsWith(Path.sep)
+      ? path.slice(0, -1).split(Path.sep).pop()
+      : path.split(Path.sep).pop();
+    return basename || '';
+  },
 
   computeRelativePath: async (
     basePath: string,
@@ -217,9 +222,14 @@ export const $FileSystem = {
     zipPath: string,
     targetPath: string,
   ): Promise<ErrorReport | undefined> => {
-    const zip = new AdmZip(zipPath);
-    zip.extractAllTo(targetPath, true);
-    return undefined;
+    try {
+      const zip = new AdmZip(zipPath);
+      zip.extractAllTo(targetPath, true);
+      return undefined;
+    } catch {
+      const errorMessage = `FileSystem.unzip: Failed to unzip file "${zipPath}"`;
+      return $ErrorReport.make(errorMessage);
+    }
   },
 
   validateExistsDir: async (path: string): Promise<ErrorReport | undefined> => {
