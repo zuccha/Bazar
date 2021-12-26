@@ -8,12 +8,8 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { ReactElement, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../../store';
-import {
-  addPatchFromDirectory,
-  addPatchFromFile,
-} from '../../store/slices/core/slices/project';
+import ProjectSnapshot from '../../core2/ProjectSnapshot';
+import { useSetAsync } from '../../hooks/useAccessors';
 import useColorScheme from '../../theme/useColorScheme';
 import Alert from '../../ui-atoms/display/Alert';
 import BrowserInput from '../../ui-atoms/input/BrowserInput';
@@ -29,10 +25,12 @@ import { $FileSystem } from '../../utils/FileSystem';
 
 interface PatchAdditionDrawerProps {
   onClose: () => void;
+  projectSnapshot: ProjectSnapshot;
 }
 
 export default function PatchAdditionDrawer({
   onClose,
+  projectSnapshot,
 }: PatchAdditionDrawerProps): ReactElement {
   const colorScheme = useColorScheme();
   const [isSingleFile, setIsSingleFile] = useState(true);
@@ -77,32 +75,36 @@ export default function PatchAdditionDrawer({
       $FileSystem.validateHasExtension(value, '.asm'),
   });
 
-  const dispatch = useDispatch<AppDispatch>();
+  const addPatchFromFile = useSetAsync(
+    projectSnapshot,
+    projectSnapshot.addPatchFromFile,
+    ProjectSnapshot.addPatchFromFileTriggers,
+  );
+
+  const addPatchFromDirectory = useSetAsync(
+    projectSnapshot,
+    projectSnapshot.addPatchFromDirectory,
+    ProjectSnapshot.addPatchFromDirectoryTriggers,
+  );
 
   const form = useForm(
     isSingleFile
       ? {
           fields: [nameField, singleFilePathField],
-          onSubmit: () => {
-            return dispatch(
-              addPatchFromFile({
-                name: nameField.value.trim(),
-                filePath: singleFilePathField.value.trim(),
-              }),
-            );
-          },
+          onSubmit: () =>
+            addPatchFromFile({
+              name: nameField.value.trim(),
+              filePath: singleFilePathField.value.trim(),
+            }),
         }
       : {
           fields: [nameField, mainFilePathField, sourceDirPathField],
-          onSubmit: () => {
-            return dispatch(
-              addPatchFromDirectory({
-                name: nameField.value.trim(),
-                sourceDirPath: sourceDirPathField.value.trim(),
-                mainFilePath: mainFilePathField.value.trim(),
-              }),
-            );
-          },
+          onSubmit: () =>
+            addPatchFromDirectory({
+              name: nameField.value.trim(),
+              sourceDirPath: sourceDirPathField.value.trim(),
+              mainFilePath: mainFilePathField.value.trim(),
+            }),
         },
   );
 

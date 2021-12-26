@@ -1,39 +1,32 @@
 import { EditIcon } from '@chakra-ui/icons';
 import { Flex, Heading, Text, VStack } from '@chakra-ui/react';
 import { ReactElement, useState } from 'react';
-import { ProjectInfo } from '../../../../core/Project';
+import Project from '../../../../core2/Project';
+import { useGet } from '../../../../hooks/useAccessors';
 import IconButton from '../../../../ui-atoms/input/IconButton';
-import { ErrorReport } from '../../../../utils/ErrorReport';
-import InfoEditor from '../../../drawers/ProjectSnapshotInfoEditorDrawer';
+import ProjectSnapshotInfoEditorDrawer from '../../../drawers/ProjectSnapshotInfoEditorDrawer';
 
 interface ProjectScreenSidebarInfoProps {
-  info: ProjectInfo;
-  isDisabled: boolean;
-  onEdit: (config: ProjectInfo) => Promise<ErrorReport | undefined>;
+  project: Project;
 }
 
 export default function ProjectScreenSidebarInfo({
-  info,
-  isDisabled,
-  onEdit,
+  project,
 }: ProjectScreenSidebarInfoProps): ReactElement {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+
+  const info = useGet(project, project.getInfo, Project.getInfoDeps);
 
   return (
     <>
       <VStack width='100%' alignItems='flex-start'>
         <Flex alignItems='center' width='100%'>
-          <Heading
-            flex={1}
-            mr={2}
-            size='sm'
-            fontStyle={isDisabled ? 'italic' : undefined}
-          >
+          <Heading flex={1} mr={2} size='sm'>
             {info.name}
           </Heading>
           <IconButton
             icon={<EditIcon />}
-            isDisabled={isDisabled}
+            isDisabled={isEditorOpen}
             label='Edit config'
             onClick={() => setIsEditorOpen(true)}
             size='xs'
@@ -45,14 +38,11 @@ export default function ProjectScreenSidebarInfo({
           <Text fontSize={14}>Author: {info.author || '-'}</Text>
         </VStack>
       </VStack>
+
       {isEditorOpen && (
-        <InfoEditor
-          info={info}
-          onCancel={() => setIsEditorOpen(false)}
-          onConfirm={(newConfig) => {
-            setIsEditorOpen(false);
-            return onEdit(newConfig);
-          }}
+        <ProjectSnapshotInfoEditorDrawer
+          onClose={() => setIsEditorOpen(false)}
+          project={project}
         />
       )}
     </>

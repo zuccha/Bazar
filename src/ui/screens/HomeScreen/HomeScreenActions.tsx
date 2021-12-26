@@ -1,10 +1,13 @@
 import { Box, VStack } from '@chakra-ui/layout';
 import { ReactElement, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
+import { useCore } from '../../../contexts/CoreContext';
+import Core from '../../../core2/Core';
+import Project from '../../../core2/Project';
+import { useSet } from '../../../hooks/useAccessors';
 import useAsyncCallback from '../../../hooks/useAsyncCallback';
 import useSafeState from '../../../hooks/usSafeState';
 import { AppDispatch } from '../../../store';
-import { openProject } from '../../../store/slices/core/slices/project';
 import { AppRouteName, setAppRoute } from '../../../store/slices/navigation';
 import { prioritizeRecentProject } from '../../../store/slices/settings';
 import Button from '../../../ui-atoms/input/Button';
@@ -13,6 +16,8 @@ import { $Dialog } from '../../../utils/Dialog';
 import ProjectCreationFromSourceDrawer from '../../drawers/ProjectCreationFromSourceDrawer';
 
 export default function HomeScreenActions(): ReactElement {
+  const core = useCore();
+
   const dispatch = useDispatch<AppDispatch>();
 
   const [isProjectCreationFromSourceOpen, setIsProjectCreationFromSourceOpen] =
@@ -22,14 +27,18 @@ export default function HomeScreenActions(): ReactElement {
     setIsProjectCreationFromSourceOpen(true);
   }, []);
 
+  const setProject = useSet(core, core.setProject, Core.setProjectTriggers);
+
   const handleOpenProject = useAsyncCallback(async () => {
     const pathOrError = await $Dialog.open({ type: 'directory' });
     if (pathOrError.isError) return pathOrError.error;
     if (!pathOrError.value) return undefined;
-    const error = await dispatch(
-      openProject({ directoryPath: pathOrError.value }),
-    );
-    if (error) return error;
+    const errorOrProject = await Project.open({
+      directoryPath: pathOrError.value,
+    });
+    if (errorOrProject.isError) return errorOrProject.error;
+    const maybeError = setProject(errorOrProject.value);
+    if (maybeError) return maybeError;
     dispatch(setAppRoute({ name: AppRouteName.Project }));
     dispatch(prioritizeRecentProject(pathOrError.value));
   }, [dispatch]);
@@ -55,6 +64,7 @@ export default function HomeScreenActions(): ReactElement {
           </Box>
         )}
       </VStack>
+
       {isProjectCreationFromSourceOpen && (
         <ProjectCreationFromSourceDrawer
           onClose={() => setIsProjectCreationFromSourceOpen(false)}

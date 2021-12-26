@@ -1,39 +1,52 @@
 import { ArrowForwardIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import { Flex, HStack } from '@chakra-ui/react';
 import { ReactElement, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { PatchInfo } from '../../../../../core/Patch';
+import Patch from '../../../../../core2/Patch';
+import ProjectSnapshot from '../../../../../core2/ProjectSnapshot';
+import { useGet, useSetAsync } from '../../../../../hooks/useAccessors';
 import useAsyncCallback from '../../../../../hooks/useAsyncCallback';
 import useHandleError from '../../../../../hooks/useHandleError';
-import { AppDispatch } from '../../../../../store';
-import {
-  getPatches,
-  removePatch,
-} from '../../../../../store/slices/core/slices/project';
 import Output from '../../../../../ui-atoms/display/Output';
 import Table from '../../../../../ui-atoms/display/Table';
 import Button from '../../../../../ui-atoms/input/Button';
 import AlertDelete from '../../../../../ui-atoms/overlay/AlertDelete';
 import PatchAdditionDrawer from '../../../../drawers/PatchAdditionDrawer';
 
-const columns = [{ name: 'Name', key: 'name' }] as const;
+const columns = [
+  { name: 'Name', render: (patch: Patch) => patch.getInfo().name },
+] as const;
 
-export default function PatchesTab(): ReactElement {
-  const dispatch = useDispatch<AppDispatch>();
-  const handleError = useHandleError();
+interface PatchesTabProps {
+  projectSnapshot: ProjectSnapshot;
+}
 
+export default function PatchesTab({
+  projectSnapshot,
+}: PatchesTabProps): ReactElement {
   const [isPatchAdditionVisible, setPatchAdditionVisible] = useState(false);
-  const [patchToRemove, setPatchToRemove] = useState<PatchInfo | undefined>();
+  const [patchToRemove, setPatchToRemove] = useState<Patch | undefined>();
 
-  const patches = useSelector(getPatches()) ?? [];
+  const patches = useGet(
+    projectSnapshot,
+    projectSnapshot.getPatches,
+    ProjectSnapshot.getPatchesDeps,
+  );
 
-  const handleDeletePath = useAsyncCallback(
-    async (patch: PatchInfo) => {
-      const error = await dispatch(removePatch(patch.name));
+  const removePatch = useSetAsync(
+    projectSnapshot,
+    projectSnapshot.removePatch,
+    ProjectSnapshot.removePatchTriggers,
+  );
+
+  const handleError = useHandleError();
+  const handleRemovePatch = useAsyncCallback(
+    async (patch: Patch) => {
+      const error = await removePatch(patch.getInfo().name);
       handleError(error, 'Failed to remove patch');
       return error;
     },
-    [dispatch],
+    [removePatch],
   );
 
   const actions = useMemo(() => {
@@ -51,7 +64,7 @@ export default function PatchesTab(): ReactElement {
       {
         icon: <DeleteIcon />,
         tooltip: 'Remove patch',
-        onClick: (patch: PatchInfo) => {
+        onClick: (patch: Patch) => {
           setPatchToRemove(patch);
         },
       },
@@ -59,8 +72,11 @@ export default function PatchesTab(): ReactElement {
   }, []);
 
   const items = useMemo(() => {
-    return patches.map((patch) => patch.info);
+    return patches.map((patch) => patch.getInfo());
   }, [patches]);
+
+  console.log('patches', patches);
+  console.log('items', items);
 
   return (
     <>
@@ -76,8 +92,8 @@ export default function PatchesTab(): ReactElement {
             <Table
               actions={actions}
               columns={columns}
-              items={items}
-              getItemKey={(item) => item.name}
+              items={patches}
+              getItemKey={(patch) => patch.getInfo().name}
             />
           </Flex>
           <HStack justifyContent='flex-end' mt={2}>
@@ -91,15 +107,18 @@ export default function PatchesTab(): ReactElement {
       </Flex>
 
       {isPatchAdditionVisible && (
-        <PatchAdditionDrawer onClose={() => setPatchAdditionVisible(false)} />
+        <PatchAdditionDrawer
+          onClose={() => setPatchAdditionVisible(false)}
+          projectSnapshot={projectSnapshot}
+        />
       )}
 
       {patchToRemove && (
         <AlertDelete
-          isDisabled={handleDeletePath.isLoading}
+          isDisabled={handleRemovePatch.isLoading}
           onClose={() => setPatchToRemove(undefined)}
-          onDelete={() => handleDeletePath.call(patchToRemove)}
-          title={`Remove patch "${patchToRemove.name}"`}
+          onDelete={() => handleRemovePatch.call(patchToRemove)}
+          title={`Remove patch "${patchToRemove.getInfo().name}"`}
         />
       )}
     </>

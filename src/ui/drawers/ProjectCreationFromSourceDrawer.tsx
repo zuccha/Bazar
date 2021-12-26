@@ -3,7 +3,6 @@ import { ReactElement } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '../../store';
 import { AppRouteName, setAppRoute } from '../../store/slices/navigation';
-import { createProjectFromSource } from '../../store/slices/core/slices/project';
 import BrowserInput from '../../ui-atoms/input/BrowserInput';
 import Button from '../../ui-atoms/input/Button';
 import FormControl, {
@@ -20,6 +19,10 @@ import FormError from '../../ui-atoms/input/FormError';
 import Alert from '../../ui-atoms/display/Alert';
 import { $FileSystem } from '../../utils/FileSystem';
 import useAsyncCallback from '../../hooks/useAsyncCallback';
+import Project from '../../core2/Project';
+import { useSet } from '../../hooks/useAccessors';
+import Core from '../../core2/Core';
+import { useCore } from '../../contexts/CoreContext';
 
 interface ProjectCreationFromSourceProps {
   onClose: () => void;
@@ -28,6 +31,8 @@ interface ProjectCreationFromSourceProps {
 export default function ProjectCreationFromSourceDrawer({
   onClose,
 }: ProjectCreationFromSourceProps): ReactElement {
+  const core = useCore();
+
   const nameField = useFormField({
     infoMessage: 'This will be the name fo the project directory.',
     initialValue: 'MyProject',
@@ -70,18 +75,20 @@ export default function ProjectCreationFromSourceDrawer({
 
   const dispatch = useDispatch<AppDispatch>();
 
+  const setProject = useSet(core, core.setProject, Core.setProjectTriggers);
+
   const form = useForm({
     fields: [nameField, romFilePathField, locationDirPathField],
     onSubmit: async () => {
-      const error = await dispatch(
-        createProjectFromSource({
-          name: nameField.value.trim(),
-          author: authorField.value.trim(),
-          romFilePath: romFilePathField.value.trim(),
-          locationDirPath: locationDirPathField.value.trim(),
-        }),
-      );
-      if (error) return error;
+      const errorOrProject = await Project.createFromSource({
+        name: nameField.value.trim(),
+        author: authorField.value.trim(),
+        romFilePath: romFilePathField.value.trim(),
+        locationDirPath: locationDirPathField.value.trim(),
+      });
+      if (errorOrProject.isError) return errorOrProject.error;
+      const maybeError = setProject(errorOrProject.value);
+      if (maybeError) return maybeError;
       const projectDirPath = await $FileSystem.join(
         locationDirPathField.value,
         nameField.value,

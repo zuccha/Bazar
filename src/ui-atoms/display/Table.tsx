@@ -1,7 +1,29 @@
 import * as Chakra from '@chakra-ui/react';
-import { ReactElement } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import useColorScheme from '../../theme/useColorScheme';
 import IconButton from '../input/IconButton';
+
+interface ColumnKey<T> {
+  readonly name: string;
+  readonly key: keyof T;
+}
+
+interface ColumnRender<T> {
+  readonly name: string;
+  readonly render: (item: T) => ReactNode;
+}
+
+function isColumnKey<T>(maybeColumnKey: {
+  name: string;
+}): maybeColumnKey is ColumnKey<T> {
+  return 'key' in maybeColumnKey;
+}
+
+function isColumnRender<T>(maybeColumnRender: {
+  name: string;
+}): maybeColumnRender is ColumnRender<T> {
+  return 'render' in maybeColumnRender;
+}
 
 interface TableProps<T> {
   actions?: readonly {
@@ -9,10 +31,7 @@ interface TableProps<T> {
     readonly onClick: (item: T) => void;
     readonly tooltip: string;
   }[];
-  columns: readonly {
-    readonly name: string;
-    readonly key: keyof T;
-  }[];
+  columns: readonly (ColumnKey<T> | ColumnRender<T>)[];
   getItemKey: (item: T) => string;
   items: T[];
   onSelectItem?: (item: T, index: number) => void;
@@ -61,10 +80,11 @@ export default function Table<T>({
             >
               {columns.map((column) => (
                 <Chakra.Td
-                  key={`${getItemKey(item)}-${item[column.key]}`}
+                  key={`${getItemKey(item)}-${column.name}`}
                   borderColor='app.bg1'
                 >
-                  {item[column.key]}
+                  {isColumnKey(column) && item[column.key]}
+                  {isColumnRender(column) && column.render(item)}
                 </Chakra.Td>
               ))}
               {actions.length > 0 && (

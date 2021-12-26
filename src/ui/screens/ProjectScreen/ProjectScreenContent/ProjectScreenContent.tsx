@@ -1,5 +1,7 @@
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
 import { ReactElement } from 'react';
+import Project from '../../../../core2/Project';
+import { useGet } from '../../../../hooks/useAccessors';
 import useColorScheme from '../../../../theme/useColorScheme';
 import ComingSoon from '../../../../ui-atoms/other/ComingSoon';
 import PatchesTab from './tabs/PatchesTab';
@@ -11,8 +13,21 @@ const tabPanelProps = {
   flexDir: 'column',
 } as const;
 
-export default function ProjectScreenContent(): ReactElement {
+interface ProjectScreenContent {
+  project: Project;
+}
+
+export default function ProjectScreenContent({
+  project,
+}: ProjectScreenContent): ReactElement {
   const colorScheme = useColorScheme();
+
+  const latestSnapshot = useGet(
+    project,
+    project.getLatest,
+    Project.getLatestDeps,
+  );
+
   return (
     <Tabs
       borderWidth={1}
@@ -40,7 +55,7 @@ export default function ProjectScreenContent(): ReactElement {
           <ComingSoon title='Music' />
         </TabPanel>
         <TabPanel {...tabPanelProps}>
-          <PatchesTab />
+          <PatchesTab projectSnapshot={latestSnapshot} />
         </TabPanel>
         <TabPanel {...tabPanelProps}>
           <ComingSoon title='Sprites' />

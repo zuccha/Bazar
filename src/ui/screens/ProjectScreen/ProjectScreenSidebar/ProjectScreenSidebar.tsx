@@ -2,30 +2,20 @@ import { Box, VStack } from '@chakra-ui/react';
 import { ReactElement, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ProjectInfo } from '../../../../core/Project';
+import Project from '../../../../core2/Project';
+import { useGet, useSet, useSetAsync } from '../../../../hooks/useAccessors';
 import useAsyncCallback from '../../../../hooks/useAsyncCallback';
 import { AppDispatch } from '../../../../store';
-import {
-  getProjectInfo,
-  setProjectInfo,
-} from '../../../../store/slices/core/slices/project';
 import ProjectScreenSidebarActions from './ProjectScreenSidebarActions';
 import ProjectScreenSidebarInfo from './ProjectScreenSidebarInfo';
 
-const defaultInfo = {
-  name: 'No project',
-  author: '',
-};
+interface ProjectScreenSidebarProps {
+  project: Project;
+}
 
-export default function ProjectScreenSidebar(): ReactElement {
-  const dispatch = useDispatch<AppDispatch>();
-
-  const info = useSelector(getProjectInfo());
-
-  const handleEditInfo = useAsyncCallback(
-    (newConfig: ProjectInfo) => dispatch(setProjectInfo(newConfig)),
-    [dispatch],
-  );
-
+export default function ProjectScreenSidebar({
+  project,
+}: ProjectScreenSidebarProps): ReactElement {
   return (
     <VStack
       bg='app.bg2'
@@ -35,13 +25,9 @@ export default function ProjectScreenSidebar(): ReactElement {
       spacing={6}
       alignItems='flex-start'
     >
-      <ProjectScreenSidebarInfo
-        info={info ?? defaultInfo}
-        isDisabled={!info || handleEditInfo.isLoading}
-        onEdit={handleEditInfo.call}
-      />
+      <ProjectScreenSidebarInfo project={project} />
       <Box w='100%' h='1px' bg='app.fg3' />
-      <ProjectScreenSidebarActions />
+      <ProjectScreenSidebarActions project={project} />
     </VStack>
   );
 }

@@ -1,10 +1,13 @@
 import { Flex, Heading, Text, VStack } from '@chakra-ui/layout';
 import { Box } from '@chakra-ui/react';
-import { ReactElement, useEffect } from 'react';
+import { ReactElement } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useCore } from '../../../contexts/CoreContext';
+import Core from '../../../core2/Core';
+import Project from '../../../core2/Project';
+import { useSet } from '../../../hooks/useAccessors';
 import useAsyncCallback from '../../../hooks/useAsyncCallback';
 import { AppDispatch } from '../../../store';
-import { openProject } from '../../../store/slices/core/slices/project';
 import { AppRouteName, setAppRoute } from '../../../store/slices/navigation';
 import {
   getSetting,
@@ -16,17 +19,22 @@ import FormError from '../../../ui-atoms/input/FormError';
 import { $FileSystem } from '../../../utils/FileSystem';
 
 export default function HomeScreenRecentProjects(): ReactElement {
+  const core = useCore();
+  const setProject = useSet(core, core.setProject, Core.setProjectTriggers);
+
   const dispatch = useDispatch<AppDispatch>();
 
   const recentProjectDirPaths = useSelector(getSetting('recentProjects'));
 
   const handleOpenRecentProject = useAsyncCallback(
     async (path: string) => {
-      const error = await dispatch(openProject({ directoryPath: path }));
-      if (error) {
+      const errorOrProject = await Project.open({ directoryPath: path });
+      if (errorOrProject.isError) {
         await dispatch(removeRecentProject(path));
-        return error;
+        return errorOrProject.error;
       }
+      const maybeError = setProject(errorOrProject.value);
+      if (maybeError) return maybeError;
       dispatch(setAppRoute({ name: AppRouteName.Project }));
       dispatch(prioritizeRecentProject(path));
     },

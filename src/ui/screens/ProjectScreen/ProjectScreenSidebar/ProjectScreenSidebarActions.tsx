@@ -1,28 +1,36 @@
 import { VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import Project from '../../../../core2/Project';
+import { useGet, useSetAsync } from '../../../../hooks/useAccessors';
 import useAsyncCallback from '../../../../hooks/useAsyncCallback';
 import useHandleError from '../../../../hooks/useHandleError';
 import { AppDispatch } from '../../../../store';
-import {
-  launchInEmulator,
-  openInLunarMagic,
-} from '../../../../store/slices/core/slices/project';
 import { getToolchain } from '../../../../store/slices/core/slices/toolchain';
 import Button from '../../../../ui-atoms/input/Button';
 
-export default function ProjectScreenSidebarActions(): ReactElement {
+interface ProjectScreenSidebarActionsProps {
+  project: Project;
+}
+
+export default function ProjectScreenSidebarActions({
+  project,
+}: ProjectScreenSidebarActionsProps): ReactElement {
   const dispatch = useDispatch<AppDispatch>();
   const toolchain = useSelector(getToolchain());
   const handleError = useHandleError();
 
+  const snapshot = useGet(project, project.getLatest, Project.getLatestDeps);
+  const openInLunarMagic = useSetAsync(snapshot, snapshot.openInLunarMagic, []);
+  const launchInEmulator = useSetAsync(snapshot, snapshot.launchInEmulator, []);
+
   const handleOpenInLunarMagic = useAsyncCallback(
-    () => dispatch(openInLunarMagic(toolchain)),
+    () => openInLunarMagic(toolchain),
     [dispatch, toolchain],
   );
 
   const handleLaunchInEmulator = useAsyncCallback(
-    () => dispatch(launchInEmulator(toolchain)),
+    () => launchInEmulator(toolchain),
     [dispatch, toolchain],
   );
 

@@ -1,6 +1,8 @@
 import { Alert, AlertIcon, Box, VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
-import { ProjectInfo } from '../../core/Project';
+import Project from '../../core2/Project';
+import { useGet, useSetAsync } from '../../hooks/useAccessors';
+import useAsyncCallback from '../../hooks/useAsyncCallback';
 import Button from '../../ui-atoms/input/Button';
 import FormControl, {
   useForm,
@@ -8,20 +10,25 @@ import FormControl, {
 } from '../../ui-atoms/input/FormControl';
 import TextInput from '../../ui-atoms/input/TextInput';
 import Drawer from '../../ui-atoms/overlay/Drawer';
-import { ErrorReport } from '../../utils/ErrorReport';
 import { $FileSystem } from '../../utils/FileSystem';
 
 interface ProjectSnapshotInfoEditorDrawerProps {
-  info: ProjectInfo;
-  onCancel: () => void;
-  onConfirm: (config: ProjectInfo) => Promise<ErrorReport | undefined>;
+  onClose: () => void;
+  project: Project;
 }
 
 export default function ProjectSnapshotInfoEditorDrawer({
-  info,
-  onCancel,
-  onConfirm,
+  onClose,
+  project,
 }: ProjectSnapshotInfoEditorDrawerProps): ReactElement {
+  const info = useGet(project, project.getInfo, Project.getInfoDeps);
+  const setInfo = useSetAsync(
+    project,
+    project.setInfo,
+    Project.setInfoTriggers,
+  );
+  const handleEditInfo = useAsyncCallback(setInfo, [setInfo]);
+
   const nameField = useFormField({
     infoMessage: 'This is the name of the project',
     initialValue: info.name,
@@ -40,22 +47,25 @@ export default function ProjectSnapshotInfoEditorDrawer({
   const form = useForm({
     fields: [nameField],
     onSubmit: () =>
-      onConfirm({ name: nameField.value, author: authorField.value }),
+      handleEditInfo.call({ name: nameField.value, author: authorField.value }),
   });
 
   return (
     <Drawer
       buttons={
         <>
-          <Button label='Cancel' onClick={onCancel} variant='outline' mr={3} />
+          <Button label='Cancel' onClick={onClose} variant='outline' mr={3} />
           <Button
             label='Save'
-            onClick={form.handleSubmit}
+            onClick={async () => {
+              await form.handleSubmit();
+              onClose();
+            }}
             isDisabled={!form.isValid}
           />
         </>
       }
-      onClose={onCancel}
+      onClose={onClose}
       title='Edit config'
     >
       <VStack flex={1}>
