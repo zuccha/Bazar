@@ -1,4 +1,4 @@
-import { Box } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from './store';
@@ -18,5 +18,11 @@ export default function App() {
     );
   }, [dispatch]);
 
-  return isLoading ? <Box>Loading...</Box> : <Navigation />;
+  return isLoading ? (
+    <Flex h='100%' w='100%' alignItems='center' justifyContent='center'>
+      Loading...
+    </Flex>
+  ) : (
+    <Navigation />
+  );
 }
