@@ -15,65 +15,65 @@ import {
   selectAppRoute,
   setAppRoute,
 } from '../store/slices/navigation';
-import PageButton from './PageButton';
-import About from './pages/About';
-import Help from './pages/Help';
-import Home from './pages/Home';
-import Project from './pages/Project';
-import Settings from './pages/Settings';
-import Tools from './pages/Tools';
+import SidebarButton from './SidebarButton';
+import AboutScreen from './screens/AboutScreen';
+import HelpScreen from './screens/HelpScreen';
+import HomeScreen from './screens/HomeScreen';
+import ProjectScreen from './screens/ProjectScreen';
+import SettingsScreen from './screens/SettingsScreen';
+import ToolsScreen from './screens/ToolchainScreen';
 
-const PageByAppRouteName: Record<AppRouteName, () => ReactElement> = {
-  [AppRouteName.About]: About,
-  [AppRouteName.Help]: Help,
-  [AppRouteName.Home]: Home,
-  [AppRouteName.Project]: Project,
-  [AppRouteName.Settings]: Settings,
-  [AppRouteName.Tools]: Tools,
+const ScreenByAppRouteName: Record<AppRouteName, () => ReactElement> = {
+  [AppRouteName.About]: AboutScreen,
+  [AppRouteName.Help]: HelpScreen,
+  [AppRouteName.Home]: HomeScreen,
+  [AppRouteName.Project]: ProjectScreen,
+  [AppRouteName.Settings]: SettingsScreen,
+  [AppRouteName.Tools]: ToolsScreen,
 } as const;
 
 export default function Navigation(): ReactElement {
   const appRoute = useSelector(selectAppRoute);
   const dispatch = useDispatch();
-  const Page = PageByAppRouteName[appRoute.name];
+  const Screen = ScreenByAppRouteName[appRoute.name];
   const projectExists = useSelector(hasProject);
 
   return (
     <Flex h='100%'>
       <VStack p='3' bg='app.bg1' overflowY='auto' flexShrink={0}>
-        <PageButton
+        <SidebarButton
           icon={<DragHandleIcon />}
           isActive={appRoute.name === AppRouteName.Home}
           label='Home'
           onClick={() => dispatch(setAppRoute({ name: AppRouteName.Home }))}
         />
-        <PageButton
+        <SidebarButton
           icon={<CopyIcon />}
           isActive={appRoute.name === AppRouteName.Project}
           isDisabled={!projectExists}
           label='Project'
           onClick={() => dispatch(setAppRoute({ name: AppRouteName.Project }))}
         />
-        <PageButton
+        <SidebarButton
           icon={<LinkIcon />}
           isActive={appRoute.name === AppRouteName.Tools}
           label='Tools'
           onClick={() => dispatch(setAppRoute({ name: AppRouteName.Tools }))}
         />
-        <PageButton
+        <SidebarButton
           icon={<SettingsIcon />}
           isActive={appRoute.name === AppRouteName.Settings}
           label='Settings'
           onClick={() => dispatch(setAppRoute({ name: AppRouteName.Settings }))}
         />
         <Flex flex={1} />
-        <PageButton
+        <SidebarButton
           icon={<InfoIcon />}
           isActive={appRoute.name === AppRouteName.About}
           label='About'
           onClick={() => dispatch(setAppRoute({ name: AppRouteName.About }))}
         />
-        <PageButton
+        <SidebarButton
           icon={<QuestionIcon />}
           isActive={appRoute.name === AppRouteName.Help}
           label='Help'
@@ -87,7 +87,7 @@ export default function Navigation(): ReactElement {
         alignItems='flex-start'
         justifyContent='flex-start'
       >
-        <Page />
+        <Screen />
       </Flex>
     </Flex>
   );
