@@ -120,33 +120,27 @@ export const $FileSystem = {
   },
 
   exists: async (path: string): Promise<boolean> => {
-    if (path === '/') return true;
     try {
-      const name = await Path.basename(path);
-      const dirPath = await Path.dirname(path);
-      const filesAndDirs = await FS.readDir(dirPath);
-      return filesAndDirs.some((fileOrDir) => fileOrDir.name === name);
+      return await invoke('exists', { path });
     } catch {
       return false;
     }
   },
 
   isDirectory: async (path: string): Promise<boolean> => {
-    if (path === '/') return true;
-    if (!(await $FileSystem.exists(path))) return false;
-    const name = await Path.basename(path);
-    const dirPath = await Path.dirname(path);
-    const dirNames = await $FileSystem.getDirNames(dirPath);
-    return dirNames.includes(name);
+    try {
+      return await invoke('is_dir', { path });
+    } catch {
+      return false;
+    }
   },
 
   isFile: async (path: string): Promise<boolean> => {
-    if (path === '/') return false;
-    if (!(await $FileSystem.exists(path))) return false;
-    const name = await Path.basename(path);
-    const dirPath = await Path.dirname(path);
-    const fileNames = await $FileSystem.getFileNames(dirPath);
-    return fileNames.includes(name);
+    try {
+      return await invoke('is_file', { path });
+    } catch {
+      return false;
+    }
   },
 
   getDirNames: async (directoryPath: string): Promise<string[]> => {
@@ -170,12 +164,15 @@ export const $FileSystem = {
   },
 
   join: async (...paths: string[]): Promise<string> => {
-    // TODO: Use Path.join() once the it'll no longer check for path existence.
-    // return await Path.join(...paths);
-    const path = paths
-      .join(Path.sep)
-      .replace(new RegExp(`${Path.sep}{2,}`, 'g'), Path.sep);
-    return path;
+    try {
+      let joinedPath = '';
+      for (const path of paths) {
+        joinedPath = await invoke('join', { path1: joinedPath, path2: path });
+      }
+      return joinedPath;
+    } catch (error) {
+      return '';
+    }
   },
 
   loadJson: async (path: string): Promise<EitherErrorOr<unknown>> => {
