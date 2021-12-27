@@ -106,8 +106,7 @@ export default function ToolchainScreen(): ReactElement {
               <Text pb={2}>
                 Bazar needs specific versions of the following tools to work
                 properly, so you cannot customize them. These tools will be
-                downloaded from SMW Central into you home directory
-                ("~/Bazar/tools").
+                downloaded from SMW Central.
               </Text>
               <ToolEmbedded
                 name='Lunar Magic'
