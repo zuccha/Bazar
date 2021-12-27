@@ -1,0 +1,70 @@
+diff --git a/node_modules/@tauri-apps/api/shell.ts b/node_modules/@tauri-apps/api/shell.ts
+index 1042825..8c581ab 100644
+--- a/node_modules/@tauri-apps/api/shell.ts
++++ b/node_modules/@tauri-apps/api/shell.ts
+@@ -96,7 +96,7 @@ class EventEmitter<E> {
+   private addEventListener(event: string, handler: (arg: any) => void): void {
+     if (event in this.eventListeners) {
+       // eslint-disable-next-line security/detect-object-injection
+-      this.eventListeners[event].push(handler)
++      this.eventListeners[event]!.push(handler)
+     } else {
+       // eslint-disable-next-line security/detect-object-injection
+       this.eventListeners[event] = [handler]
+@@ -107,7 +107,7 @@ class EventEmitter<E> {
+   _emit(event: E, payload: any): void {
+     if (event in this.eventListeners) {
+       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+-      const listeners = this.eventListeners[event as any]
++      const listeners = this.eventListeners[event as any] || []
+       for (const listener of listeners) {
+         listener(payload)
+       }
+diff --git a/node_modules/@tauri-apps/api/tauri.ts b/node_modules/@tauri-apps/api/tauri.ts
+index 149cfba..a2e81f4 100644
+--- a/node_modules/@tauri-apps/api/tauri.ts
++++ b/node_modules/@tauri-apps/api/tauri.ts
+@@ -27,7 +27,7 @@ declare let __TAURI_INVOKE_KEY__: number
+ function uid(): string {
+   const length = new Int8Array(1)
+   window.crypto.getRandomValues(length)
+-  const array = new Uint8Array(Math.max(16, Math.abs(length[0])))
++  const array = new Uint8Array(Math.max(16, Math.abs(length[0]!)))
+   window.crypto.getRandomValues(array)
+   return array.join('')
+ }
+diff --git a/node_modules/@tauri-apps/api/window.ts b/node_modules/@tauri-apps/api/window.ts
+index b51c38d..0e14144 100644
+--- a/node_modules/@tauri-apps/api/window.ts
++++ b/node_modules/@tauri-apps/api/window.ts
+@@ -251,7 +251,9 @@ class WebviewWindowHandle {
+       return Promise.resolve(() => {
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, security/detect-object-injection
+         const listeners = this.listeners[event]
+-        listeners.splice(listeners.indexOf(handler), 1)
++        if (listeners) {
++          listeners.splice(listeners.indexOf(handler), 1)
++        }
+       })
+     }
+     return listen(event, handler)
+@@ -269,7 +271,9 @@ class WebviewWindowHandle {
+       return Promise.resolve(() => {
+         // eslint-disable-next-line security/detect-object-injection
+         const listeners = this.listeners[event]
+-        listeners.splice(listeners.indexOf(handler), 1)
++        if (listeners) {
++          listeners.splice(listeners.indexOf(handler), 1)
++        }
+       })
+     }
+     return once(event, handler)
+@@ -299,7 +303,7 @@ class WebviewWindowHandle {
+         this.listeners[event] = [handler]
+       } else {
+         // eslint-disable-next-line
+-        this.listeners[event].push(handler)
++        this.listeners[event]!.push(handler)
+       }
+       return true
+     }
