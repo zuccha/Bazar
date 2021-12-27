@@ -1,7 +1,7 @@
-import AdmZip from 'adm-zip';
 import * as Tauri from '@tauri-apps/api';
 import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
 import { $ErrorReport, ErrorReport } from '../utils/ErrorReport';
+import { invoke } from '@tauri-apps/api';
 
 const HTTP = Tauri.http;
 const FS = Tauri.fs;
@@ -223,8 +223,11 @@ export const $FileSystem = {
     targetPath: string,
   ): Promise<ErrorReport | undefined> => {
     try {
-      const zip = new AdmZip(zipPath);
-      zip.extractAllTo(targetPath, true);
+      if (!(await $FileSystem.exists(targetPath))) {
+        const maybeError = await $FileSystem.createDirectory(targetPath);
+        if (maybeError) return maybeError;
+      }
+      await invoke('extract', { zipPath, targetPath });
       return undefined;
     } catch {
       const errorMessage = `FileSystem.unzip: Failed to unzip file "${zipPath}"`;
