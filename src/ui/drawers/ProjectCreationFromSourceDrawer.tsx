@@ -1,8 +1,5 @@
 import { Flex, VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../../store';
-import { AppRouteName, setAppRoute } from '../../store/slices/navigation';
 import BrowserInput from '../../ui-atoms/input/BrowserInput';
 import Button from '../../ui-atoms/input/Button';
 import FormControl, {
@@ -21,6 +18,8 @@ import {
   usePrioritizeRecentProject,
   useSetting,
 } from '../../core-hooks/Settings';
+import { useNavigateRoot } from '../../navigation/hooks';
+import { RootRouteName } from '../../navigation/Navigation';
 
 interface ProjectCreationFromSourceProps {
   onClose: () => void;
@@ -73,11 +72,11 @@ export default function ProjectCreationFromSourceDrawer({
       $FileSystem.validateHasExtension(value, '.smc'),
   });
 
-  const dispatch = useDispatch<AppDispatch>();
-
   const setProject = useSetProject();
 
   const prioritizeRecentProject = usePrioritizeRecentProject(settings);
+
+  const navigateRoot = useNavigateRoot();
 
   const form = useForm({
     fields: [nameField, romFilePathField, locationDirPathField],
@@ -102,9 +101,9 @@ export default function ProjectCreationFromSourceDrawer({
   const handleCreate = useAsyncCallback(async () => {
     const maybeError = await form.handleSubmit();
     if (maybeError) return maybeError;
-    dispatch(setAppRoute({ name: AppRouteName.Project }));
+    navigateRoot(RootRouteName.Project);
     onClose();
-  }, [form, dispatch, onClose]);
+  }, [form, navigateRoot, onClose]);
 
   return (
     <Drawer

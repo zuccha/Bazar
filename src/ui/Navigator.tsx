@@ -8,12 +8,6 @@ import {
 } from '@chakra-ui/icons';
 import { Flex, VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-  AppRouteName,
-  selectAppRoute,
-  setAppRoute,
-} from '../store/slices/navigation';
 import SidebarButton from './SidebarButton';
 import AboutScreen from './screens/AboutScreen';
 import HelpScreen from './screens/HelpScreen';
@@ -22,20 +16,23 @@ import ProjectScreen from './screens/ProjectScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import ToolsScreen from './screens/ToolchainScreen';
 import { useProject } from '../core-hooks/Core';
+import { useNavigateRoot, useRootRoute } from '../navigation/hooks';
+import { RootRouteName } from '../navigation/Navigation';
 
-const ScreenByAppRouteName: Record<AppRouteName, () => ReactElement> = {
-  [AppRouteName.About]: AboutScreen,
-  [AppRouteName.Help]: HelpScreen,
-  [AppRouteName.Home]: HomeScreen,
-  [AppRouteName.Project]: ProjectScreen,
-  [AppRouteName.Settings]: SettingsScreen,
-  [AppRouteName.Tools]: ToolsScreen,
+const ScreenByAppRouteName: Record<RootRouteName, () => ReactElement> = {
+  [RootRouteName.About]: AboutScreen,
+  [RootRouteName.Help]: HelpScreen,
+  [RootRouteName.Home]: HomeScreen,
+  [RootRouteName.Project]: ProjectScreen,
+  [RootRouteName.Settings]: SettingsScreen,
+  [RootRouteName.Tools]: ToolsScreen,
 } as const;
 
-export default function Navigation(): ReactElement {
-  const appRoute = useSelector(selectAppRoute);
-  const dispatch = useDispatch();
-  const Screen = ScreenByAppRouteName[appRoute.name];
+export default function Navigator(): ReactElement {
+  const rootRoute = useRootRoute();
+  const navigateRoot = useNavigateRoot();
+
+  const Screen = ScreenByAppRouteName[rootRoute];
   const project = useProject();
 
   return (
@@ -43,41 +40,41 @@ export default function Navigation(): ReactElement {
       <VStack p='3' bg='app.bg1' overflowY='auto' flexShrink={0}>
         <SidebarButton
           icon={<DragHandleIcon />}
-          isActive={appRoute.name === AppRouteName.Home}
+          isActive={rootRoute === RootRouteName.Home}
           label='Home'
-          onClick={() => dispatch(setAppRoute({ name: AppRouteName.Home }))}
+          onClick={() => navigateRoot(RootRouteName.Home)}
         />
         <SidebarButton
           icon={<CopyIcon />}
-          isActive={appRoute.name === AppRouteName.Project}
+          isActive={rootRoute === RootRouteName.Project}
           isDisabled={!project}
           label='Project'
-          onClick={() => dispatch(setAppRoute({ name: AppRouteName.Project }))}
+          onClick={() => navigateRoot(RootRouteName.Project)}
         />
         <SidebarButton
           icon={<LinkIcon />}
-          isActive={appRoute.name === AppRouteName.Tools}
+          isActive={rootRoute === RootRouteName.Tools}
           label='Tools'
-          onClick={() => dispatch(setAppRoute({ name: AppRouteName.Tools }))}
+          onClick={() => navigateRoot(RootRouteName.Tools)}
         />
         <SidebarButton
           icon={<SettingsIcon />}
-          isActive={appRoute.name === AppRouteName.Settings}
+          isActive={rootRoute === RootRouteName.Settings}
           label='Settings'
-          onClick={() => dispatch(setAppRoute({ name: AppRouteName.Settings }))}
+          onClick={() => navigateRoot(RootRouteName.Settings)}
         />
         <Flex flex={1} />
         <SidebarButton
           icon={<InfoIcon />}
-          isActive={appRoute.name === AppRouteName.About}
+          isActive={rootRoute === RootRouteName.About}
           label='About'
-          onClick={() => dispatch(setAppRoute({ name: AppRouteName.About }))}
+          onClick={() => navigateRoot(RootRouteName.About)}
         />
         <SidebarButton
           icon={<QuestionIcon />}
-          isActive={appRoute.name === AppRouteName.Help}
+          isActive={rootRoute === RootRouteName.Help}
           label='Help'
-          onClick={() => dispatch(setAppRoute({ name: AppRouteName.Help }))}
+          onClick={() => navigateRoot(RootRouteName.Help)}
         />
       </VStack>
       <Flex

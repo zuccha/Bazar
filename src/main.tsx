@@ -1,21 +1,20 @@
 import { ChakraProvider } from '@chakra-ui/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
 import App from './App';
 import { CoreContextProvider } from './contexts/CoreContext';
-import store from './store';
+import { NavigationContextProvider } from './contexts/NavigationContext';
 import theme from './theme';
 
 ReactDOM.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <ChakraProvider theme={theme}>
+    <ChakraProvider theme={theme}>
+      <NavigationContextProvider>
         <CoreContextProvider>
           <App />
         </CoreContextProvider>
-      </ChakraProvider>
-    </Provider>
+      </NavigationContextProvider>
+    </ChakraProvider>
   </React.StrictMode>,
   document.getElementById('root'),
 );

@@ -1,20 +1,16 @@
 import { Flex, Heading, Text, VStack } from '@chakra-ui/layout';
 import { Box } from '@chakra-ui/react';
 import { ReactElement } from 'react';
-import { useDispatch } from 'react-redux';
-import { useCore } from '../../../contexts/CoreContext';
 import { useSetProject, useSettings } from '../../../core-hooks/Core';
 import {
   useSetting,
   usePrioritizeRecentProject,
   useRemoveRecentProject,
 } from '../../../core-hooks/Settings';
-import Core from '../../../core/Core';
 import Project from '../../../core/Project';
-import { useGet, useSet, useSetAsync } from '../../../hooks/useAccessors';
 import useAsyncCallback from '../../../hooks/useAsyncCallback';
-import { AppDispatch } from '../../../store';
-import { AppRouteName, setAppRoute } from '../../../store/slices/navigation';
+import { useNavigateRoot } from '../../../navigation/hooks';
+import { RootRouteName } from '../../../navigation/Navigation';
 import Button from '../../../ui-atoms/input/Button';
 import FormError from '../../../ui-atoms/input/FormError';
 import { $FileSystem } from '../../../utils/FileSystem';
@@ -24,10 +20,10 @@ export default function HomeScreenRecentProjects(): ReactElement {
   const setProject = useSetProject();
   const recentProjectDirPaths = useSetting(settings, 'recentProjects');
 
-  const dispatch = useDispatch<AppDispatch>();
-
   const prioritizeRecentProject = usePrioritizeRecentProject(settings);
   const removeRecentProject = useRemoveRecentProject(settings);
+
+  const navigateRoot = useNavigateRoot();
 
   const handleOpenRecentProject = useAsyncCallback(
     async (path: string) => {
@@ -38,15 +34,15 @@ export default function HomeScreenRecentProjects(): ReactElement {
       }
       const maybeError = setProject(errorOrProject.value);
       if (maybeError) return maybeError;
-      dispatch(setAppRoute({ name: AppRouteName.Project }));
+      navigateRoot(RootRouteName.Project);
       prioritizeRecentProject(path);
     },
-    [dispatch],
+    [navigateRoot, prioritizeRecentProject, removeRecentProject, setProject],
   );
 
   const handleRemoveRecentProject = useAsyncCallback(
     (path: string) => removeRecentProject(path),
-    [dispatch],
+    [removeRecentProject],
   );
 
   // useEffect(() => {

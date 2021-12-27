@@ -5,8 +5,7 @@ import { useCore } from './contexts/CoreContext';
 import { useSettings, useToolchain } from './core-hooks/Core';
 import { useLoadSettings } from './core-hooks/Settings';
 import { useLoadToolchain } from './core-hooks/Toolchain';
-import { AppDispatch } from './store';
-import Navigation from './ui/Navigation';
+import Navigator from './ui/Navigator';
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -18,19 +17,17 @@ export default function App() {
   const toolchain = useToolchain();
   const loadToolchain = useLoadToolchain(toolchain);
 
-  const dispatch = useDispatch<AppDispatch>();
-
   useEffect(() => {
     Promise.all([loadSettings(), loadToolchain()]).then((responses) => {
       setIsLoading(false);
     });
-  }, [dispatch]);
+  }, [loadSettings, loadToolchain]);
 
   return isLoading ? (
     <Flex h='100%' w='100%' alignItems='center' justifyContent='center'>
       Loading...
     </Flex>
   ) : (
-    <Navigation />
+    <Navigator />
   );
 }

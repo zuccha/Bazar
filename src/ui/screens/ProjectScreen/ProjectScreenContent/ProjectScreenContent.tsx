@@ -1,7 +1,12 @@
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
-import { ReactElement } from 'react';
+import { ReactElement, useCallback } from 'react';
 import { useProjectLatestSnapshot } from '../../../../core-hooks/Project';
 import Project from '../../../../core/Project';
+import {
+  useNavigateProject,
+  useProjectRoute,
+} from '../../../../navigation/hooks';
+import { ProjectRouteName } from '../../../../navigation/Navigation';
 import useColorScheme from '../../../../theme/useColorScheme';
 import ComingSoon from '../../../../ui-atoms/other/ComingSoon';
 import PatchesTab from './tabs/PatchesTab';
@@ -12,6 +17,26 @@ const tabPanelProps = {
   display: 'flex',
   flexDir: 'column',
 } as const;
+
+const projectRouteNameToTabIndex: Record<ProjectRouteName, number> = {
+  [ProjectRouteName.Blocks]: 0,
+  [ProjectRouteName.Music]: 1,
+  [ProjectRouteName.Patches]: 2,
+  [ProjectRouteName.Sprites]: 3,
+  [ProjectRouteName.UberAsm]: 4,
+  [ProjectRouteName.Backups]: 5,
+  [ProjectRouteName.Releases]: 6,
+};
+
+const tabIndexToProjectRouteName: Record<number, ProjectRouteName> = {
+  0: ProjectRouteName.Blocks,
+  1: ProjectRouteName.Music,
+  2: ProjectRouteName.Patches,
+  3: ProjectRouteName.Sprites,
+  4: ProjectRouteName.UberAsm,
+  5: ProjectRouteName.Backups,
+  6: ProjectRouteName.Releases,
+};
 
 interface ProjectScreenContent {
   project: Project;
@@ -24,6 +49,19 @@ export default function ProjectScreenContent({
 
   const latestSnapshot = useProjectLatestSnapshot(project);
 
+  const projectRoute = useProjectRoute();
+  const navigateProject = useNavigateProject();
+
+  const tabIndex = projectRouteNameToTabIndex[projectRoute];
+  const handleTabsChange = useCallback(
+    (index: number): void => {
+      navigateProject(
+        tabIndexToProjectRouteName[index] ?? ProjectRouteName.Blocks,
+      );
+    },
+    [navigateProject],
+  );
+
   return (
     <Tabs
       borderWidth={1}
@@ -33,6 +71,8 @@ export default function ProjectScreenContent({
       flexDir='column'
       defaultIndex={2}
       colorScheme={colorScheme}
+      index={tabIndex}
+      onChange={handleTabsChange}
     >
       <TabList>
         <Tab>Blocks</Tab>

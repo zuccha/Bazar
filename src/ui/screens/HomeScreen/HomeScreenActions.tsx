@@ -1,13 +1,12 @@
 import { Box, VStack } from '@chakra-ui/layout';
 import { ReactElement, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
 import { useSetProject, useSettings } from '../../../core-hooks/Core';
 import { usePrioritizeRecentProject } from '../../../core-hooks/Settings';
 import Project from '../../../core/Project';
 import useAsyncCallback from '../../../hooks/useAsyncCallback';
 import useSafeState from '../../../hooks/usSafeState';
-import { AppDispatch } from '../../../store';
-import { AppRouteName, setAppRoute } from '../../../store/slices/navigation';
+import { useNavigateRoot } from '../../../navigation/hooks';
+import { RootRouteName } from '../../../navigation/Navigation';
 import Button from '../../../ui-atoms/input/Button';
 import FormError from '../../../ui-atoms/input/FormError';
 import { $Dialog } from '../../../utils/Dialog';
@@ -15,8 +14,6 @@ import ProjectCreationFromSourceDrawer from '../../drawers/ProjectCreationFromSo
 
 export default function HomeScreenActions(): ReactElement {
   const settings = useSettings();
-
-  const dispatch = useDispatch<AppDispatch>();
 
   const [isProjectCreationFromSourceOpen, setIsProjectCreationFromSourceOpen] =
     useSafeState(false);
@@ -29,6 +26,8 @@ export default function HomeScreenActions(): ReactElement {
 
   const prioritizeRecentProject = usePrioritizeRecentProject(settings);
 
+  const navigateRoot = useNavigateRoot();
+
   const handleOpenProject = useAsyncCallback(async () => {
     const pathOrError = await $Dialog.open({ type: 'directory' });
     if (pathOrError.isError) return pathOrError.error;
@@ -39,9 +38,9 @@ export default function HomeScreenActions(): ReactElement {
     if (errorOrProject.isError) return errorOrProject.error;
     const maybeError = setProject(errorOrProject.value);
     if (maybeError) return maybeError;
-    dispatch(setAppRoute({ name: AppRouteName.Project }));
+    navigateRoot(RootRouteName.Project);
     prioritizeRecentProject(pathOrError.value);
-  }, [dispatch]);
+  }, [navigateRoot, prioritizeRecentProject, setProject]);
 
   return (
     <>
