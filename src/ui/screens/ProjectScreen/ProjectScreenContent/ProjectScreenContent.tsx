@@ -1,7 +1,7 @@
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
 import { ReactElement } from 'react';
+import { useProjectLatestSnapshot } from '../../../../core-hooks/Project';
 import Project from '../../../../core/Project';
-import { useGet } from '../../../../hooks/useAccessors';
 import useColorScheme from '../../../../theme/useColorScheme';
 import ComingSoon from '../../../../ui-atoms/other/ComingSoon';
 import PatchesTab from './tabs/PatchesTab';
@@ -22,11 +22,7 @@ export default function ProjectScreenContent({
 }: ProjectScreenContent): ReactElement {
   const colorScheme = useColorScheme();
 
-  const latestSnapshot = useGet(
-    project,
-    project.getLatest,
-    Project.getLatestDeps,
-  );
+  const latestSnapshot = useProjectLatestSnapshot(project);
 
   return (
     <Tabs

@@ -8,8 +8,11 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { ReactElement, useState } from 'react';
+import {
+  useAddPatchToProjectSnapshotFromDirectory,
+  useAddPatchToProjectSnapshotFromFile,
+} from '../../core-hooks/ProjectSnapshot';
 import ProjectSnapshot from '../../core/ProjectSnapshot';
-import { useSetAsync } from '../../hooks/useAccessors';
 import useColorScheme from '../../theme/useColorScheme';
 import Alert from '../../ui-atoms/display/Alert';
 import BrowserInput from '../../ui-atoms/input/BrowserInput';
@@ -75,17 +78,11 @@ export default function PatchAdditionDrawer({
       $FileSystem.validateHasExtension(value, '.asm'),
   });
 
-  const addPatchFromFile = useSetAsync(
-    projectSnapshot,
-    projectSnapshot.addPatchFromFile,
-    ProjectSnapshot.addPatchFromFileTriggers,
-  );
+  const addPatchFromFile =
+    useAddPatchToProjectSnapshotFromFile(projectSnapshot);
 
-  const addPatchFromDirectory = useSetAsync(
-    projectSnapshot,
-    projectSnapshot.addPatchFromDirectory,
-    ProjectSnapshot.addPatchFromDirectoryTriggers,
-  );
+  const addPatchFromDirectory =
+    useAddPatchToProjectSnapshotFromDirectory(projectSnapshot);
 
   const form = useForm(
     isSingleFile

@@ -1,7 +1,7 @@
 import { Alert, AlertIcon, Box, VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
+import { useProjectInfo, useSetProjectInfo } from '../../core-hooks/Project';
 import Project from '../../core/Project';
-import { useGet, useSetAsync } from '../../hooks/useAccessors';
 import useAsyncCallback from '../../hooks/useAsyncCallback';
 import Button from '../../ui-atoms/input/Button';
 import FormControl, {
@@ -21,12 +21,8 @@ export default function ProjectSnapshotInfoEditorDrawer({
   onClose,
   project,
 }: ProjectSnapshotInfoEditorDrawerProps): ReactElement {
-  const info = useGet(project, project.getInfo, Project.getInfoDeps);
-  const setInfo = useSetAsync(
-    project,
-    project.setInfo,
-    Project.setInfoTriggers,
-  );
+  const info = useProjectInfo(project);
+  const setInfo = useSetProjectInfo(project);
   const handleEditInfo = useAsyncCallback(setInfo, [setInfo]);
 
   const nameField = useFormField({

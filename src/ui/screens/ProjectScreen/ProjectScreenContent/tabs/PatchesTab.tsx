@@ -1,9 +1,12 @@
 import { ArrowForwardIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import { Flex, HStack } from '@chakra-ui/react';
 import { ReactElement, useMemo, useState } from 'react';
+import {
+  useProjectSnapshotPatches,
+  useRemovePatchFromProjectSnapshot,
+} from '../../../../../core-hooks/ProjectSnapshot';
 import Patch from '../../../../../core/Patch';
 import ProjectSnapshot from '../../../../../core/ProjectSnapshot';
-import { useGet, useSetAsync } from '../../../../../hooks/useAccessors';
 import useAsyncCallback from '../../../../../hooks/useAsyncCallback';
 import useHandleError from '../../../../../hooks/useHandleError';
 import Output from '../../../../../ui-atoms/display/Output';
@@ -26,17 +29,8 @@ export default function PatchesTab({
   const [isPatchAdditionVisible, setPatchAdditionVisible] = useState(false);
   const [patchToRemove, setPatchToRemove] = useState<Patch | undefined>();
 
-  const patches = useGet(
-    projectSnapshot,
-    projectSnapshot.getPatches,
-    ProjectSnapshot.getPatchesDeps,
-  );
-
-  const removePatch = useSetAsync(
-    projectSnapshot,
-    projectSnapshot.removePatch,
-    ProjectSnapshot.removePatchTriggers,
-  );
+  const patches = useProjectSnapshotPatches(projectSnapshot);
+  const removePatch = useRemovePatchFromProjectSnapshot(projectSnapshot);
 
   const handleError = useHandleError();
   const handleRemovePatch = useAsyncCallback(
@@ -69,10 +63,6 @@ export default function PatchesTab({
       },
     ];
   }, []);
-
-  const items = useMemo(() => {
-    return patches.map((patch) => patch.getInfo());
-  }, [patches]);
 
   return (
     <>

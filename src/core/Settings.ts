@@ -69,6 +69,7 @@ export default class Settings {
     if (error) return error.extend(errorMessage);
   };
 
+  static prioritizeRecentProjectTriggers = ['Settings.recentProjects'];
   prioritizeRecentProject = async (
     dirPath: string,
   ): Promise<ErrorReport | undefined> => {
@@ -79,6 +80,7 @@ export default class Settings {
     if (error) return error.extend(errorMessage);
   };
 
+  static removeRecentProjectTriggers = ['Settings.recentProjects'];
   removeRecentProject = async (
     dirPath: string,
   ): Promise<ErrorReport | undefined> => {

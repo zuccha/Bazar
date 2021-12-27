@@ -1,8 +1,7 @@
 import { useCallback } from 'react';
-import { useCore } from '../../../contexts/CoreContext';
-import Core from '../../../core/Core';
+import { useSettings } from '../../../core-hooks/Core';
+import { useSetSetting, useSetting } from '../../../core-hooks/Settings';
 import { GenericSetting, GenericSettingsStore } from '../../../core/Settings';
-import { useGet, useSetAsync } from '../../../hooks/useAccessors';
 import {
   FormField,
   FormFieldParams,
@@ -18,16 +17,15 @@ export default function useSettingField<S extends GenericSetting>(
   save: () => Promise<ErrorReport | undefined>;
   reset: () => void;
 } {
-  const core = useCore();
-  const settings = useGet(core, core.getSettings, Core.getSettingsDeps);
+  const settings = useSettings();
 
-  const initialValue = useGet(settings, () => settings.get(setting), [setting]);
+  const initialValue = useSetting(settings, setting);
   const field = useFormField<GenericSettingsStore[S]>({
     initialValue,
     ...params,
   });
 
-  const setSetting = useSetAsync(settings, settings.set, [setting]);
+  const setSetting = useSetSetting(settings, setting);
 
   const save = useCallback(() => {
     return setSetting(setting, field.value);

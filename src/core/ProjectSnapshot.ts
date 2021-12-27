@@ -146,6 +146,7 @@ export default class ProjectSnapshot {
 
   // #region Generic
 
+  static openInLunarMagicTriggers = [];
   openInLunarMagic = async (
     toolchain: Toolchain,
   ): Promise<ErrorReport | undefined> => {
@@ -172,6 +173,7 @@ export default class ProjectSnapshot {
     }
   };
 
+  static launchInEmulatorTriggers = [];
   launchInEmulator = async (
     toolchain: Toolchain,
   ): Promise<ErrorReport | undefined> => {

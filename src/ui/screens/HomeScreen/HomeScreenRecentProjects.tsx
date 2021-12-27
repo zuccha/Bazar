@@ -3,6 +3,12 @@ import { Box } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 import { useDispatch } from 'react-redux';
 import { useCore } from '../../../contexts/CoreContext';
+import { useSetProject, useSettings } from '../../../core-hooks/Core';
+import {
+  useSetting,
+  usePrioritizeRecentProject,
+  useRemoveRecentProject,
+} from '../../../core-hooks/Settings';
 import Core from '../../../core/Core';
 import Project from '../../../core/Project';
 import { useGet, useSet, useSetAsync } from '../../../hooks/useAccessors';
@@ -14,30 +20,14 @@ import FormError from '../../../ui-atoms/input/FormError';
 import { $FileSystem } from '../../../utils/FileSystem';
 
 export default function HomeScreenRecentProjects(): ReactElement {
-  const core = useCore();
-  const settings = useGet(core, core.getSettings, Core.getSettingsDeps);
-
-  const setProject = useSet(core, core.setProject, Core.setProjectTriggers);
+  const settings = useSettings();
+  const setProject = useSetProject();
+  const recentProjectDirPaths = useSetting(settings, 'recentProjects');
 
   const dispatch = useDispatch<AppDispatch>();
 
-  const recentProjectDirPaths = useGet(
-    settings,
-    () => settings.get('recentProjects'),
-    ['recentProjects'],
-  );
-
-  const prioritizeRecentProject = useSetAsync(
-    settings,
-    settings.prioritizeRecentProject,
-    ['recentProjects'],
-  );
-
-  const removeRecentProject = useSetAsync(
-    settings,
-    settings.removeRecentProject,
-    ['recentProjects'],
-  );
+  const prioritizeRecentProject = usePrioritizeRecentProject(settings);
+  const removeRecentProject = useRemoveRecentProject(settings);
 
   const handleOpenRecentProject = useAsyncCallback(
     async (path: string) => {

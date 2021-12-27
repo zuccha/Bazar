@@ -16,9 +16,11 @@ import Alert from '../../ui-atoms/display/Alert';
 import { $FileSystem } from '../../utils/FileSystem';
 import useAsyncCallback from '../../hooks/useAsyncCallback';
 import Project from '../../core/Project';
-import { useGet, useSet, useSetAsync } from '../../hooks/useAccessors';
-import Core from '../../core/Core';
-import { useCore } from '../../contexts/CoreContext';
+import { useSetProject, useSettings } from '../../core-hooks/Core';
+import {
+  usePrioritizeRecentProject,
+  useSetting,
+} from '../../core-hooks/Settings';
 
 interface ProjectCreationFromSourceProps {
   onClose: () => void;
@@ -27,8 +29,7 @@ interface ProjectCreationFromSourceProps {
 export default function ProjectCreationFromSourceDrawer({
   onClose,
 }: ProjectCreationFromSourceProps): ReactElement {
-  const core = useCore();
-  const settings = useGet(core, core.getSettings, Core.getSettingsDeps);
+  const settings = useSettings();
 
   const nameField = useFormField({
     infoMessage: 'This will be the name fo the project directory.',
@@ -38,11 +39,7 @@ export default function ProjectCreationFromSourceDrawer({
     onValidate: $FileSystem.validateIsValidName,
   });
 
-  const defaultAuthor = useGet(
-    settings,
-    () => settings.get('newProjectDefaultAuthor'),
-    ['newProjectDefaultAuthor'],
-  );
+  const defaultAuthor = useSetting(settings, 'newProjectDefaultAuthor');
   const authorField = useFormField({
     infoMessage: 'Author of the project.',
     initialValue: defaultAuthor,
@@ -50,10 +47,9 @@ export default function ProjectCreationFromSourceDrawer({
     label: 'Author',
   });
 
-  const defaultLocationDirPath = useGet(
+  const defaultLocationDirPath = useSetting(
     settings,
-    () => settings.get('newProjectDefaultLocationDirPath'),
-    ['newProjectDefaultLocationDirPath'],
+    'newProjectDefaultLocationDirPath',
   );
   const locationDirPathField = useFormField({
     infoMessage: 'The project will be created in this directory.',
@@ -63,10 +59,9 @@ export default function ProjectCreationFromSourceDrawer({
     onValidate: $FileSystem.validateExistsDir,
   });
 
-  const defaultRomFilePath = useGet(
+  const defaultRomFilePath = useSetting(
     settings,
-    () => settings.get('newProjectDefaultRomFilePath'),
-    ['newProjectDefaultRomFilePath'],
+    'newProjectDefaultRomFilePath',
   );
   const romFilePathField = useFormField({
     infoMessage: 'ROM used for the project (a copy will be made).',
@@ -80,13 +75,9 @@ export default function ProjectCreationFromSourceDrawer({
 
   const dispatch = useDispatch<AppDispatch>();
 
-  const setProject = useSet(core, core.setProject, Core.setProjectTriggers);
+  const setProject = useSetProject();
 
-  const prioritizeRecentProject = useSetAsync(
-    settings,
-    settings.prioritizeRecentProject,
-    ['recentProjects'],
-  );
+  const prioritizeRecentProject = usePrioritizeRecentProject(settings);
 
   const form = useForm({
     fields: [nameField, romFilePathField, locationDirPathField],

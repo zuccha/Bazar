@@ -2,10 +2,9 @@ import { Flex } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useCore } from './contexts/CoreContext';
-import Core from './core/Core';
-import Settings from './core/Settings';
-import Toolchain from './core/Toolchain';
-import { useGet, useSetAsync } from './hooks/useAccessors';
+import { useSettings, useToolchain } from './core-hooks/Core';
+import { useLoadSettings } from './core-hooks/Settings';
+import { useLoadToolchain } from './core-hooks/Toolchain';
 import { AppDispatch } from './store';
 import Navigation from './ui/Navigation';
 
@@ -13,19 +12,11 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const core = useCore();
 
-  const settings = useGet(core, core.getSettings, Core.getSettingsDeps);
-  const loadSettings = useSetAsync(
-    settings,
-    settings.load,
-    Settings.loadTriggers,
-  );
+  const settings = useSettings();
+  const loadSettings = useLoadSettings(settings);
 
-  const toolchain = useGet(core, core.getToolchain, Core.getToolchainDeps);
-  const loadToolchain = useSetAsync(
-    toolchain,
-    toolchain.load,
-    Toolchain.loadTriggers,
-  );
+  const toolchain = useToolchain();
+  const loadToolchain = useLoadToolchain(toolchain);
 
   const dispatch = useDispatch<AppDispatch>();
 

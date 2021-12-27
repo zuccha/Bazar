@@ -1,10 +1,9 @@
 import { Box, VStack } from '@chakra-ui/layout';
 import { ReactElement, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { useCore } from '../../../contexts/CoreContext';
-import Core from '../../../core/Core';
+import { useSetProject, useSettings } from '../../../core-hooks/Core';
+import { usePrioritizeRecentProject } from '../../../core-hooks/Settings';
 import Project from '../../../core/Project';
-import { useGet, useSet, useSetAsync } from '../../../hooks/useAccessors';
 import useAsyncCallback from '../../../hooks/useAsyncCallback';
 import useSafeState from '../../../hooks/usSafeState';
 import { AppDispatch } from '../../../store';
@@ -15,8 +14,7 @@ import { $Dialog } from '../../../utils/Dialog';
 import ProjectCreationFromSourceDrawer from '../../drawers/ProjectCreationFromSourceDrawer';
 
 export default function HomeScreenActions(): ReactElement {
-  const core = useCore();
-  const settings = useGet(core, core.getSettings, Core.getSettingsDeps);
+  const settings = useSettings();
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -27,13 +25,9 @@ export default function HomeScreenActions(): ReactElement {
     setIsProjectCreationFromSourceOpen(true);
   }, []);
 
-  const setProject = useSet(core, core.setProject, Core.setProjectTriggers);
+  const setProject = useSetProject();
 
-  const prioritizeRecentProject = useSetAsync(
-    settings,
-    settings.prioritizeRecentProject,
-    ['recentProjects'],
-  );
+  const prioritizeRecentProject = usePrioritizeRecentProject(settings);
 
   const handleOpenProject = useAsyncCallback(async () => {
     const pathOrError = await $Dialog.open({ type: 'directory' });

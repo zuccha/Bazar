@@ -1,6 +1,12 @@
 import { VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 import { useCore } from '../../../../contexts/CoreContext';
+import { useToolchain } from '../../../../core-hooks/Core';
+import { useProjectLatestSnapshot } from '../../../../core-hooks/Project';
+import {
+  useLaunchProjectSnapshotInEmulator,
+  useOpenProjectSnapshotInLunarMagic,
+} from '../../../../core-hooks/ProjectSnapshot';
 import Core from '../../../../core/Core';
 import Project from '../../../../core/Project';
 import { useGet, useSetAsync } from '../../../../hooks/useAccessors';
@@ -15,13 +21,12 @@ interface ProjectScreenSidebarActionsProps {
 export default function ProjectScreenSidebarActions({
   project,
 }: ProjectScreenSidebarActionsProps): ReactElement {
-  const core = useCore();
-  const toolchain = useGet(core, core.getToolchain, Core.getToolchainDeps);
+  const toolchain = useToolchain();
   const handleError = useHandleError();
 
-  const snapshot = useGet(project, project.getLatest, Project.getLatestDeps);
-  const openInLunarMagic = useSetAsync(snapshot, snapshot.openInLunarMagic, []);
-  const launchInEmulator = useSetAsync(snapshot, snapshot.launchInEmulator, []);
+  const snapshot = useProjectLatestSnapshot(project);
+  const openInLunarMagic = useOpenProjectSnapshotInLunarMagic(snapshot);
+  const launchInEmulator = useLaunchProjectSnapshotInEmulator(snapshot);
 
   const handleOpenInLunarMagic = useAsyncCallback(
     () => openInLunarMagic(toolchain),

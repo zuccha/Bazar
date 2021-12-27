@@ -1,14 +1,11 @@
 import { Center, Flex } from '@chakra-ui/react';
 import { ReactElement } from 'react';
-import { useCore } from '../../../contexts/CoreContext';
-import Core from '../../../core/Core';
-import { useGet } from '../../../hooks/useAccessors';
+import { useProject } from '../../../core-hooks/Core';
 import ProjectScreenContent from './ProjectScreenContent';
 import ProjectScreenSidebar from './ProjectScreenSidebar';
 
 export default function ProjectScreen(): ReactElement {
-  const core = useCore();
-  const project = useGet(core, core.getProject, Core.getProjectDeps);
+  const project = useProject();
 
   if (!project) {
     return (

@@ -1,8 +1,8 @@
 import { EditIcon } from '@chakra-ui/icons';
 import { Flex, Heading, Text, VStack } from '@chakra-ui/react';
 import { ReactElement, useState } from 'react';
+import { useProjectInfo } from '../../../../core-hooks/Project';
 import Project from '../../../../core/Project';
-import { useGet } from '../../../../hooks/useAccessors';
 import IconButton from '../../../../ui-atoms/input/IconButton';
 import ProjectSnapshotInfoEditorDrawer from '../../../drawers/ProjectSnapshotInfoEditorDrawer';
 
@@ -15,7 +15,7 @@ export default function ProjectScreenSidebarInfo({
 }: ProjectScreenSidebarInfoProps): ReactElement {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
 
-  const info = useGet(project, project.getInfo, Project.getInfoDeps);
+  const info = useProjectInfo(project);
 
   return (
     <>

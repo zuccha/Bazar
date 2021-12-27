@@ -307,10 +307,10 @@ export default class Toolchain {
     return this[propertyName];
   };
 
-  static getEditorDeps = ['editor'];
+  static getEditorDeps = ['Toolchain.editor'];
   getEditor = () => this.editor;
 
-  static editEditorTriggers = ['editor'];
+  static editEditorTriggers = ['Toolchain.editor'];
   editEditor = async (exePath: string): Promise<ErrorReport | undefined> => {
     return await this.editCustom(
       'editor',
@@ -320,10 +320,10 @@ export default class Toolchain {
     );
   };
 
-  static getEmulatorDeps = ['emulator'];
+  static getEmulatorDeps = ['Toolchain.emulator'];
   getEmulator = () => this.emulator;
 
-  static editEmulatorTriggers = ['emulator'];
+  static editEmulatorTriggers = ['Toolchain.emulator'];
   editEmulator = async (exePath: string): Promise<ErrorReport | undefined> => {
     return await this.editCustom(
       'emulator',
@@ -333,10 +333,10 @@ export default class Toolchain {
     );
   };
 
-  static getLunarMagicDeps = ['lunarMagic'];
+  static getLunarMagicDeps = ['Toolchain.lunarMagic'];
   getLunarMagic = () => this.lunarMagic;
 
-  static downloadLunarMagicTriggers = ['lunarMagic'];
+  static downloadLunarMagicTriggers = ['Toolchain.lunarMagic'];
   downloadLunarMagic = async (): Promise<ErrorReport | undefined> => {
     return await this.downloadEmbedded(
       'lunarMagic',
@@ -345,42 +345,42 @@ export default class Toolchain {
     );
   };
 
-  static getAsarDeps = ['asar'];
+  static getAsarDeps = ['Toolchain.asar'];
   getAsar = () => this.asar;
 
-  static downloadAsarTriggers = ['asar'];
+  static downloadAsarTriggers = ['Toolchain.asar'];
   downloadAsar = async (): Promise<ErrorReport | undefined> => {
     return await this.downloadEmbedded('asar', 'downloadAsar', ASAR_OPTIONS);
   };
 
-  static getFlipsDeps = ['flips'];
+  static getFlipsDeps = ['Toolchain.flips'];
   getFlips = () => this.flips;
 
-  static downloadFlipsTriggers = ['flips'];
+  static downloadFlipsTriggers = ['Toolchain.flips'];
   downloadFlips = async (): Promise<ErrorReport | undefined> => {
     return await this.downloadEmbedded('flips', 'downloadFlips', FLIPS_OPTIONS);
   };
 
-  static getGpsDeps = ['gps'];
+  static getGpsDeps = ['Toolchain.gps'];
   getGps = () => this.gps;
 
-  static downloadGpsTriggers = ['gps'];
+  static downloadGpsTriggers = ['Toolchain.gps'];
   downloadGps = async (): Promise<ErrorReport | undefined> => {
     return await this.downloadEmbedded('gps', 'downloadGps', GPS_OPTIONS);
   };
 
-  static getPixiDeps = ['pixi'];
+  static getPixiDeps = ['Toolchain.pixi'];
   getPixi = () => this.pixi;
 
-  static downloadPixiTriggers = ['pixi'];
+  static downloadPixiTriggers = ['Toolchain.pixi'];
   downloadPixi = async (): Promise<ErrorReport | undefined> => {
     return await this.downloadEmbedded('pixi', 'downloadPixi', PIXI_OPTIONS);
   };
 
-  static getUberAsmDeps = ['uberAsm'];
+  static getUberAsmDeps = ['Toolchain.uberAsm'];
   getUberAsm = () => this.uberAsm;
 
-  static downloadUberAsmTriggers = ['uberAsm'];
+  static downloadUberAsmTriggers = ['Toolchain.uberAsm'];
   downloadUberAsm = async (): Promise<ErrorReport | undefined> => {
     return await this.downloadEmbedded(
       'uberAsm',
