@@ -28,7 +28,7 @@ const $ToolchainSettingsStore = $SettingsStore.create({
 
 // #region Types
 
-interface ToolCustom {
+export interface ToolCustom {
   exePath: string;
 }
 
@@ -37,7 +37,7 @@ interface ToolCustomOptions {
   settingKey: keyof ToolchainSettingsStore;
 }
 
-type ToolEmbedded =
+export type ToolEmbedded =
   | {
       status: 'installed';
       exePath: string;
@@ -214,14 +214,14 @@ export default class Toolchain {
   }
 
   static loadTriggers = [
-    'editor',
-    'emulator',
-    'lunarMagic',
-    'asar',
-    'flips',
-    'gps',
-    'pixi',
-    'uberAsm',
+    'Toolchain.editor',
+    'Toolchain.emulator',
+    'Toolchain.lunarMagic',
+    'Toolchain.asar',
+    'Toolchain.flips',
+    'Toolchain.gps',
+    'Toolchain.pixi',
+    'Toolchain.uberAsm',
   ];
   load = async (): Promise<ErrorReport | undefined> => {
     const editorOrError = await readCustom(EDITOR_OPTIONS);
@@ -251,25 +251,35 @@ export default class Toolchain {
     this.uberAsm = uberAsmOrError.value;
   };
 
-  private editCustom = async (
-    propertyName: ToolchainCustom,
-    methodName: string,
-    { settingKey }: ToolCustomOptions,
+  editCustom = async (
+    toolCustom: ToolchainCustom,
     exePath: string,
   ): Promise<ErrorReport | undefined> => {
+    const { settingKey } = {
+      editor: EDITOR_OPTIONS,
+      emulator: EMULATOR_OPTIONS,
+    }[toolCustom];
+
     let error: ErrorReport | undefined;
-    const errorMessage = `Toolchain.${methodName}: Failed to set path`;
+    const errorMessage = `Toolchain.editCustom(${toolCustom}): Failed to set path`;
     error = await $ToolchainSettingsStore.set(settingKey, exePath);
     if (error) return error.extend(errorMessage);
-    this[propertyName].exePath = exePath;
+    this[toolCustom].exePath = exePath;
   };
 
-  private downloadEmbedded = async (
-    propertyName: ToolchainEmbedded,
-    methodName: string,
-    { directoryName, exeName, version, downloadUrl }: ToolEmbeddedOptions,
+  downloadEmbedded = async (
+    toolEmbedded: ToolchainEmbedded,
   ): Promise<ErrorReport | undefined> => {
-    const errorPrefix = `Toolchain.${methodName}`;
+    const { directoryName, exeName, version, downloadUrl } = {
+      lunarMagic: LUNAR_MAGIC_OPTIONS,
+      asar: ASAR_OPTIONS,
+      flips: FLIPS_OPTIONS,
+      gps: GPS_OPTIONS,
+      pixi: PIXI_OPTIONS,
+      uberAsm: UBER_ASM_OPTIONS,
+    }[toolEmbedded];
+
+    const errorPrefix = `Toolchain.downloadEmbedded(${toolEmbedded})`;
     let error: ErrorReport | undefined;
 
     const toolchainDirPath = await getToolchainDirPath();
@@ -296,7 +306,7 @@ export default class Toolchain {
 
     await $FileSystem.removeFile(zipPath);
 
-    this[propertyName] = { status: 'installed', exePath, directoryPath };
+    this[toolEmbedded] = { status: 'installed', exePath, directoryPath };
   };
 
   getCustom = (propertyName: ToolchainCustom): ToolCustom => {
@@ -305,87 +315,5 @@ export default class Toolchain {
 
   getEmbedded = (propertyName: ToolchainEmbedded): ToolEmbedded => {
     return this[propertyName];
-  };
-
-  static getEditorDeps = ['Toolchain.editor'];
-  getEditor = () => this.editor;
-
-  static editEditorTriggers = ['Toolchain.editor'];
-  editEditor = async (exePath: string): Promise<ErrorReport | undefined> => {
-    return await this.editCustom(
-      'editor',
-      'selectEditor',
-      EDITOR_OPTIONS,
-      exePath,
-    );
-  };
-
-  static getEmulatorDeps = ['Toolchain.emulator'];
-  getEmulator = () => this.emulator;
-
-  static editEmulatorTriggers = ['Toolchain.emulator'];
-  editEmulator = async (exePath: string): Promise<ErrorReport | undefined> => {
-    return await this.editCustom(
-      'emulator',
-      'selectEmulator',
-      EMULATOR_OPTIONS,
-      exePath,
-    );
-  };
-
-  static getLunarMagicDeps = ['Toolchain.lunarMagic'];
-  getLunarMagic = () => this.lunarMagic;
-
-  static downloadLunarMagicTriggers = ['Toolchain.lunarMagic'];
-  downloadLunarMagic = async (): Promise<ErrorReport | undefined> => {
-    return await this.downloadEmbedded(
-      'lunarMagic',
-      'downloadLunarMagic',
-      LUNAR_MAGIC_OPTIONS,
-    );
-  };
-
-  static getAsarDeps = ['Toolchain.asar'];
-  getAsar = () => this.asar;
-
-  static downloadAsarTriggers = ['Toolchain.asar'];
-  downloadAsar = async (): Promise<ErrorReport | undefined> => {
-    return await this.downloadEmbedded('asar', 'downloadAsar', ASAR_OPTIONS);
-  };
-
-  static getFlipsDeps = ['Toolchain.flips'];
-  getFlips = () => this.flips;
-
-  static downloadFlipsTriggers = ['Toolchain.flips'];
-  downloadFlips = async (): Promise<ErrorReport | undefined> => {
-    return await this.downloadEmbedded('flips', 'downloadFlips', FLIPS_OPTIONS);
-  };
-
-  static getGpsDeps = ['Toolchain.gps'];
-  getGps = () => this.gps;
-
-  static downloadGpsTriggers = ['Toolchain.gps'];
-  downloadGps = async (): Promise<ErrorReport | undefined> => {
-    return await this.downloadEmbedded('gps', 'downloadGps', GPS_OPTIONS);
-  };
-
-  static getPixiDeps = ['Toolchain.pixi'];
-  getPixi = () => this.pixi;
-
-  static downloadPixiTriggers = ['Toolchain.pixi'];
-  downloadPixi = async (): Promise<ErrorReport | undefined> => {
-    return await this.downloadEmbedded('pixi', 'downloadPixi', PIXI_OPTIONS);
-  };
-
-  static getUberAsmDeps = ['Toolchain.uberAsm'];
-  getUberAsm = () => this.uberAsm;
-
-  static downloadUberAsmTriggers = ['Toolchain.uberAsm'];
-  downloadUberAsm = async (): Promise<ErrorReport | undefined> => {
-    return await this.downloadEmbedded(
-      'uberAsm',
-      'downloadUberAsm',
-      UBER_ASM_OPTIONS,
-    );
   };
 }

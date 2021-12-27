@@ -10,45 +10,29 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { ReactElement } from 'react';
-import { useCore } from '../../../contexts/CoreContext';
-import Core from '../../../core/Core';
-import Toolchain from '../../../core/Toolchain';
-import { useGet, useSetAsync } from '../../../hooks/useAccessors';
+import { useToolchain } from '../../../core-hooks/Core';
+import {
+  useDownloadEmbeddedTool,
+  useEditCustomTool,
+  useGetCustomTool,
+} from '../../../core-hooks/Toolchain';
 import useAsyncCallback from '../../../hooks/useAsyncCallback';
 import useHandleError from '../../../hooks/useHandleError';
 import useColorScheme from '../../../theme/useColorScheme';
 import ToolCustom from './ToolCustom';
 import ToolEmbedded from './ToolEmbedded';
-import useDownloadToolEmbedded from './useDownloadToolEmbedded';
+import useHandleDownloadEmbeddedTool from './useDownloadToolEmbedded';
 
 export default function ToolchainScreen(): ReactElement {
   const colorScheme = useColorScheme();
 
-  const core = useCore();
-  const toolchain = useGet(core, core.getToolchain, Core.getToolchainDeps);
+  const toolchain = useToolchain();
 
-  const editor = useGet(
-    toolchain,
-    toolchain.getEditor,
-    Toolchain.getEditorDeps,
-  );
-  const emulator = useGet(
-    toolchain,
-    toolchain.getEmulator,
-    Toolchain.getEmulatorDeps,
-  );
+  const editor = useGetCustomTool(toolchain, 'editor');
+  const emulator = useGetCustomTool(toolchain, 'emulator');
 
-  const editEditor = useSetAsync(
-    toolchain,
-    toolchain.editEditor,
-    Toolchain.editEditorTriggers,
-  );
-
-  const editEmulator = useSetAsync(
-    toolchain,
-    toolchain.editEmulator,
-    Toolchain.editEmulatorTriggers,
-  );
+  const editEditor = useEditCustomTool(toolchain, 'editor');
+  const editEmulator = useEditCustomTool(toolchain, 'emulator');
 
   const handleError = useHandleError();
 
@@ -70,70 +54,36 @@ export default function ToolchainScreen(): ReactElement {
     [editEmulator],
   );
 
-  const downloadLunarMagic = useSetAsync(
-    toolchain,
-    toolchain.downloadLunarMagic,
-    Toolchain.downloadLunarMagicTriggers,
-  );
-  const [handleDownloadLunarMagic, lunarMagicStatus] = useDownloadToolEmbedded({
-    name: 'Lunar Magic',
-    key: 'lunarMagic',
-    download: downloadLunarMagic,
-  });
+  const [handleDownloadLunarMagic, lunarMagicStatus] =
+    useHandleDownloadEmbeddedTool({
+      name: 'Lunar Magic',
+      key: 'lunarMagic',
+    });
 
-  const downloadAsar = useSetAsync(
-    toolchain,
-    toolchain.downloadAsar,
-    Toolchain.downloadAsarTriggers,
-  );
-  const [handleDownloadAsar, asarStatus] = useDownloadToolEmbedded({
+  const [handleDownloadAsar, asarStatus] = useHandleDownloadEmbeddedTool({
     name: 'Asar',
     key: 'asar',
-    download: downloadAsar,
   });
 
-  const downloadFlips = useSetAsync(
-    toolchain,
-    toolchain.downloadFlips,
-    Toolchain.downloadFlipsTriggers,
-  );
-  const [handleDownloadFlips, flipsStatus] = useDownloadToolEmbedded({
+  const [handleDownloadFlips, flipsStatus] = useHandleDownloadEmbeddedTool({
     name: 'Flips',
     key: 'flips',
-    download: downloadFlips,
   });
 
-  const downloadGps = useSetAsync(
-    toolchain,
-    toolchain.downloadGps,
-    Toolchain.downloadGpsTriggers,
-  );
-  const [handleDownloadGps, gpsStatus] = useDownloadToolEmbedded({
+  const [handleDownloadGps, gpsStatus] = useHandleDownloadEmbeddedTool({
     name: 'GPS',
     key: 'gps',
-    download: downloadGps,
   });
 
-  const downloadPixi = useSetAsync(
-    toolchain,
-    toolchain.downloadPixi,
-    Toolchain.downloadPixiTriggers,
-  );
-  const [handleDownloadPixi, pixiStatus] = useDownloadToolEmbedded({
+  const downloadPixi = useDownloadEmbeddedTool(toolchain, 'pixi');
+  const [handleDownloadPixi, pixiStatus] = useHandleDownloadEmbeddedTool({
     name: 'PIXI',
     key: 'pixi',
-    download: downloadPixi,
   });
 
-  const downloadUberAsm = useSetAsync(
-    toolchain,
-    toolchain.downloadUberAsm,
-    Toolchain.downloadUberAsmTriggers,
-  );
-  const [handleDownloadUberAsm, uberAsmStatus] = useDownloadToolEmbedded({
+  const [handleDownloadUberAsm, uberAsmStatus] = useHandleDownloadEmbeddedTool({
     name: 'UberASM',
     key: 'uberAsm',
-    download: downloadUberAsm,
   });
 
   return (

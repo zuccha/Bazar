@@ -1,31 +1,30 @@
-import { useCore } from '../../../contexts/CoreContext';
-import Core from '../../../core/Core';
+import { useToolchain } from '../../../core-hooks/Core';
+import {
+  useDownloadEmbeddedTool,
+  useGetEmbeddedTool,
+} from '../../../core-hooks/Toolchain';
 import { ToolchainEmbedded } from '../../../core/Toolchain';
-import { useGet } from '../../../hooks/useAccessors';
 import useAsyncCallback from '../../../hooks/useAsyncCallback';
 import useHandleError from '../../../hooks/useHandleError';
-import { ErrorReport } from '../../../utils/ErrorReport';
 
-export default function useDownloadToolEmbedded({
+export default function useHandleDownloadEmbeddedTool({
   name,
   key,
-  download,
 }: {
   name: string;
   key: ToolchainEmbedded;
-  download: () => Promise<ErrorReport | undefined>;
 }): [() => void, 'downloading' | 'installed' | 'not-installed' | 'deprecated'] {
   const handleError = useHandleError();
 
-  const core = useCore();
-  const toolchain = useGet(core, core.getToolchain, Core.getToolchainDeps);
-  const tool = useGet(toolchain, () => toolchain.getEmbedded(key), [key]);
+  const toolchain = useToolchain();
+  const tool = useGetEmbeddedTool(toolchain, key);
+  const downloadTool = useDownloadEmbeddedTool(toolchain, key);
 
   const handleDownload = useAsyncCallback(async () => {
-    const error = await download();
-    handleError(error, `Failed to download  ${name}`);
+    const error = await downloadTool();
+    handleError(error, `Failed to download ${name}`);
     return error;
-  }, [handleError, name, download]);
+  }, [handleError, name, downloadTool]);
 
   const status = handleDownload.isLoading ? 'downloading' : tool.status;
 

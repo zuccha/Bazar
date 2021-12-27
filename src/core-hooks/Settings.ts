@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import Settings, {
   GenericSetting,
   GenericSettingsStore,
@@ -20,7 +20,8 @@ export const useSetting = <Setting extends GenericSetting>(
     () => settings.get(setting),
     [settings, setting],
   );
-  return useGet(settings, getSetting, [`Settings.${setting}`]);
+  const getSettingDeps = useMemo(() => [`Settings.${setting}`], [setting]);
+  return useGet(settings, getSetting, getSettingDeps);
 };
 
 export const useSetSetting = <Setting extends GenericSetting>(
@@ -30,7 +31,8 @@ export const useSetSetting = <Setting extends GenericSetting>(
   key: Setting,
   value: GenericSettingsStore[Setting],
 ) => Promise<ErrorReport | undefined>) => {
-  return useSetAsync(settings, settings.set, [`Settings.${setting}`]);
+  const setSettingTriggers = useMemo(() => [`Settings.${setting}`], [setting]);
+  return useSetAsync(settings, settings.set, setSettingTriggers);
 };
 
 export const usePrioritizeRecentProject = (
