@@ -7,6 +7,10 @@ import {
   useLaunchProjectSnapshotInEmulator,
   useOpenProjectSnapshotInLunarMagic,
 } from '../../../../core-hooks/ProjectSnapshot';
+import {
+  useGetCustomTool,
+  useGetEmbeddedTool,
+} from '../../../../core-hooks/Toolchain';
 import Core from '../../../../core/Core';
 import Project from '../../../../core/Project';
 import { useGet, useSetAsync } from '../../../../hooks/useAccessors';
@@ -25,6 +29,8 @@ export default function ProjectScreenSidebarActions({
   const handleError = useHandleError();
 
   const snapshot = useProjectLatestSnapshot(project);
+  const lunarMagic = useGetEmbeddedTool(toolchain, 'lunarMagic');
+  const emulator = useGetCustomTool(toolchain, 'emulator');
   const openInLunarMagic = useOpenProjectSnapshotInLunarMagic(snapshot);
   const launchInEmulator = useLaunchProjectSnapshotInEmulator(snapshot);
 
@@ -42,8 +48,7 @@ export default function ProjectScreenSidebarActions({
     <VStack w='100%'>
       <Button
         isDisabled={
-          toolchain.getLunarMagic().status !== 'installed' ||
-          handleOpenInLunarMagic.isLoading
+          lunarMagic.status !== 'installed' || handleOpenInLunarMagic.isLoading
         }
         label='Open in Lunar Magic'
         onClick={async () => {
@@ -53,9 +58,7 @@ export default function ProjectScreenSidebarActions({
         w='100%'
       />
       <Button
-        isDisabled={
-          !toolchain.getEmulator().exePath || handleLaunchInEmulator.isLoading
-        }
+        isDisabled={!emulator.exePath || handleLaunchInEmulator.isLoading}
         label='Run on emulator'
         onClick={async () => {
           const error = await handleLaunchInEmulator.call();

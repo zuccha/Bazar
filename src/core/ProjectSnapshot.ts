@@ -152,7 +152,7 @@ export default class ProjectSnapshot {
   ): Promise<ErrorReport | undefined> => {
     const errorPrefix = 'ProjectSnapshot.openInLunarMagic';
     let error: ErrorReport | undefined;
-    const lunarMagic = toolchain.getLunarMagic();
+    const lunarMagic = toolchain.getEmbedded('lunarMagic');
 
     if (lunarMagic.status !== 'installed') {
       const errorMessage = `${errorPrefix}: Lunar Magic is not installed`;
@@ -179,7 +179,7 @@ export default class ProjectSnapshot {
   ): Promise<ErrorReport | undefined> => {
     const errorPrefix = 'ProjectSnapshot.launchInEmulator';
     let error: ErrorReport | undefined;
-    const emulator = toolchain.getEmulator();
+    const emulator = toolchain.getCustom('emulator');
 
     if ((error = await $FileSystem.validateExistsFile(emulator.exePath))) {
       const errorMessage = `${errorPrefix}: Emulator is not available`;
