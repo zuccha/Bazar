@@ -291,6 +291,14 @@ export default class Toolchain {
     const exePath = await $FileSystem.join(versionPath, exeName);
     const zipPath = await $FileSystem.join(directoryPath, `${version}.zip`);
 
+    if (await $FileSystem.exists(zipPath)) {
+      error = await $FileSystem.removeFile(zipPath);
+      if (error) {
+        const errorMessage = `${errorPrefix}: Failed to remove existing zip`;
+        return error.extend(errorMessage);
+      }
+    }
+
     error = await $FileSystem.downloadFile(zipPath, downloadUrl);
     if (error) {
       const errorMessage = `${errorPrefix}: Failed to download`;

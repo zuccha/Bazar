@@ -10,11 +10,17 @@ fn exists(path: String) -> bool {
 
 #[tauri::command]
 fn extract(zip_path: String, target_path: String) -> std::result::Result<(), String> {
-  let extract = tauri::api::file::Extract::from_source(std::path::Path::new(&zip_path));
-  let res = extract.extract_into(std::path::Path::new(&target_path));
-  match res {
-    Ok(()) => return Ok(()),
-    Err(e) => return Err(e.to_string()),
+  let source = match std::fs::File::open(std::path::Path::new(&zip_path)) {
+    Ok(s) => s,
+    Err(err) => return Err(err.to_string()),
+  };
+  let mut archive = match zip::ZipArchive::new(source) {
+    Ok(a) => a,
+    Err(err) => return Err(err.to_string()),
+  };
+  match archive.extract(std::path::Path::new(&target_path)) {
+    Ok(_) => Ok(()),
+    Err(err) => Err(err.to_string()),
   }
 }
 
