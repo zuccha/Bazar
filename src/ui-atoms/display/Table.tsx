@@ -28,6 +28,7 @@ function isColumnRender<T>(maybeColumnRender: {
 interface TableProps<T> {
   actions?: readonly {
     readonly icon: ReactElement;
+    readonly isDisabled?: boolean;
     readonly onClick: (item: T) => void;
     readonly tooltip: string;
   }[];
@@ -95,8 +96,9 @@ export default function Table<T>({
                   >
                     {actions.map((action) => (
                       <IconButton
-                        key={`${getItemKey(item)}-${action.tooltip}`}
                         icon={action.icon}
+                        isDisabled={action.isDisabled}
+                        key={`${getItemKey(item)}-${action.tooltip}`}
                         label={action.tooltip}
                         onClick={() => action.onClick(item)}
                         size='sm'

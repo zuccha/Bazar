@@ -1,10 +1,12 @@
 import { ArrowForwardIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import { Flex, HStack } from '@chakra-ui/react';
 import { ReactElement, useMemo, useState } from 'react';
+import { useToolchain } from '../../../../../core-hooks/Core';
 import {
   useProjectSnapshotPatches,
   useRemovePatchFromProjectSnapshot,
 } from '../../../../../core-hooks/ProjectSnapshot';
+import { useGetEmbeddedTool } from '../../../../../core-hooks/Toolchain';
 import Patch from '../../../../../core/Patch';
 import ProjectSnapshot from '../../../../../core/ProjectSnapshot';
 import useAsyncCallback from '../../../../../hooks/useAsyncCallback';
@@ -42,12 +44,26 @@ export default function PatchesTab({
     [removePatch],
   );
 
+  const toolchain = useToolchain();
+  const asar = useGetEmbeddedTool(toolchain, 'asar');
+
+  const handleApplyPatch = useAsyncCallback(
+    async (patch: Patch): Promise<undefined> => {
+      if (asar.status === 'installed') {
+        const process = await projectSnapshot.applyPatch(patch, asar.exePath);
+        return undefined;
+      }
+    },
+    [asar, projectSnapshot],
+  );
+
   const actions = useMemo(() => {
     return [
       {
         icon: <ArrowForwardIcon />,
+        isDisabled: asar.status !== 'installed',
         tooltip: 'Apply patch',
-        onClick: () => {},
+        onClick: handleApplyPatch.call,
       },
       {
         icon: <EditIcon />,
@@ -57,12 +73,10 @@ export default function PatchesTab({
       {
         icon: <DeleteIcon />,
         tooltip: 'Remove patch',
-        onClick: (patch: Patch) => {
-          setPatchToRemove(patch);
-        },
+        onClick: setPatchToRemove,
       },
     ];
-  }, []);
+  }, [handleApplyPatch]);
 
   return (
     <>

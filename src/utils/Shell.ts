@@ -1,6 +1,6 @@
 import * as Tauri from '@tauri-apps/api';
 
-interface Process {
+export interface Process {
   code: number | null;
   stdout: string;
   stderr: string;

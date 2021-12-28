@@ -3,7 +3,7 @@ import { $DateTime } from '../utils/DateTime';
 import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
 import { $ErrorReport, ErrorReport } from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
-import { $Shell } from '../utils/Shell';
+import { $Shell, Process } from '../utils/Shell';
 import Patch from './Patch';
 import Resource from './Resource';
 import Toolchain from './Toolchain';
@@ -306,6 +306,19 @@ export default class ProjectSnapshot {
     }
 
     this.patches.splice(patchIndex, 1);
+  };
+
+  // Non-mutable
+  applyPatch = async (
+    patch: Patch,
+    asarPath: string,
+  ): Promise<EitherErrorOr<Process>> => {
+    const errorPrefix = 'ProjectSnapshot.applyPatch';
+    const romPath = await this.resource.path(ProjectSnapshot.ROM_FILE_NAME);
+    const patchPath = await patch.getMainFilePath();
+
+    const process = await $Shell.execute(asarPath, [patchPath, romPath]);
+    return $EitherErrorOr.value(process);
   };
 
   // #endregion Patches

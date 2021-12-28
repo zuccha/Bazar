@@ -1,8 +1,10 @@
 import { z } from 'zod';
 import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
-import { ErrorReport } from '../utils/ErrorReport';
+import { $ErrorReport, ErrorReport } from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
+import { $Shell } from '../utils/Shell';
 import Resource from './Resource';
+import Toolchain from './Toolchain';
 
 const PatchInfoSchema = z.object({
   name: z.string(),
@@ -176,5 +178,13 @@ export default class Patch {
     const errorMessage = 'Patch.setInfo: failed to set info';
     const maybeError = await this.resource.setInfo(info);
     return maybeError ? maybeError.extend(errorMessage) : undefined;
+  };
+
+  getMainFilePath = async (): Promise<string> => {
+    const mainFileRelativePath = this.getInfo().mainFileRelativePath;
+    return await $FileSystem.join(
+      this.resource.getDirectoryPath(),
+      mainFileRelativePath,
+    );
   };
 }
