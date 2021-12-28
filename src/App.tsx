@@ -1,6 +1,5 @@
 import { Flex } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { useCore } from './contexts/CoreContext';
 import { useSettings, useToolchain } from './core-hooks/Core';
 import { useLoadSettings } from './core-hooks/Settings';
