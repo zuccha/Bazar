@@ -11,10 +11,11 @@ import Patch from '../../../../../core/Patch';
 import ProjectSnapshot from '../../../../../core/ProjectSnapshot';
 import useAsyncCallback from '../../../../../hooks/useAsyncCallback';
 import useHandleError from '../../../../../hooks/useHandleError';
-import Output from '../../../../../ui-atoms/display/Output';
+import Output, { OutputChunk } from '../../../../../ui-atoms/display/Output';
 import Table from '../../../../../ui-atoms/display/Table';
 import Button from '../../../../../ui-atoms/input/Button';
 import AlertDelete from '../../../../../ui-atoms/overlay/AlertDelete';
+import { $ErrorReport, ErrorReport } from '../../../../../utils/ErrorReport';
 import PatchAdditionDrawer from '../../../../drawers/PatchAdditionDrawer';
 
 const columns = [
@@ -28,6 +29,7 @@ interface PatchesTabProps {
 export default function PatchesTab({
   projectSnapshot,
 }: PatchesTabProps): ReactElement {
+  const [outputChunks, setOutputChunks] = useState<OutputChunk[]>([]);
   const [isPatchAdditionVisible, setPatchAdditionVisible] = useState(false);
   const [patchToRemove, setPatchToRemove] = useState<Patch | undefined>();
 
@@ -48,11 +50,40 @@ export default function PatchesTab({
   const asar = useGetEmbeddedTool(toolchain, 'asar');
 
   const handleApplyPatch = useAsyncCallback(
-    async (patch: Patch): Promise<undefined> => {
-      if (asar.status === 'installed') {
-        const process = await projectSnapshot.applyPatch(patch, asar.exePath);
-        return undefined;
+    async (patch: Patch): Promise<ErrorReport | undefined> => {
+      if (asar.status !== 'installed') {
+        const errorMessage = 'asar is not installed, please install it first';
+        const error = $ErrorReport.make(errorMessage);
+        handleError(error, 'Failed to apply patch');
+        return error;
       }
+
+      const exePath = asar.exePath;
+      const processOrError = await projectSnapshot.applyPatch(patch, exePath);
+      if (processOrError.isError) {
+        handleError(processOrError.error, 'Failed to apply patch');
+        return processOrError.error;
+      }
+
+      const newOutputChunks: OutputChunk[] = [];
+      if (processOrError.value.stdout)
+        newOutputChunks.push({
+          text: processOrError.value.stdout,
+          type: 'plain',
+        });
+      if (processOrError.value.stderr)
+        newOutputChunks.push({
+          text: processOrError.value.stderr,
+          type: 'failure',
+        });
+      else
+        newOutputChunks.push({
+          text: 'Patch applied successfully!',
+          type: 'success',
+          isBold: true,
+        });
+
+      setOutputChunks(newOutputChunks);
     },
     [asar, projectSnapshot],
   );
@@ -61,7 +92,7 @@ export default function PatchesTab({
     return [
       {
         icon: <ArrowForwardIcon />,
-        isDisabled: asar.status !== 'installed',
+        isDisabled: asar.status !== 'installed' || handleApplyPatch.isLoading,
         tooltip: 'Apply patch',
         onClick: handleApplyPatch.call,
       },
@@ -102,7 +133,7 @@ export default function PatchesTab({
           </HStack>
         </Flex>
         <Flex w={512} h='100%' ml={3} flexDir='column' borderColor='app.bg1'>
-          <Output output='' />
+          <Output chunks={outputChunks} />
         </Flex>
       </Flex>
 

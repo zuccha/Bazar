@@ -1,15 +1,26 @@
 import * as Chakra from '@chakra-ui/react';
 import { ReactElement } from 'react';
 
-interface OutputProps {
-  output: string;
+export interface OutputChunk {
+  text: string;
+  type: 'plain' | 'failure' | 'success';
+  isBold?: boolean;
 }
 
-export default function Output({ output }: OutputProps): ReactElement {
+interface OutputProps {
+  chunks: OutputChunk[];
+}
+
+const colorByChunkType = {
+  plain: 'gray.200',
+  failure: 'red.400',
+  success: 'green.400',
+};
+
+export default function Output({ chunks }: OutputProps): ReactElement {
   return (
     <Chakra.Table flex={1} h='100%' display='flex' flexDirection='column'>
       <Chakra.Thead
-        w='100%'
         display='flex'
         borderColor='app.bg1'
         borderWidth={1}
@@ -23,17 +34,25 @@ export default function Output({ output }: OutputProps): ReactElement {
         display='flex'
         flexDirection='column'
         h='100%'
-        bg='black'
-        color='white'
+        bg='gray.700'
         overflowY='auto'
       >
-        <Chakra.Tr borderColor='black' borderWidth={1}>
-          <Chakra.Td verticalAlign={'top'} borderWidth={0}>
-            {output.split('\n').map((line) => (
-              <Chakra.Text key={line}>{line}</Chakra.Text>
-            ))}
-          </Chakra.Td>
-        </Chakra.Tr>
+        {chunks.map((chunk, index) => (
+          <Chakra.Tr key={index} borderColor='gray.700' borderWidth={1}>
+            <Chakra.Td verticalAlign={'top'} borderWidth={0}>
+              {chunk.text.split('\n').map((line) => (
+                <Chakra.Text
+                  key={line}
+                  color={colorByChunkType[chunk.type]}
+                  fontWeight={chunk.isBold ? 'bold' : 'normal'}
+                  mb={1}
+                >
+                  {line}
+                </Chakra.Text>
+              ))}
+            </Chakra.Td>
+          </Chakra.Tr>
+        ))}
       </Chakra.Tbody>
     </Chakra.Table>
   );
