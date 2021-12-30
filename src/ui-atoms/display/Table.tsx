@@ -52,7 +52,7 @@ export default function Table<T>({
     <Chakra.Box flex={1} overflowY='auto'>
       <Chakra.Table colorScheme={colorScheme} flex={1} overflowY='auto'>
         <Chakra.Thead>
-          <Chakra.Tr bg='app.bg2'>
+          <Chakra.Tr bg='app.bg2' h='49px'>
             {columns.map((column) => (
               <Chakra.Th key={column.name} borderColor='app.bg1'>
                 {column.name}
