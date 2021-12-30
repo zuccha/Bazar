@@ -53,23 +53,24 @@ export default function PatchesTab({
     setOutputChunks([]);
   }, []);
 
-  const handleApplyPatch = useAsyncCallback(
-    async (patch: Patch): Promise<ErrorReport | undefined> => {
-      if (asar.status !== 'installed') {
-        const errorMessage = 'asar is not installed, please install it first';
-        const error = $ErrorReport.make(errorMessage);
-        handleError(error, 'Failed to apply patch');
-        return error;
-      }
+  const applyPatch = useCallback(
+    async (patch: Patch, exePath: string): Promise<OutputChunk[]> => {
+      const newOutputChunks: OutputChunk[] = [];
 
-      const exePath = asar.exePath;
+      newOutputChunks.push({
+        text: `Applying patch "${patch.getInfo().name}"`,
+        type: 'info',
+      });
+
       const processOrError = await projectSnapshot.applyPatch(patch, exePath);
       if (processOrError.isError) {
-        handleError(processOrError.error, 'Failed to apply patch');
-        return processOrError.error;
+        newOutputChunks.push({
+          text: 'Failed to apply patch',
+          type: 'failure',
+        });
+        return newOutputChunks;
       }
 
-      const newOutputChunks: OutputChunk[] = [];
       if (processOrError.value.stdout)
         newOutputChunks.push({
           text: processOrError.value.stdout,
@@ -81,16 +82,55 @@ export default function PatchesTab({
           type: 'failure',
         });
 
+      return newOutputChunks;
+    },
+    [projectSnapshot],
+  );
+
+  const handleApplyPatch = useAsyncCallback(
+    async (patch: Patch): Promise<ErrorReport | undefined> => {
+      if (asar.status !== 'installed') {
+        const errorMessage = 'asar is not installed, please install it first';
+        const error = $ErrorReport.make(errorMessage);
+        handleError(error, 'Failed to apply patch');
+        return error;
+      }
+
+      const exePath = asar.exePath;
+      const newOutputChunks = await applyPatch(patch, exePath);
       setOutputChunks(newOutputChunks);
     },
-    [asar, projectSnapshot],
+    [asar, applyPatch, handleError],
   );
+
+  const handleApplyAllPatches = useAsyncCallback(async (): Promise<
+    ErrorReport | undefined
+  > => {
+    if (asar.status !== 'installed') {
+      const errorMessage = 'asar is not installed, please install it first';
+      const error = $ErrorReport.make(errorMessage);
+      handleError(error, 'Failed to apply patch');
+      return error;
+    }
+
+    const exePath = asar.exePath;
+    const newOutputChunks: OutputChunk[] = [];
+    for (const patch of patches) {
+      newOutputChunks.push(...(await applyPatch(patch, exePath)));
+    }
+    setOutputChunks(newOutputChunks);
+  }, [asar, patches, projectSnapshot]);
+
+  const canApplyPatch =
+    asar.status === 'installed' &&
+    !handleApplyAllPatches.isLoading &&
+    !handleApplyPatch.isLoading;
 
   const actions = useMemo(() => {
     return [
       {
         icon: <ArrowForwardIcon />,
-        isDisabled: asar.status !== 'installed' || handleApplyPatch.isLoading,
+        isDisabled: !canApplyPatch,
         tooltip: 'Apply patch',
         onClick: handleApplyPatch.call,
       },
@@ -105,7 +145,7 @@ export default function PatchesTab({
         onClick: setPatchToRemove,
       },
     ];
-  }, [handleApplyPatch]);
+  }, [handleApplyPatch.call, canApplyPatch]);
 
   return (
     <>
@@ -126,7 +166,11 @@ export default function PatchesTab({
             />
           </Flex>
           <HStack justifyContent='flex-end' mt={2}>
-            <Button label='Apply all' onClick={() => {}} isDisabled />
+            <Button
+              label='Apply all'
+              onClick={handleApplyAllPatches.call}
+              isDisabled={!canApplyPatch}
+            />
             <Button label='Add' onClick={() => setPatchAdditionVisible(true)} />
           </HStack>
         </Flex>
