@@ -1,6 +1,6 @@
 import { ArrowForwardIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import { Flex, HStack } from '@chakra-ui/react';
-import { ReactElement, useMemo, useState } from 'react';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { useToolchain } from '../../../../../core-hooks/Core';
 import {
   useProjectSnapshotPatches,
@@ -49,6 +49,10 @@ export default function PatchesTab({
   const toolchain = useToolchain();
   const asar = useGetEmbeddedTool(toolchain, 'asar');
 
+  const handleClearOutput = useCallback(() => {
+    setOutputChunks([]);
+  }, []);
+
   const handleApplyPatch = useAsyncCallback(
     async (patch: Patch): Promise<ErrorReport | undefined> => {
       if (asar.status !== 'installed') {
@@ -75,12 +79,6 @@ export default function PatchesTab({
         newOutputChunks.push({
           text: processOrError.value.stderr,
           type: 'failure',
-        });
-      else
-        newOutputChunks.push({
-          text: 'Patch applied successfully!',
-          type: 'success',
-          isBold: true,
         });
 
       setOutputChunks(newOutputChunks);
@@ -133,7 +131,7 @@ export default function PatchesTab({
           </HStack>
         </Flex>
         <Flex w={512} h='100%' ml={3} flexDir='column' borderColor='app.bg1'>
-          <Output chunks={outputChunks} />
+          <Output chunks={outputChunks} onClear={handleClearOutput} />
         </Flex>
       </Flex>
 
