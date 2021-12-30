@@ -1,96 +1,122 @@
-import * as Chakra from '@chakra-ui/react';
-import { ReactElement, ReactNode } from 'react';
-import useColorScheme from '../../theme/useColorScheme';
+import { Center, Flex, HStack, Text } from '@chakra-ui/react';
+import { ReactElement, useMemo } from 'react';
 import IconButton from '../input/IconButton';
 
-interface ColumnKey<T> {
-  readonly name: string;
-  readonly key: keyof T;
+export interface TableRow<T> {
+  key: string;
+  data: T;
 }
 
-interface ColumnRender<T> {
-  readonly name: string;
-  readonly render: (item: T) => ReactNode;
+export interface TableColumn<T> {
+  key: string;
+  label: string;
+
+  getValue: (row: TableRow<T>) => string | number | boolean;
+
+  isSortable?: boolean;
+  isEditable?: boolean;
+
+  width: 'fill' | `${number}px`;
 }
 
-function isColumnKey<T>(maybeColumnKey: {
-  name: string;
-}): maybeColumnKey is ColumnKey<T> {
-  return 'key' in maybeColumnKey;
-}
-
-function isColumnRender<T>(maybeColumnRender: {
-  name: string;
-}): maybeColumnRender is ColumnRender<T> {
-  return 'render' in maybeColumnRender;
+export interface TableAction<T> {
+  icon: ReactElement;
+  isDisabled?: boolean;
+  label: string;
+  onClick: (row: TableRow<T>) => unknown;
 }
 
 interface TableProps<T> {
-  actions?: readonly {
-    readonly icon: ReactElement;
-    readonly isDisabled?: boolean;
-    readonly onClick: (item: T) => void;
-    readonly tooltip: string;
-  }[];
-  columns: readonly (ColumnKey<T> | ColumnRender<T>)[];
-  getItemKey: (item: T) => string;
-  items: T[];
-  onSelectItem?: (item: T, index: number) => void;
-  selectedItemIndex?: number;
+  actions: TableAction<T>[];
+  columns: TableColumn<T>[];
+  rows: TableRow<T>[];
+
+  flex?: number;
+  height?: number | string;
+  width?: number | string;
 }
 
+function computeColumnStyle<T>(
+  column: TableColumn<T>,
+): undefined | { flexGrow: number } | { width: string | number } {
+  return column.width === 'fill' ? { flexGrow: 1 } : { width: column.width };
+}
+
+const borderStyle = {
+  borderColor: 'gray.300',
+  borderWidth: '1px',
+};
+
+const rowStyle = {
+  borderColor: 'gray.300',
+  borderBottomWidth: '1px',
+  px: 5,
+  py: 2,
+};
+
 export default function Table<T>({
-  actions = [],
+  actions,
   columns,
-  getItemKey,
-  items,
-  onSelectItem,
-  selectedItemIndex,
+  rows,
+
+  flex,
+  height,
+  width,
 }: TableProps<T>): ReactElement {
-  const colorScheme = useColorScheme();
+  const columnStyles = useMemo(() => {
+    return columns.map(computeColumnStyle);
+  }, [columns]);
+
   return (
-    <Chakra.Box flex={1} overflowY='auto'>
-      <Chakra.Table colorScheme={colorScheme} flex={1} overflowY='auto'>
-        <Chakra.Thead>
-          <Chakra.Tr bg='app.bg2' h='49px'>
-            {columns.map((column) => (
-              <Chakra.Th key={column.name} borderColor='app.bg1'>
-                {column.name}
-              </Chakra.Th>
-            ))}
-            {actions.length > 0 && <Chakra.Th borderColor='app.bg1' />}
-          </Chakra.Tr>
-        </Chakra.Thead>
-        <Chakra.Tbody>
-          {items.map((item, index) => (
-            <Chakra.Tr
-              key={getItemKey(item)}
+    <Flex
+      flexDir='column'
+      height={height}
+      width={width}
+      flex={flex}
+      {...borderStyle}
+      overflow='hidden'
+    >
+      <Flex h={50} bg='gray.200'>
+        {columns.map((column, columnIndex) => (
+          <Flex
+            key={column.key}
+            alignItems='center'
+            {...columnStyles[columnIndex]}
+            {...rowStyle}
+          >
+            <Text textTransform='uppercase' fontWeight='bold' fontSize='xs'>
+              {column.label}
+            </Text>
+          </Flex>
+        ))}
+        {actions.length > 0 && <Flex width='120px' {...rowStyle} />}
+      </Flex>
+
+      <Flex flex={1} pb={2} flexDir='column' overflow='auto'>
+        {rows.map((row) => {
+          return (
+            <Flex
+              key={row.key}
+              h={45}
               role='group'
-              onClick={() => {
-                onSelectItem?.(item, index);
-              }}
-              backgroundColor={
-                selectedItemIndex === index
-                  ? `${colorScheme}.100`
-                  : 'transparent'
-              }
               _hover={{
                 backgroundColor: 'app.bg2',
-                cursor: onSelectItem ? 'pointer' : undefined,
               }}
             >
-              {columns.map((column) => (
-                <Chakra.Td
-                  key={`${getItemKey(item)}-${column.name}`}
-                  borderColor='app.bg1'
+              {columns.map((column, columnIndex) => (
+                <Flex
+                  key={`${row.key}-${column.key}`}
+                  alignItems='center'
+                  {...columnStyles[columnIndex]}
+                  {...rowStyle}
                 >
-                  {isColumnKey(column) && item[column.key]}
-                  {isColumnRender(column) && column.render(item)}
-                </Chakra.Td>
+                  <Text fontSize='md'>{column.getValue(row)}</Text>
+                </Flex>
               ))}
               {actions.length > 0 && (
-                <Chakra.Td borderColor='app.bg1' w={1}>
-                  <Chakra.HStack
+                <Center {...rowStyle} width='120px'>
+                  <HStack
+                    spacing={1}
                     visibility='hidden'
                     _groupHover={{ visibility: 'visible' }}
                   >
@@ -98,20 +124,20 @@ export default function Table<T>({
                       <IconButton
                         icon={action.icon}
                         isDisabled={action.isDisabled}
-                        key={`${getItemKey(item)}-${action.tooltip}`}
-                        label={action.tooltip}
-                        onClick={() => action.onClick(item)}
+                        key={`${row.key}-${action.label}`}
+                        label={action.label}
+                        onClick={() => action.onClick(row)}
                         size='sm'
                         variant='ghost'
                       />
                     ))}
-                  </Chakra.HStack>
-                </Chakra.Td>
+                  </HStack>
+                </Center>
               )}
-            </Chakra.Tr>
-          ))}
-        </Chakra.Tbody>
-      </Chakra.Table>
-    </Chakra.Box>
+            </Flex>
+          );
+        })}
+      </Flex>
+    </Flex>
   );
 }

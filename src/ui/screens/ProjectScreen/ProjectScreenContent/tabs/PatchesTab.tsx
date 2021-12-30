@@ -9,18 +9,19 @@ import {
 import { useGetEmbeddedTool } from '../../../../../core-hooks/Toolchain';
 import Patch from '../../../../../core/Patch';
 import ProjectSnapshot from '../../../../../core/ProjectSnapshot';
+import { useGet } from '../../../../../hooks/useAccessors';
 import useAsyncCallback from '../../../../../hooks/useAsyncCallback';
 import useHandleError from '../../../../../hooks/useHandleError';
 import Output, { OutputChunk } from '../../../../../ui-atoms/display/Output';
-import Table from '../../../../../ui-atoms/display/Table';
+import Table, {
+  TableAction,
+  TableColumn,
+  TableRow,
+} from '../../../../../ui-atoms/display/Table';
 import Button from '../../../../../ui-atoms/input/Button';
 import AlertDelete from '../../../../../ui-atoms/overlay/AlertDelete';
 import { $ErrorReport, ErrorReport } from '../../../../../utils/ErrorReport';
 import PatchAdditionDrawer from '../../../../drawers/PatchAdditionDrawer';
-
-const columns = [
-  { name: 'Name', render: (patch: Patch) => patch.getInfo().name },
-] as const;
 
 interface PatchesTabProps {
   projectSnapshot: ProjectSnapshot;
@@ -37,14 +38,6 @@ export default function PatchesTab({
   const removePatch = useRemovePatchFromProjectSnapshot(projectSnapshot);
 
   const handleError = useHandleError();
-  const handleRemovePatch = useAsyncCallback(
-    async (patch: Patch) => {
-      const error = await removePatch(patch.getInfo().name);
-      handleError(error, 'Failed to remove patch');
-      return error;
-    },
-    [removePatch],
-  );
 
   const toolchain = useToolchain();
   const asar = useGetEmbeddedTool(toolchain, 'asar');
@@ -59,7 +52,7 @@ export default function PatchesTab({
 
       newOutputChunks.push({
         text: `Applying patch "${patch.getInfo().name}"`,
-        type: 'info',
+        type: 'plain',
       });
 
       const processOrError = await projectSnapshot.applyPatch(patch, exePath);
@@ -121,55 +114,78 @@ export default function PatchesTab({
     setOutputChunks(newOutputChunks);
   }, [asar, patches, projectSnapshot]);
 
-  const canApplyPatch =
-    asar.status === 'installed' &&
-    !handleApplyAllPatches.isLoading &&
-    !handleApplyPatch.isLoading;
+  const handleRemovePatch = useAsyncCallback(
+    async (patch: Patch) => {
+      const error = await removePatch(patch.getInfo().name);
+      handleError(error, 'Failed to remove patch');
+      return error;
+    },
+    [removePatch],
+  );
 
-  const actions = useMemo(() => {
+  const isEditingPatches =
+    !handleApplyAllPatches.isLoading && !handleApplyPatch.isLoading;
+
+  const actions: TableAction<Patch>[] = useMemo(() => {
     return [
       {
         icon: <ArrowForwardIcon />,
-        isDisabled: !canApplyPatch,
-        tooltip: 'Apply patch',
-        onClick: handleApplyPatch.call,
+        isDisabled: isEditingPatches || asar.status !== 'installed',
+        label: 'Apply patch',
+        onClick: (row) => handleApplyPatch.call(row.data),
       },
       {
         icon: <EditIcon />,
-        tooltip: 'Open patch in editor',
+        label: 'Open patch in editor',
+        isDisabled: true,
         onClick: () => {},
       },
       {
         icon: <DeleteIcon />,
-        tooltip: 'Remove patch',
-        onClick: setPatchToRemove,
+        label: 'Remove patch',
+        onClick: (row) => setPatchToRemove(row.data),
       },
     ];
-  }, [handleApplyPatch.call, canApplyPatch]);
+  }, [handleApplyPatch.call, isEditingPatches, asar.status]);
+
+  const columns: TableColumn<Patch>[] = useMemo(() => {
+    return [
+      {
+        key: 'name',
+        label: 'Name',
+        getValue: (row) => row.data.getInfo().name,
+        width: 'fill',
+      },
+    ];
+  }, []);
+
+  const rows: TableRow<Patch>[] = useGet(
+    projectSnapshot,
+    useCallback(() => {
+      return projectSnapshot.getPatches().map((patch) => ({
+        data: patch,
+        key: patch.getInfo().name,
+      }));
+    }, [projectSnapshot]),
+    ProjectSnapshot.getPatchesDeps,
+  );
 
   return (
     <>
       <Flex h='100%'>
         <Flex flexDir='column' h='100%' w={512}>
-          <Flex
-            flexDir='column'
+          <Table
+            actions={actions}
+            columns={columns}
+            rows={rows}
             flex={1}
-            h='100%'
-            borderColor='app.bg1'
-            borderWidth={1}
-          >
-            <Table
-              actions={actions}
-              columns={columns}
-              items={patches}
-              getItemKey={(patch) => patch.getInfo().name}
-            />
-          </Flex>
+            width='100%'
+          />
           <HStack justifyContent='flex-end' mt={2}>
             <Button
               label='Apply all'
               onClick={handleApplyAllPatches.call}
-              isDisabled={!canApplyPatch}
+              isDisabled={isEditingPatches || asar.status !== 'installed'}
             />
             <Button label='Add' onClick={() => setPatchAdditionVisible(true)} />
           </HStack>
