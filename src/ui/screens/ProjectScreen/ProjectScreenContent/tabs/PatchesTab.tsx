@@ -1,5 +1,5 @@
 import { ArrowForwardIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
-import { Flex, HStack } from '@chakra-ui/react';
+import { Flex, HStack, VStack } from '@chakra-ui/react';
 import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { useToolchain } from '../../../../../core-hooks/Core';
 import {
@@ -52,7 +52,8 @@ export default function PatchesTab({
 
       newOutputChunks.push({
         text: `Applying patch "${patch.getInfo().name}"`,
-        type: 'plain',
+        type: 'info',
+        isBold: true,
       });
 
       const processOrError = await projectSnapshot.applyPatch(patch, exePath);
@@ -60,20 +61,34 @@ export default function PatchesTab({
         newOutputChunks.push({
           text: 'Failed to apply patch',
           type: 'failure',
+          isBold: true,
         });
         return newOutputChunks;
       }
 
-      if (processOrError.value.stdout)
+      if (processOrError.value.stdout) {
         newOutputChunks.push({
           text: processOrError.value.stdout,
           type: 'plain',
         });
-      if (processOrError.value.stderr)
+      }
+      if (processOrError.value.stderr) {
         newOutputChunks.push({
           text: processOrError.value.stderr,
           type: 'failure',
         });
+        newOutputChunks.push({
+          text: 'Failed to apply patch',
+          type: 'failure',
+          isBold: true,
+        });
+      } else {
+        newOutputChunks.push({
+          text: 'Patch applied successfully',
+          type: 'success',
+          isBold: true,
+        });
+      }
 
       return newOutputChunks;
     },
@@ -124,7 +139,7 @@ export default function PatchesTab({
   );
 
   const isEditingPatches =
-    !handleApplyAllPatches.isLoading && !handleApplyPatch.isLoading;
+    handleApplyAllPatches.isLoading || handleApplyPatch.isLoading;
 
   const actions: TableAction<Patch>[] = useMemo(() => {
     return [
@@ -172,8 +187,8 @@ export default function PatchesTab({
 
   return (
     <>
-      <Flex h='100%'>
-        <Flex flexDir='column' h='100%' w={512}>
+      <HStack h='100%' spacing={3}>
+        <VStack h='100%' w={512} spacing={2}>
           <Table
             actions={actions}
             columns={columns}
@@ -181,7 +196,7 @@ export default function PatchesTab({
             flex={1}
             width='100%'
           />
-          <HStack justifyContent='flex-end' mt={2}>
+          <HStack w='100%' justifyContent='flex-end'>
             <Button
               label='Apply all'
               onClick={handleApplyAllPatches.call}
@@ -189,11 +204,16 @@ export default function PatchesTab({
             />
             <Button label='Add' onClick={() => setPatchAdditionVisible(true)} />
           </HStack>
+        </VStack>
+        <Flex h='100%' w={512}>
+          <Output
+            chunks={outputChunks}
+            onClear={handleClearOutput}
+            flex={1}
+            width='100%'
+          />
         </Flex>
-        <Flex w={512} h='100%' ml={3} flexDir='column' borderColor='app.bg1'>
-          <Output chunks={outputChunks} onClear={handleClearOutput} />
-        </Flex>
-      </Flex>
+      </HStack>
 
       {isPatchAdditionVisible && (
         <PatchAdditionDrawer
