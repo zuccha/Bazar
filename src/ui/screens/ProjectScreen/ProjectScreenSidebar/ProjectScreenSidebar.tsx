@@ -21,7 +21,7 @@ export default function ProjectScreenSidebar({
       alignItems='flex-start'
     >
       <ProjectScreenSidebarInfo project={project} />
-      <Box w='100%' h='1px' bg='app.fg3' />
+      <Box w='100%' h='1px' bg='app.bg1' />
       <ProjectScreenSidebarActions project={project} />
     </VStack>
   );

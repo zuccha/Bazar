@@ -187,8 +187,8 @@ export default function PatchesTab({
 
   return (
     <>
-      <HStack h='100%' spacing={3}>
-        <VStack h='100%' w={512} spacing={2}>
+      <HStack h='100%' spacing={3} alignItems='stretch'>
+        <VStack flex={1} minW={512} spacing={2}>
           <Table
             actions={actions}
             columns={columns}
@@ -205,7 +205,7 @@ export default function PatchesTab({
             <Button label='Add' onClick={() => setPatchAdditionVisible(true)} />
           </HStack>
         </VStack>
-        <Flex h='100%' w={512}>
+        <Flex flex={1} minW={512}>
           <Output
             chunks={outputChunks}
             onClear={handleClearOutput}
