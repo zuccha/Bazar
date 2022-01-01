@@ -1,9 +1,12 @@
 import { useCallback } from 'react';
 import { useSettings } from '../../../core-hooks/Core';
-import { useSetSetting, useSetting } from '../../../core-hooks/Settings';
+import {
+  useIsSavingSettings,
+  useSetSetting,
+  useSetting,
+} from '../../../core-hooks/Settings';
 import { GenericSetting, GenericSettingsStore } from '../../../core/Settings';
 import useHandleError from '../../../hooks/useHandleError';
-import useSafeState from '../../../hooks/usSafeState';
 import {
   FormField,
   FormFieldParams,
@@ -11,7 +14,6 @@ import {
 } from '../../../ui-atoms/input/FormControl';
 
 // TODO: Add debounce.
-// TODO: Handle global settings saving.
 
 export default function useSettingField<S extends GenericSetting>(
   setting: S,
@@ -23,8 +25,8 @@ export default function useSettingField<S extends GenericSetting>(
 } {
   const handleError = useHandleError();
 
-  const [isSaving, setIsSaving] = useSafeState(false);
   const settings = useSettings();
+  const isSaving = useIsSavingSettings(settings);
 
   const initialValue = useSetting(settings, setting);
   const field = useFormField<GenericSettingsStore[S]>({
@@ -37,17 +39,15 @@ export default function useSettingField<S extends GenericSetting>(
   const set = useCallback(
     (newValue: GenericSettingsStore[S]) => {
       const oldValue = field.value;
-      setIsSaving(true);
       field.handleChange(newValue);
-      setSetting(setting, newValue).then((maybeError) => {
-        setIsSaving(false);
+      setSetting(newValue).then((maybeError) => {
         if (maybeError) {
           field.handleChange(oldValue);
           handleError(maybeError, 'Failed to save setting');
         }
       });
     },
-    [field.value, setting],
+    [field.value, setting, isSaving],
   );
 
   return { field, set, isSaving };

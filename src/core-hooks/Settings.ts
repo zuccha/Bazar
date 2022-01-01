@@ -3,13 +3,41 @@ import Settings, {
   GenericSetting,
   GenericSettingsStore,
 } from '../core/Settings';
-import { useGet, useSetAsync } from '../hooks/useAccessors';
-import { ErrorReport } from '../utils/ErrorReport';
+import { useGet, useSet, useSetAsync } from '../hooks/useAccessors';
+import { $ErrorReport, ErrorReport } from '../utils/ErrorReport';
 
 export const useLoadSettings = (
   settings: Settings,
 ): (() => Promise<ErrorReport | undefined>) => {
   return useSetAsync(settings, settings.load, Settings.loadTriggers);
+};
+
+export const useIsSavingSettings = (settings: Settings): boolean => {
+  return useGet(
+    settings,
+    settings.getIsSavingGeneric,
+    Settings.getIsSavingGenericDeps,
+  );
+};
+
+export const useStartSavingSettings = (
+  settings: Settings,
+): (() => ErrorReport | undefined) => {
+  return useSet(
+    settings,
+    settings.startSavingGeneric,
+    Settings.startSavingTriggers,
+  );
+};
+
+export const useStopSavingSettings = (
+  settings: Settings,
+): (() => ErrorReport | undefined) => {
+  return useSet(
+    settings,
+    settings.stopSavingGeneric,
+    Settings.stopSavingTriggers,
+  );
 };
 
 export const useSetting = <Setting extends GenericSetting>(
@@ -28,11 +56,25 @@ export const useSetSetting = <Setting extends GenericSetting>(
   settings: Settings,
   setting: Setting,
 ): ((
-  key: Setting,
   value: GenericSettingsStore[Setting],
 ) => Promise<ErrorReport | undefined>) => {
   const setSettingTriggers = useMemo(() => [`Settings.${setting}`], [setting]);
-  return useSetAsync(settings, settings.set, setSettingTriggers);
+  const startSaving = useStartSavingSettings(settings);
+  const stopSaving = useStopSavingSettings(settings);
+  const set = useCallback(
+    async (value: GenericSettingsStore[Setting]) => {
+      if (settings.getIsSavingGeneric()) {
+        const errorMessage = `Settings.set: failed to set ${setting}, already saving another one`;
+        return $ErrorReport.make(errorMessage, []);
+      }
+      startSaving();
+      const error = await settings.set(setting, value);
+      stopSaving();
+      return error;
+    },
+    [settings.getIsSavingGeneric, settings.set, startSaving, stopSaving],
+  );
+  return useSetAsync(settings, set, setSettingTriggers);
 };
 
 export const usePrioritizeRecentProject = (

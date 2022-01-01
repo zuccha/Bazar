@@ -20,6 +20,7 @@ export type GenericSetting = keyof GenericSettingsStore;
 
 export default class Settings {
   private generic;
+  private isSavingGeneric;
 
   private constructor() {
     // Nothing to do here.
@@ -34,6 +35,7 @@ export default class Settings {
       fileName: 'generic.json',
       schema: GenericSettingsStoreSchema,
     });
+    this.isSavingGeneric = false;
   }
 
   static create(): Settings {
@@ -89,5 +91,22 @@ export default class Settings {
     const value = $PriorityList.remove(recentProjects, dirPath);
     const error = await this.generic.set('recentProjects', value);
     if (error) return error.extend(errorMessage);
+  };
+
+  static getIsSavingGenericDeps = ['Settings.isSavingGeneric'];
+  getIsSavingGeneric = (): boolean => {
+    return this.isSavingGeneric;
+  };
+
+  static startSavingTriggers = ['Settings.isSavingGeneric'];
+  startSavingGeneric = (): undefined => {
+    this.isSavingGeneric = true;
+    return undefined;
+  };
+
+  static stopSavingTriggers = ['Settings.isSavingGeneric'];
+  stopSavingGeneric = (): undefined => {
+    this.isSavingGeneric = false;
+    return undefined;
   };
 }
