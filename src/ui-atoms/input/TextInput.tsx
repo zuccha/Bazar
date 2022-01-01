@@ -5,6 +5,7 @@ import useColorScheme from '../../theme/useColorScheme';
 interface TextInputProps {
   isDisabled?: boolean;
   isInvalid?: boolean;
+  isReadonly?: boolean;
   onBlur?: () => void;
   onChange: (value: string) => void;
   placeholder: string;
@@ -14,6 +15,7 @@ interface TextInputProps {
 export default function TextInput({
   isDisabled,
   isInvalid,
+  isReadonly,
   onBlur,
   onChange,
   placeholder,
@@ -34,6 +36,7 @@ export default function TextInput({
       colorScheme={colorScheme}
       isDisabled={isDisabled}
       isInvalid={isInvalid}
+      isReadOnly={isReadonly}
       onBlur={onBlur}
       onChange={handleChange}
       placeholder={placeholder}
