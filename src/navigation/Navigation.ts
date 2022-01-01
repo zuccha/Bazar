@@ -19,13 +19,22 @@ export enum ProjectRouteName {
   Releases = 'Releases',
 }
 
+export enum SettingsRouteName {
+  Appearance = 'Appearance',
+  NewProject = 'NewProject',
+}
+
 export default class Navigation {
   private root: Router<RootRouteName>;
   private project: Router<ProjectRouteName>;
+  private settings: Router<SettingsRouteName>;
 
   private constructor() {
-    this.root = Router.create<RootRouteName>(RootRouteName.Home);
-    this.project = Router.create<ProjectRouteName>(ProjectRouteName.Blocks);
+    this.root = Router.create<RootRouteName>(RootRouteName.Settings);
+    this.project = Router.create<ProjectRouteName>(ProjectRouteName.Patches);
+    this.settings = Router.create<SettingsRouteName>(
+      SettingsRouteName.Appearance,
+    );
   }
 
   static create(): Navigation {
@@ -37,4 +46,7 @@ export default class Navigation {
 
   static getProjectDeps = ['Navigation.project'];
   getProject = (): Router<ProjectRouteName> => this.project;
+
+  static getSettingsDeps = ['Navigation.settings'];
+  getSettings = (): Router<SettingsRouteName> => this.settings;
 }

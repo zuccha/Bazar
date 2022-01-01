@@ -1,6 +1,10 @@
 import { useNavigation } from '../contexts/NavigationContext';
 import { useGet, useSet } from '../hooks/useAccessors';
-import Navigation, { ProjectRouteName, RootRouteName } from './Navigation';
+import Navigation, {
+  ProjectRouteName,
+  RootRouteName,
+  SettingsRouteName,
+} from './Navigation';
 import Router from './Router';
 
 // #region Root
@@ -40,3 +44,22 @@ export const useNavigateProject = (): ((route: ProjectRouteName) => void) => {
 };
 
 // #endregion Project
+
+// #region Settings
+
+const useSettings = (): Router<SettingsRouteName> => {
+  const navigation = useNavigation();
+  return useGet(navigation, navigation.getSettings, Navigation.getSettingsDeps);
+};
+
+export const useSettingsRoute = (): SettingsRouteName => {
+  const settings = useSettings();
+  return useGet(settings, settings.getRoute, Router.getRouteDeps);
+};
+
+export const useNavigateSettings = (): ((route: SettingsRouteName) => void) => {
+  const settings = useSettings();
+  return useSet(settings, settings.navigate, Router.navigateTriggers);
+};
+
+// #endregion Settings
