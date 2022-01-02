@@ -27,9 +27,7 @@ export default function EmbeddedToolItem({
           {status === 'deprecated' && <Text color='red.600'>[deprecated]</Text>}
           {status === 'installed' && <Text color='green.600'>[installed]</Text>}
         </Heading>
-        <Text fontSize='sm' mt={1}>
-          {description}
-        </Text>
+        <Text mt={1}>{description}</Text>
       </Flex>
       <Flex w={90}>
         {status === 'not-installed' && (

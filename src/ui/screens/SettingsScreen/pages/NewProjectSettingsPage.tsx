@@ -19,15 +19,11 @@ export default function NewProjectSettingsPage(): ReactElement {
   const locationDirPath = useSettingField('newProjectDefaultLocationDirPath', {
     infoMessage: 'Default directory for new projects',
     label: 'Default destination directory',
-    onValidate: $FileSystem.validateExistsDir,
   });
 
   const romFilePath = useSettingField('newProjectDefaultRomFilePath', {
     infoMessage: 'ROM used for the project (a copy will be made).',
     label: 'Default ROM file',
-    onValidate: async (value: string) =>
-      (await $FileSystem.validateExistsFile(value)) ||
-      (await $FileSystem.validateHasExtension(value, '.smc')),
   });
 
   return (
@@ -46,6 +42,7 @@ export default function NewProjectSettingsPage(): ReactElement {
           isDisabled={locationDirPath.isSaving}
           isManualEditDisabled
           mode='directory'
+          onClear={() => locationDirPath.set('')}
           onChange={locationDirPath.set}
           placeholder={locationDirPath.field.control.label}
           value={locationDirPath.field.value}
@@ -58,6 +55,7 @@ export default function NewProjectSettingsPage(): ReactElement {
           isManualEditDisabled
           filters={[{ name: 'ROM', extensions: ['smc'] }]}
           mode='file'
+          onClear={() => romFilePath.set('')}
           onChange={romFilePath.set}
           placeholder={romFilePath.field.control.label}
           value={romFilePath.field.value}

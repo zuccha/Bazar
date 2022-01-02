@@ -23,19 +23,13 @@ export default function CustomToolItem({
 }: CustomToolItemProps): ReactElement {
   const handleError = useHandleError();
 
-  const handleBrowse = useAsyncCallback(async () => {
-    const maybePathOrError = await $Dialog.open({
-      type: 'file',
-      filters: [{ name: 'Executable', extensions: ['exe'] }],
-    });
-    if (maybePathOrError.isError) {
-      handleError(maybePathOrError.error, 'Failed to open file dialog');
-      return maybePathOrError.error;
-    }
-    if (maybePathOrError.value) {
-      onChoose(maybePathOrError.value);
-    }
-  }, [onChoose, handleError]);
+  const handleBrowse = useAsyncCallback(
+    async (value: string) => {
+      onChoose(value);
+      return undefined;
+    },
+    [onChoose, handleError],
+  );
 
   const handleClear = useCallback(() => {
     onChoose('');
@@ -57,8 +51,9 @@ export default function CustomToolItem({
         <BrowserInput
           isDisabled={handleBrowse.isLoading || isDisabled}
           isManualEditDisabled
-          filters={[{ name: 'ROM', extensions: ['smc'] }]}
+          filters={[{ name: 'Executable', extensions: ['exe'] }]}
           mode='file'
+          onClear={handleClear}
           onChange={handleBrowse.call}
           placeholder='Choose executable'
           value={exePath}
