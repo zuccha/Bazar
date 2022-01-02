@@ -1,6 +1,6 @@
 import { Flex, Heading, Text, VStack } from '@chakra-ui/layout';
 import { Box } from '@chakra-ui/react';
-import { ReactElement } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { useSetProject, useSettings } from '../../../core-hooks/Core';
 import {
   useSetting,
@@ -48,7 +48,7 @@ export default function HomeScreenRecentProjects(): ReactElement {
   // useEffect(() => {
   //   const recentProjectDirPath = recentProjectDirPaths.items[0];
   //   if (recentProjectDirPath) {
-  //     handleOpenRecentProject(recentProjectDirPath);
+  //     handleOpenRecentProject.call(recentProjectDirPath);
   //   }
   // }, []);
 
