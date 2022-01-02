@@ -1,10 +1,8 @@
 import * as Chakra from '@chakra-ui/react';
-import { CloseIcon } from '@chakra-ui/icons';
 import { ChangeEvent, ReactElement, useCallback } from 'react';
 import useColorScheme from '../../theme/useColorScheme';
-import IconButton from './IconButton';
 
-interface TextInputProps {
+interface TextInputProps extends Chakra.LayoutProps {
   isDisabled?: boolean;
   isInvalid?: boolean;
   isReadonly?: boolean;
@@ -24,6 +22,7 @@ export default function TextInput({
   onChange,
   placeholder,
   value,
+  ...props
 }: TextInputProps): ReactElement {
   const colorScheme = useColorScheme();
 
@@ -35,7 +34,7 @@ export default function TextInput({
   );
 
   return (
-    <Chakra.InputGroup alignItems='center' size='sm'>
+    <Chakra.InputGroup alignItems='center' size='sm' {...props}>
       <Chakra.Input
         borderRadius={0}
         colorScheme={colorScheme}

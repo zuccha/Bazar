@@ -1,19 +1,22 @@
-import { Text } from '@chakra-ui/react';
 import { ReactElement, useCallback, useMemo } from 'react';
-import { useToolchain } from '../../../../../core-hooks/Core';
+import { useToolchain } from '../../../../../../core-hooks/Core';
 import {
   useProjectSnapshotPatches,
   useRemovePatchFromProjectSnapshot,
-} from '../../../../../core-hooks/ProjectSnapshot';
-import { useGetEmbeddedTool } from '../../../../../core-hooks/Toolchain';
-import Patch from '../../../../../core/Patch';
-import ProjectSnapshot from '../../../../../core/ProjectSnapshot';
-import { useGet } from '../../../../../hooks/useAccessors';
-import { TableColumn, TableRow } from '../../../../../ui-atoms/display/Table';
-import { $EitherErrorOr } from '../../../../../utils/EitherErrorOr';
-import { $ErrorReport } from '../../../../../utils/ErrorReport';
-import PatchAdditionDrawer from '../../../../drawers/PatchAdditionDrawer';
-import ResourcesTab from '../ResourcesTab';
+} from '../../../../../../core-hooks/ProjectSnapshot';
+import { useGetEmbeddedTool } from '../../../../../../core-hooks/Toolchain';
+import Patch from '../../../../../../core/Patch';
+import ProjectSnapshot from '../../../../../../core/ProjectSnapshot';
+import { useGet } from '../../../../../../hooks/useAccessors';
+import {
+  TableColumn,
+  TableRow,
+} from '../../../../../../ui-atoms/display/Table';
+import { $EitherErrorOr } from '../../../../../../utils/EitherErrorOr';
+import { $ErrorReport } from '../../../../../../utils/ErrorReport';
+import PatchAdditionDrawer from '../../../../../drawers/PatchAdditionDrawer';
+import ResourcesTab from '../../ResourcesTab';
+import PatchesTabInfo from './PatchesTabInfo';
 
 interface PatchesTabProps {
   projectSnapshot: ProjectSnapshot;
@@ -70,9 +73,7 @@ export default function PatchesTab({
       onApply={handleApplyPatch}
       onOpenInEditor={() => Promise.resolve(undefined)}
       onRemove={handleRemovePatch}
-      renderInfo={(patch) => (
-        <Text>{patch ? patch.getInfo().name : '<n/a>'}</Text>
-      )}
+      renderInfo={(patch) => <PatchesTabInfo patch={patch} />}
       renderResourceAdditionDrawer={({ onClose }) => (
         <PatchAdditionDrawer
           onClose={onClose}

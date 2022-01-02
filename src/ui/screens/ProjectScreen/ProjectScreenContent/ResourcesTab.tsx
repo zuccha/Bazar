@@ -226,7 +226,7 @@ export default function ResourcesTab<R extends Resource>({
   return (
     <>
       <HStack h='100%' spacing={3} alignItems='stretch'>
-        <VStack flex={1} minW={512} spacing={2}>
+        <VStack flex={1} minW={512} spacing={3}>
           <Table
             actions={actions}
             columns={columns}
