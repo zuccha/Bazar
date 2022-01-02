@@ -82,6 +82,7 @@ export default class Patch {
       (error = await $FileSystem.copyDirectory(
         sourceDirPath,
         resource.getDirectoryPath(),
+        true,
       ))
     ) {
       resource.delete();

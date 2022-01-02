@@ -19,7 +19,7 @@ export const $FileSystem = {
     basePath: string,
     targetPath: string,
   ): Promise<string> => {
-    const normalizedBasePath = await Path.normalize(basePath);
+    const normalizedBasePath = (await Path.normalize(basePath)) + Path.sep;
     const normalizedTargetPath = await Path.normalize(targetPath);
     return normalizedTargetPath.startsWith(normalizedBasePath)
       ? normalizedTargetPath.replace(normalizedBasePath, '')
@@ -33,9 +33,9 @@ export const $FileSystem = {
   ): Promise<ErrorReport | undefined> => {
     try {
       // Create directory if it doesn't exist.
-      const sourceDirExist = await $FileSystem.exists(sourceDirPath);
-      if (!sourceDirExist) {
-        await FS.createDir(sourceDirPath);
+      const targetDirExist = await $FileSystem.exists(targetDirPath);
+      if (!targetDirExist) {
+        await FS.createDir(targetDirPath, { recursive: true });
       }
 
       // Copy files.
@@ -89,7 +89,7 @@ export const $FileSystem = {
 
   createDirectory: async (path: string): Promise<ErrorReport | undefined> => {
     try {
-      await FS.createDir(path);
+      await FS.createDir(path, { recursive: true });
     } catch {
       return $ErrorReport.make(`Failed to create directory "${path}"`);
     }
