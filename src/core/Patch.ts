@@ -1,17 +1,17 @@
 import { z } from 'zod';
 import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
-import { $ErrorReport, ErrorReport } from '../utils/ErrorReport';
+import { ErrorReport } from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
-import { $Shell } from '../utils/Shell';
 import Resource from './Resource';
-import Toolchain from './Toolchain';
 
 const PatchInfoSchema = z.object({
   name: z.string(),
+  author: z.string(),
+  version: z.string(),
   mainFileRelativePath: z.string(),
 });
 
-export type PatchInfo = z.infer<typeof PatchInfoSchema>;
+export type PatchInfo = Required<z.infer<typeof PatchInfoSchema>>;
 
 export default class Patch {
   private resource: Resource<PatchInfo>;
@@ -23,11 +23,15 @@ export default class Patch {
   static async createFromDirectory({
     locationDirPath,
     name,
+    author,
+    version,
     sourceDirPath,
     mainFilePath,
   }: {
     locationDirPath: string;
     name: string;
+    author: string;
+    version: string;
     sourceDirPath: string;
     mainFilePath: string;
   }): Promise<EitherErrorOr<Patch>> {
@@ -40,7 +44,7 @@ export default class Patch {
       sourceDirPath,
       mainFilePath,
     );
-    const info = { name, mainFileRelativePath };
+    const info = { name, author, version, mainFileRelativePath };
     const resourceOrError = await Resource.create(locationDirPath, name, info);
     if (resourceOrError.isError) {
       const errorMessage = `${errorPrefix}: failed to create resource`;
@@ -94,10 +98,14 @@ export default class Patch {
   static async createFromFile({
     locationDirPath,
     name,
+    author,
+    version,
     filePath,
   }: {
     locationDirPath: string;
     name: string;
+    author: string;
+    version: string;
     filePath: string;
   }): Promise<EitherErrorOr<Patch>> {
     const errorPrefix = 'Patch.createFromFile';
@@ -106,7 +114,7 @@ export default class Patch {
     // Resource
 
     const mainFileRelativePath = $FileSystem.basename(filePath);
-    const info = { name, mainFileRelativePath };
+    const info = { name, author, version, mainFileRelativePath };
     const resourceOrError = await Resource.create(locationDirPath, name, info);
     if (resourceOrError.isError) {
       const errorMessage = `${errorPrefix}: failed to create resource`;

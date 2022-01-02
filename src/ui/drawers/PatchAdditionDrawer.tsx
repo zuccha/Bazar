@@ -1,5 +1,6 @@
 import {
   Flex,
+  HStack,
   Tab,
   TabList,
   TabPanel,
@@ -44,6 +45,18 @@ export default function PatchAdditionDrawer({
     isRequired: true,
     label: 'Patch name',
     onValidate: $FileSystem.validateIsValidName,
+  });
+
+  const versionField = useFormField({
+    infoMessage: 'Version of the patch',
+    initialValue: '',
+    label: 'Version',
+  });
+
+  const authorField = useFormField({
+    infoMessage: 'Author(s) of the patch',
+    initialValue: '',
+    label: 'Author(s)',
   });
 
   const sourceDirPathField = useFormField({
@@ -91,6 +104,8 @@ export default function PatchAdditionDrawer({
           onSubmit: () =>
             addPatchFromFile({
               name: nameField.value.trim(),
+              author: authorField.value.trim(),
+              version: versionField.value.trim(),
               filePath: singleFilePathField.value.trim(),
             }),
         }
@@ -99,6 +114,8 @@ export default function PatchAdditionDrawer({
           onSubmit: () =>
             addPatchFromDirectory({
               name: nameField.value.trim(),
+              author: authorField.value.trim(),
+              version: versionField.value.trim(),
               sourceDirPath: sourceDirPathField.value.trim(),
               mainFilePath: mainFilePathField.value.trim(),
             }),
@@ -130,14 +147,35 @@ export default function PatchAdditionDrawer({
       title='Add patch'
     >
       <Flex direction='column' h='100%'>
-        <VStack width='100%' spacing={4} flex={1}>
-          <FormControl {...nameField.control}>
+        <VStack w='100%' spacing={4} flex={1}>
+          <HStack w='100%'>
+            <FormControl {...nameField.control}>
+              <TextInput
+                isDisabled={form.isSubmitting}
+                onBlur={nameField.handleBlur}
+                onChange={nameField.handleChange}
+                placeholder={nameField.control.label}
+                value={nameField.value}
+              />
+            </FormControl>
+            <FormControl {...versionField.control} width={150}>
+              <TextInput
+                isDisabled={form.isSubmitting}
+                onBlur={versionField.handleBlur}
+                onChange={versionField.handleChange}
+                placeholder={versionField.control.label}
+                value={versionField.value}
+              />
+            </FormControl>
+          </HStack>
+
+          <FormControl {...authorField.control}>
             <TextInput
               isDisabled={form.isSubmitting}
-              onBlur={nameField.handleBlur}
-              onChange={nameField.handleChange}
-              placeholder={nameField.control.label}
-              value={nameField.value}
+              onBlur={authorField.handleBlur}
+              onChange={authorField.handleChange}
+              placeholder={authorField.control.label}
+              value={authorField.value}
             />
           </FormControl>
 

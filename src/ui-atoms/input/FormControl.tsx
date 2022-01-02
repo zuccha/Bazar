@@ -23,6 +23,7 @@ interface FormControlProps {
   isInvalid?: boolean;
   isRequired?: boolean;
   label: string;
+  width?: number | string;
 }
 
 export default function FormControl({
@@ -33,6 +34,7 @@ export default function FormControl({
   isInvalid,
   isRequired = false,
   label,
+  width,
 }: FormControlProps): ReactElement {
   return (
     <Chakra.FormControl
@@ -40,6 +42,7 @@ export default function FormControl({
       label={label}
       isDisabled={isDisabled}
       isInvalid={isInvalid}
+      width={width}
     >
       <FormLabel label={label} infoMessage={infoMessage} />
       {children}

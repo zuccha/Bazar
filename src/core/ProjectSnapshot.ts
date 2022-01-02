@@ -225,10 +225,14 @@ export default class ProjectSnapshot {
   static addPatchFromDirectoryTriggers = ['ProjectSnapshot.patches'];
   addPatchFromDirectory = async ({
     name,
+    author,
+    version,
     sourceDirPath,
     mainFilePath,
   }: {
     name: string;
+    author: string;
+    version: string;
     sourceDirPath: string;
     mainFilePath: string;
   }): Promise<ErrorReport | undefined> => {
@@ -244,6 +248,8 @@ export default class ProjectSnapshot {
         ProjectSnapshot.PATCHES_DIR_NAME,
       ),
       name,
+      author,
+      version,
       sourceDirPath,
       mainFilePath,
     });
@@ -258,9 +264,13 @@ export default class ProjectSnapshot {
   static addPatchFromFileTriggers = ['ProjectSnapshot.patches'];
   addPatchFromFile = async ({
     name,
+    author,
+    version,
     filePath,
   }: {
     name: string;
+    author: string;
+    version: string;
     filePath: string;
   }): Promise<ErrorReport | undefined> => {
     const errorPrefix = 'ProjectSnapshot.addPatchFromFile';
@@ -275,6 +285,8 @@ export default class ProjectSnapshot {
         ProjectSnapshot.PATCHES_DIR_NAME,
       ),
       name,
+      author,
+      version,
       filePath,
     });
     if (patchOrError.isError) {
