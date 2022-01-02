@@ -286,22 +286,20 @@ export default class ProjectSnapshot {
   };
 
   static removePatchTriggers = ['ProjectSnapshot.patches'];
-  removePatch = async (patchName: string): Promise<ErrorReport | undefined> => {
+  removePatch = async (patch: Patch): Promise<ErrorReport | undefined> => {
     const errorPrefix = 'ProjectSnapshot.removePatch';
 
-    const patchIndex = this.patches.findIndex(
-      (patch) => patch.getInfo().name === patchName,
-    );
-    const patch = this.patches[patchIndex];
+    const name = patch.getInfo().name;
+    const patchIndex = this.patches.findIndex((p) => p.getInfo().name === name);
 
-    if (!patch) {
-      const errorMessage = `${errorPrefix}: patch "${patchName}" does not exist`;
+    if (patchIndex === -1) {
+      const errorMessage = `${errorPrefix}: patch "${name}" does not exist`;
       return $ErrorReport.make(errorMessage);
     }
 
     const error = await patch.delete();
     if (error) {
-      const errorMessage = `${errorPrefix}: failed to remove patch "${patchName}"`;
+      const errorMessage = `${errorPrefix}: failed to remove patch "${name}"`;
       return error.extend(errorMessage);
     }
 

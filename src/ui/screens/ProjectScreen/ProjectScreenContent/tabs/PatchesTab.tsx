@@ -1,6 +1,5 @@
-import { ArrowForwardIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
-import { Flex, HStack, VStack } from '@chakra-ui/react';
-import { ReactElement, useCallback, useMemo, useState } from 'react';
+import { Flex } from '@chakra-ui/react';
+import { ReactElement, useCallback, useMemo } from 'react';
 import { useToolchain } from '../../../../../core-hooks/Core';
 import {
   useProjectSnapshotPatches,
@@ -10,18 +9,11 @@ import { useGetEmbeddedTool } from '../../../../../core-hooks/Toolchain';
 import Patch from '../../../../../core/Patch';
 import ProjectSnapshot from '../../../../../core/ProjectSnapshot';
 import { useGet } from '../../../../../hooks/useAccessors';
-import useAsyncCallback from '../../../../../hooks/useAsyncCallback';
-import useHandleError from '../../../../../hooks/useHandleError';
-import Output, { OutputChunk } from '../../../../../ui-atoms/display/Output';
-import Table, {
-  TableAction,
-  TableColumn,
-  TableRow,
-} from '../../../../../ui-atoms/display/Table';
-import Button from '../../../../../ui-atoms/input/Button';
-import AlertDelete from '../../../../../ui-atoms/overlay/AlertDelete';
-import { $ErrorReport, ErrorReport } from '../../../../../utils/ErrorReport';
+import { TableColumn, TableRow } from '../../../../../ui-atoms/display/Table';
+import { $EitherErrorOr } from '../../../../../utils/EitherErrorOr';
+import { $ErrorReport } from '../../../../../utils/ErrorReport';
 import PatchAdditionDrawer from '../../../../drawers/PatchAdditionDrawer';
+import ResourcesTab from '../ResourcesTab';
 
 interface PatchesTabProps {
   projectSnapshot: ProjectSnapshot;
@@ -30,138 +22,21 @@ interface PatchesTabProps {
 export default function PatchesTab({
   projectSnapshot,
 }: PatchesTabProps): ReactElement {
-  const [outputChunks, setOutputChunks] = useState<OutputChunk[]>([]);
-  const [isPatchAdditionVisible, setPatchAdditionVisible] = useState(false);
-  const [patchToRemove, setPatchToRemove] = useState<Patch | undefined>();
-
-  const patches = useProjectSnapshotPatches(projectSnapshot);
-  const removePatch = useRemovePatchFromProjectSnapshot(projectSnapshot);
-
-  const handleError = useHandleError();
-
   const toolchain = useToolchain();
   const asar = useGetEmbeddedTool(toolchain, 'asar');
 
-  const handleClearOutput = useCallback(() => {
-    setOutputChunks([]);
-  }, []);
+  const patches = useProjectSnapshotPatches(projectSnapshot);
 
-  const applyPatch = useCallback(
-    async (patch: Patch, exePath: string): Promise<OutputChunk[]> => {
-      const newOutputChunks: OutputChunk[] = [];
-
-      newOutputChunks.push({
-        text: `Applying patch "${patch.getInfo().name}"`,
-        type: 'info',
-        isBold: true,
-      });
-
-      const processOrError = await projectSnapshot.applyPatch(patch, exePath);
-      if (processOrError.isError) {
-        newOutputChunks.push({
-          text: 'Failed to apply patch',
-          type: 'failure',
-          isBold: true,
-        });
-        return newOutputChunks;
-      }
-
-      if (processOrError.value.stdout) {
-        newOutputChunks.push({
-          text: processOrError.value.stdout,
-          type: 'plain',
-        });
-      }
-      if (processOrError.value.stderr) {
-        newOutputChunks.push({
-          text: processOrError.value.stderr,
-          type: 'failure',
-        });
-        newOutputChunks.push({
-          text: 'Failed to apply patch',
-          type: 'failure',
-          isBold: true,
-        });
-      } else {
-        newOutputChunks.push({
-          text: 'Patch applied successfully',
-          type: 'success',
-          isBold: true,
-        });
-      }
-
-      return newOutputChunks;
-    },
-    [projectSnapshot],
-  );
-
-  const handleApplyPatch = useAsyncCallback(
-    async (patch: Patch): Promise<ErrorReport | undefined> => {
-      if (asar.status !== 'installed') {
-        const errorMessage = 'asar is not installed, please install it first';
-        const error = $ErrorReport.make(errorMessage);
-        handleError(error, 'Failed to apply patch');
-        return error;
-      }
-
-      const exePath = asar.exePath;
-      const newOutputChunks = await applyPatch(patch, exePath);
-      setOutputChunks(newOutputChunks);
-    },
-    [asar, applyPatch, handleError],
-  );
-
-  const handleApplyAllPatches = useAsyncCallback(async (): Promise<
-    ErrorReport | undefined
-  > => {
-    if (asar.status !== 'installed') {
-      const errorMessage = 'asar is not installed, please install it first';
-      const error = $ErrorReport.make(errorMessage);
-      handleError(error, 'Failed to apply patch');
-      return error;
-    }
-
-    const exePath = asar.exePath;
-    const newOutputChunks: OutputChunk[] = [];
-    for (const patch of patches) {
-      newOutputChunks.push(...(await applyPatch(patch, exePath)));
-    }
-    setOutputChunks(newOutputChunks);
-  }, [asar, patches, projectSnapshot]);
-
-  const handleRemovePatch = useAsyncCallback(
+  const handleApplyPatch = useCallback(
     async (patch: Patch) => {
-      const error = await removePatch(patch.getInfo().name);
-      handleError(error, 'Failed to remove patch');
-      return error;
+      return asar.status === 'installed'
+        ? await projectSnapshot.applyPatch(patch, asar.exePath)
+        : $EitherErrorOr.error($ErrorReport.make('asar not installed'));
     },
-    [removePatch],
+    [projectSnapshot.applyPatch],
   );
 
-  const isEditingPatches =
-    handleApplyAllPatches.isLoading || handleApplyPatch.isLoading;
-
-  const actions: TableAction<Patch>[] = useMemo(() => {
-    return [
-      {
-        icon: <ArrowForwardIcon />,
-        isDisabled: isEditingPatches || asar.status !== 'installed',
-        label: 'Apply patch',
-        onClick: (row) => handleApplyPatch.call(row.data),
-      },
-      {
-        icon: <EditIcon />,
-        label: 'Open patch in editor',
-        isDisabled: true,
-        onClick: () => {},
-      },
-      {
-        icon: <DeleteIcon />,
-        label: 'Remove patch',
-        onClick: (row) => setPatchToRemove(row.data),
-      },
-    ];
-  }, [handleApplyPatch.call, isEditingPatches, asar.status]);
+  const handleRemovePatch = useRemovePatchFromProjectSnapshot(projectSnapshot);
 
   const columns: TableColumn<Patch>[] = useMemo(() => {
     return [
@@ -186,50 +61,24 @@ export default function PatchesTab({
   );
 
   return (
-    <>
-      <HStack h='100%' spacing={3} alignItems='stretch'>
-        <VStack flex={1} minW={512} spacing={2}>
-          <Table
-            actions={actions}
-            columns={columns}
-            rows={rows}
-            flex={1}
-            width='100%'
-          />
-          <HStack w='100%' justifyContent='flex-end'>
-            <Button
-              label='Apply all'
-              onClick={handleApplyAllPatches.call}
-              isDisabled={isEditingPatches || asar.status !== 'installed'}
-            />
-            <Button label='Add' onClick={() => setPatchAdditionVisible(true)} />
-          </HStack>
-        </VStack>
-        <Flex flex={1} minW={512}>
-          <Output
-            chunks={outputChunks}
-            onClear={handleClearOutput}
-            flex={1}
-            width='100%'
-          />
-        </Flex>
-      </HStack>
-
-      {isPatchAdditionVisible && (
+    <ResourcesTab
+      name='patch'
+      resources={patches}
+      canApply={asar.status === 'installed'}
+      canOpenInEditor={false}
+      canRemove={true}
+      onApply={handleApplyPatch}
+      onOpenInEditor={() => Promise.resolve(undefined)}
+      onRemove={handleRemovePatch}
+      renderInfo={() => <Flex />}
+      renderResourceAdditionDrawer={({ onClose }) => (
         <PatchAdditionDrawer
-          onClose={() => setPatchAdditionVisible(false)}
+          onClose={onClose}
           projectSnapshot={projectSnapshot}
         />
       )}
-
-      {patchToRemove && (
-        <AlertDelete
-          isDisabled={handleRemovePatch.isLoading}
-          onClose={() => setPatchToRemove(undefined)}
-          onDelete={() => handleRemovePatch.call(patchToRemove)}
-          title={`Remove patch "${patchToRemove.getInfo().name}"`}
-        />
-      )}
-    </>
+      columns={columns}
+      rows={rows}
+    />
   );
 }
