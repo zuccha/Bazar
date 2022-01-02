@@ -7,10 +7,14 @@ import { $FileSystem } from '../../../../utils/FileSystem';
 import useSettingField from '../useSettingsField';
 
 export default function NewProjectSettingsPage(): ReactElement {
-  const author = useSettingField('newProjectDefaultAuthor', {
-    infoMessage: 'Default author for new projects',
-    label: 'Default author',
-  });
+  const author = useSettingField(
+    'newProjectDefaultAuthor',
+    {
+      infoMessage: 'Default author for new projects',
+      label: 'Default author',
+    },
+    { debounce: 1000 },
+  );
 
   const locationDirPath = useSettingField('newProjectDefaultLocationDirPath', {
     infoMessage: 'Default directory for new projects',
