@@ -67,9 +67,9 @@ export default function ProjectCreationFromSourceDrawer({
     initialValue: defaultRomFilePath,
     isRequired: true,
     label: 'ROM file',
-    onValidate: (value: string) =>
-      $FileSystem.validateExistsFile(value) ||
-      $FileSystem.validateHasExtension(value, '.smc'),
+    onValidate: async (value: string) =>
+      (await $FileSystem.validateExistsFile(value)) ||
+      (await $FileSystem.validateHasExtension(value, '.smc')),
   });
 
   const setProject = useSetProject();
