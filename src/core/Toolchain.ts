@@ -267,7 +267,7 @@ export default class Toolchain {
     this[toolCustom].exePath = exePath;
   };
 
-  downloadEmbedded = async (
+  installEmbedded = async (
     toolEmbedded: ToolchainEmbedded,
   ): Promise<ErrorReport | undefined> => {
     const { directoryName, exeName, version, downloadUrl } = {
@@ -279,7 +279,7 @@ export default class Toolchain {
       uberAsm: UBER_ASM_OPTIONS,
     }[toolEmbedded];
 
-    const errorPrefix = `Toolchain.downloadEmbedded(${toolEmbedded})`;
+    const errorPrefix = `Toolchain.installEmbedded(${toolEmbedded})`;
     let error: ErrorReport | undefined;
 
     const toolchainDirPath = await getToolchainDirPath();
@@ -315,6 +315,39 @@ export default class Toolchain {
     await $FileSystem.removeFile(zipPath);
 
     this[toolEmbedded] = { status: 'installed', exePath, directoryPath };
+  };
+
+  uninstallEmbedded = async (
+    toolEmbedded: ToolchainEmbedded,
+  ): Promise<ErrorReport | undefined> => {
+    const { directoryName, exeName, version, downloadUrl } = {
+      lunarMagic: LUNAR_MAGIC_OPTIONS,
+      asar: ASAR_OPTIONS,
+      flips: FLIPS_OPTIONS,
+      gps: GPS_OPTIONS,
+      pixi: PIXI_OPTIONS,
+      uberAsm: UBER_ASM_OPTIONS,
+    }[toolEmbedded];
+
+    const errorPrefix = `Toolchain.uninstallEmbedded(${toolEmbedded})`;
+    let error: ErrorReport | undefined;
+
+    const toolchainDirPath = await getToolchainDirPath();
+    const directoryPath = await $FileSystem.join(
+      toolchainDirPath,
+      directoryName,
+    );
+    const versionPath = await $FileSystem.join(directoryPath, version);
+
+    if (await $FileSystem.exists(directoryPath)) {
+      error = await $FileSystem.removeDir(directoryPath);
+      if (error) {
+        const errorMessage = `${errorPrefix}: Failed to remove directory`;
+        return error.extend(errorMessage);
+      }
+    }
+
+    this[toolEmbedded] = { status: 'not-installed' };
   };
 
   getCustom = (propertyName: ToolchainCustom): ToolCustom => {

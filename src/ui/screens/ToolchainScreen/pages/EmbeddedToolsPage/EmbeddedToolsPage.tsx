@@ -1,35 +1,35 @@
 import { StackDivider, Text, VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 import EmbeddedToolItem from './EmbeddedToolItem';
-import useDownloadEmbeddedTool from './useHandleDownloadEmbeddedTool';
+import useHandleEmbeddedTool from './useHandleEmbeddedTool';
 
 export default function ToolchainScreen(): ReactElement {
-  const [handleDownloadLunarMagic, lunarMagicStatus] = useDownloadEmbeddedTool({
+  const lunarMagic = useHandleEmbeddedTool({
     name: 'Lunar Magic',
     key: 'lunarMagic',
   });
 
-  const [handleDownloadAsar, asarStatus] = useDownloadEmbeddedTool({
+  const asar = useHandleEmbeddedTool({
     name: 'Asar',
     key: 'asar',
   });
 
-  const [handleDownloadFlips, flipsStatus] = useDownloadEmbeddedTool({
+  const flips = useHandleEmbeddedTool({
     name: 'Flips',
     key: 'flips',
   });
 
-  const [handleDownloadGps, gpsStatus] = useDownloadEmbeddedTool({
+  const gps = useHandleEmbeddedTool({
     name: 'GPS',
     key: 'gps',
   });
 
-  const [handleDownloadPixi, pixiStatus] = useDownloadEmbeddedTool({
+  const pixi = useHandleEmbeddedTool({
     name: 'PIXI',
     key: 'pixi',
   });
 
-  const [handleDownloadUberAsm, uberAsmStatus] = useDownloadEmbeddedTool({
+  const uberAsm = useHandleEmbeddedTool({
     name: 'UberASM',
     key: 'uberAsm',
   });
@@ -49,44 +49,44 @@ export default function ToolchainScreen(): ReactElement {
       <EmbeddedToolItem
         name='Lunar Magic'
         description='Fundamental tool for editing levels, colors, map16, and more.'
-        onInstall={handleDownloadLunarMagic}
-        onUninstall={() => {}}
-        status={lunarMagicStatus}
+        onInstall={lunarMagic.install}
+        onUninstall={lunarMagic.uninstall}
+        status={lunarMagic.status}
       />
       <EmbeddedToolItem
         name='Asar'
         description='SNES assembler for applying patches to ROM images.'
-        onInstall={handleDownloadAsar}
-        onUninstall={() => {}}
-        status={asarStatus}
+        onInstall={asar.install}
+        onUninstall={asar.uninstall}
+        status={asar.status}
       />
       <EmbeddedToolItem
         name='Flips'
         description='Utility for creating BPS patches.'
-        onInstall={handleDownloadFlips}
-        onUninstall={() => {}}
-        status={flipsStatus}
+        onInstall={flips.install}
+        onUninstall={flips.uninstall}
+        status={flips.status}
       />
       <EmbeddedToolItem
         name='GPS'
         description='Tool for inserting custom blocks.'
-        onInstall={handleDownloadGps}
-        onUninstall={() => {}}
-        status={gpsStatus}
+        onInstall={gps.install}
+        onUninstall={gps.uninstall}
+        status={gps.status}
       />
       <EmbeddedToolItem
         name='PIXI'
         description='Tool for inserting custom sprites.'
-        onInstall={handleDownloadPixi}
-        onUninstall={() => {}}
-        status={pixiStatus}
+        onInstall={pixi.install}
+        onUninstall={pixi.uninstall}
+        status={pixi.status}
       />
       <EmbeddedToolItem
         name='UberASM'
         description='Tool for inserting custom ASM, made specifically for SMW.'
-        onInstall={handleDownloadUberAsm}
-        onUninstall={() => {}}
-        status={uberAsmStatus}
+        onInstall={uberAsm.install}
+        onUninstall={uberAsm.uninstall}
+        status={uberAsm.status}
       />
     </VStack>
   );

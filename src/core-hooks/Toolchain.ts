@@ -55,16 +55,30 @@ export const useEditCustomTool = (
   return useSetAsync(toolchain, editCustom, editCustomTriggers);
 };
 
-export const useDownloadEmbeddedTool = (
+export const useInstallEmbeddedTool = (
   toolchain: Toolchain,
   toolName: ToolchainEmbedded,
 ): (() => Promise<ErrorReport | undefined>) => {
-  const downloadEmbedded = useCallback(() => {
-    return toolchain.downloadEmbedded(toolName);
-  }, [toolchain.downloadEmbedded, toolName]);
-  const downloadEmbeddedTriggers = useMemo(
+  const installEmbedded = useCallback(() => {
+    return toolchain.installEmbedded(toolName);
+  }, [toolchain.installEmbedded, toolName]);
+  const installEmbeddedTriggers = useMemo(
     () => [`Toolchain.${toolName}`],
     [toolName],
   );
-  return useSetAsync(toolchain, downloadEmbedded, downloadEmbeddedTriggers);
+  return useSetAsync(toolchain, installEmbedded, installEmbeddedTriggers);
+};
+
+export const useUninstallEmbeddedTool = (
+  toolchain: Toolchain,
+  toolName: ToolchainEmbedded,
+): (() => Promise<ErrorReport | undefined>) => {
+  const uninstallEmbedded = useCallback(() => {
+    return toolchain.uninstallEmbedded(toolName);
+  }, [toolchain.uninstallEmbedded, toolName]);
+  const uninstallEmbeddedTriggers = useMemo(
+    () => [`Toolchain.${toolName}`],
+    [toolName],
+  );
+  return useSetAsync(toolchain, uninstallEmbedded, uninstallEmbeddedTriggers);
 };
