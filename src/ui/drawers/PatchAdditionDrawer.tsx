@@ -127,7 +127,7 @@ export default function PatchAdditionDrawer({
         </>
       }
       onClose={onClose}
-      title='New project'
+      title='Add patch'
     >
       <Flex direction='column' h='100%'>
         <VStack width='100%' spacing={4} flex={1}>
