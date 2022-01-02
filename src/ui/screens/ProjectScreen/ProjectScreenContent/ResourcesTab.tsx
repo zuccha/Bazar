@@ -34,7 +34,7 @@ interface ResourcesTabProps<R extends Resource> {
   onRemove: (resource: R) => Promise<ErrorReport | undefined>;
   onOpenInEditor: (resource: R) => Promise<ErrorReport | undefined>;
 
-  renderInfo: (resource: R) => ReactElement;
+  renderInfo: (resource: R | undefined) => ReactElement;
   renderResourceAdditionDrawer: (params: {
     onClose: () => void;
   }) => ReactElement;
@@ -69,6 +69,10 @@ export default function ResourcesTab<R extends Resource>({
   const [resourceToRemove, setResourceToRemove] = useSafeState<R | undefined>(
     undefined,
   );
+
+  const [selectedRowIndex, setSelectedRowIndex] = useSafeState<
+    number | undefined
+  >(undefined);
 
   const [isResourceAdditionDrawerVisible, setIsResourceAdditionDrawerVisible] =
     useSafeState(false);
@@ -227,6 +231,8 @@ export default function ResourcesTab<R extends Resource>({
             actions={actions}
             columns={columns}
             rows={rows}
+            selectedRowIndex={selectedRowIndex}
+            onSelectRowIndex={setSelectedRowIndex}
             flex={1}
             width='100%'
           />
@@ -244,7 +250,11 @@ export default function ResourcesTab<R extends Resource>({
         </VStack>
         <VStack flex={1} minW={512} spacing={3}>
           <Info width='100%'>
-            <Flex h='80px' />
+            {renderInfo(
+              selectedRowIndex !== undefined
+                ? rows[selectedRowIndex]?.data
+                : undefined,
+            )}
           </Info>
           <Output
             chunks={outputChunks}

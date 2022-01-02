@@ -1,4 +1,4 @@
-import { Flex } from '@chakra-ui/react';
+import { Text } from '@chakra-ui/react';
 import { ReactElement, useCallback, useMemo } from 'react';
 import { useToolchain } from '../../../../../core-hooks/Core';
 import {
@@ -70,7 +70,9 @@ export default function PatchesTab({
       onApply={handleApplyPatch}
       onOpenInEditor={() => Promise.resolve(undefined)}
       onRemove={handleRemovePatch}
-      renderInfo={() => <Flex />}
+      renderInfo={(patch) => (
+        <Text>{patch ? patch.getInfo().name : '<n/a>'}</Text>
+      )}
       renderResourceAdditionDrawer={({ onClose }) => (
         <PatchAdditionDrawer
           onClose={onClose}

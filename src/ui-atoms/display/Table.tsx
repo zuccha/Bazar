@@ -1,5 +1,6 @@
 import { Center, Flex, HStack, Text } from '@chakra-ui/react';
 import { ReactElement, useMemo } from 'react';
+import useColorScheme from '../../theme/useColorScheme';
 import IconButton from '../input/IconButton';
 
 export interface TableRow<T> {
@@ -31,6 +32,9 @@ interface TableProps<T> {
   columns: TableColumn<T>[];
   rows: TableRow<T>[];
 
+  selectedRowIndex?: number | undefined;
+  onSelectRowIndex?: (index: number) => void;
+
   flex?: number;
   height?: number | string;
   width?: number | string;
@@ -59,10 +63,15 @@ export default function Table<T>({
   columns,
   rows,
 
+  selectedRowIndex,
+  onSelectRowIndex,
+
   flex,
   height,
   width,
 }: TableProps<T>): ReactElement {
+  const colorScheme = useColorScheme();
+
   const columnStyles = useMemo(() => {
     return columns.map(computeColumnStyle);
   }, [columns]);
@@ -93,15 +102,20 @@ export default function Table<T>({
       </Flex>
 
       <Flex flex={1} pb={2} flexDir='column' overflow='auto'>
-        {rows.map((row) => {
+        {rows.map((row, rowIndex) => {
           return (
             <Flex
               key={row.key}
               h={45}
               role='group'
+              bg={
+                selectedRowIndex === rowIndex ? `${colorScheme}.100` : undefined
+              }
               _hover={{
                 backgroundColor: 'app.bg2',
+                cursor: onSelectRowIndex ? 'pointer' : undefined,
               }}
+              onClick={() => onSelectRowIndex?.(rowIndex)}
             >
               {columns.map((column, columnIndex) => (
                 <Flex
