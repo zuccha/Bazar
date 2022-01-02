@@ -79,8 +79,8 @@ There is not necessarily an order of completion. Features will be implemented at
   - [ ] Version
 - [ ] Check patch integrity
 - [x] Remove patch
-- [ ] Apply patch
-- [ ] Apply all patches
+- [x] Apply patch
+- [x] Apply all patches
 - [ ] Open patch in editor
 - [ ] Show patch info
 - [ ] Edit patch info
@@ -164,8 +164,8 @@ There is not necessarily an order of completion. Features will be implemented at
   - [x] UberASM
 - [x] Download embedded tool
 - [ ] Check embedded tool integrity
-- [ ] Add description to embedded tool
-- [ ] Uninstall embedded tool
+- [x] Add description to embedded tool
+- [x] Uninstall embedded tool
 - [ ] Update embedded tool
 - [x] List custom tools
   - [x] Editor (code)
@@ -174,19 +174,19 @@ There is not necessarily an order of completion. Features will be implemented at
   - [x] Emulator
 - [x] Edit custom tool
 - [ ] Check custom tool integrity
-- [ ] Add description to custom tool
-- [ ] Unset custom tool
+- [x] Add description to custom tool
+- [x] Unset custom tool
 - [ ] Set command line args for custom tool
 
 ## Settings
 
+- [x] Add "appearance" settings
+  - [x] Accent color
 - [x] Add "new project" settings
   - [x] Default author
   - [x] Default destination directory
   - [x] Default ROM file
-- [ ] Add "generic" settings
-  - [ ] Accent color
-- [ ] Divide settings in sections
+- [x] Divide settings in sections
 - [ ] Export settings
 - [ ] Import settings
 
