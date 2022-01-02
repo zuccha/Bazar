@@ -1,11 +1,11 @@
-import { useToolchain } from '../../../core-hooks/Core';
+import { useToolchain } from '../../../../../core-hooks/Core';
 import {
   useDownloadEmbeddedTool,
   useGetEmbeddedTool,
-} from '../../../core-hooks/Toolchain';
-import { ToolchainEmbedded } from '../../../core/Toolchain';
-import useAsyncCallback from '../../../hooks/useAsyncCallback';
-import useHandleError from '../../../hooks/useHandleError';
+} from '../../../../../core-hooks/Toolchain';
+import { ToolchainEmbedded } from '../../../../../core/Toolchain';
+import useAsyncCallback from '../../../../../hooks/useAsyncCallback';
+import useHandleError from '../../../../../hooks/useHandleError';
 
 export default function useHandleDownloadEmbeddedTool({
   name,
@@ -13,7 +13,7 @@ export default function useHandleDownloadEmbeddedTool({
 }: {
   name: string;
   key: ToolchainEmbedded;
-}): [() => void, 'downloading' | 'installed' | 'not-installed' | 'deprecated'] {
+}): [() => void, 'loading' | 'installed' | 'not-installed' | 'deprecated'] {
   const handleError = useHandleError();
 
   const toolchain = useToolchain();
@@ -26,7 +26,7 @@ export default function useHandleDownloadEmbeddedTool({
     return error;
   }, [handleError, name, downloadTool]);
 
-  const status = handleDownload.isLoading ? 'downloading' : tool.status;
+  const status = handleDownload.isLoading ? 'loading' : tool.status;
 
   return [handleDownload.call, status];
 }

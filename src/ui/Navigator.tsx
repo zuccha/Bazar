@@ -25,7 +25,7 @@ const ScreenByAppRouteName: Record<RootRouteName, () => ReactElement> = {
   [RootRouteName.Home]: HomeScreen,
   [RootRouteName.Project]: ProjectScreen,
   [RootRouteName.Settings]: SettingsScreen,
-  [RootRouteName.Tools]: ToolsScreen,
+  [RootRouteName.Toolchain]: ToolsScreen,
 } as const;
 
 export default function Navigator(): ReactElement {
@@ -53,9 +53,9 @@ export default function Navigator(): ReactElement {
         />
         <SidebarButton
           icon={<LinkIcon />}
-          isActive={rootRoute === RootRouteName.Tools}
+          isActive={rootRoute === RootRouteName.Toolchain}
           label='Tools'
-          onClick={() => navigateRoot(RootRouteName.Tools)}
+          onClick={() => navigateRoot(RootRouteName.Toolchain)}
         />
         <SidebarButton
           icon={<SettingsIcon />}

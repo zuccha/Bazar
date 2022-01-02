@@ -9,6 +9,7 @@ interface ButtonProps extends LayoutProps, SpaceProps {
   label: string;
   onClick: () => void;
   scheme?: 'normal' | 'destructive';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
   variant?: 'solid' | 'outline' | 'ghost' | 'link';
 }
 
@@ -19,6 +20,7 @@ function Button(
     label,
     onClick,
     scheme = 'normal',
+    size = 'sm',
     variant = 'solid',
     ...props
   }: ButtonProps,
@@ -41,7 +43,7 @@ function Button(
       onClick={onClick}
       py={1}
       ref={ref}
-      size='sm'
+      size={size}
       variant={variant}
       {...props}
     >

@@ -4,6 +4,7 @@ import Navigation, {
   ProjectRouteName,
   RootRouteName,
   SettingsRouteName,
+  ToolchainRouteName,
 } from './Navigation';
 import Router from './Router';
 
@@ -63,3 +64,28 @@ export const useNavigateSettings = (): ((route: SettingsRouteName) => void) => {
 };
 
 // #endregion Settings
+
+// #region Toolchain
+
+const useToolchain = (): Router<ToolchainRouteName> => {
+  const navigation = useNavigation();
+  return useGet(
+    navigation,
+    navigation.getToolchain,
+    Navigation.getToolchainDeps,
+  );
+};
+
+export const useToolchainRoute = (): ToolchainRouteName => {
+  const toolchain = useToolchain();
+  return useGet(toolchain, toolchain.getRoute, Router.getRouteDeps);
+};
+
+export const useNavigateToolchain = (): ((
+  route: ToolchainRouteName,
+) => void) => {
+  const toolchain = useToolchain();
+  return useSet(toolchain, toolchain.navigate, Router.navigateTriggers);
+};
+
+// #endregion Toolchain
