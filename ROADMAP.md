@@ -23,7 +23,6 @@ There is not necessarily an order of completion. Features will be implemented at
   - [x] Author
 - [x] Edit project info
 - [x] Open in Lunar Magic
-  - **FIXME: Catch errors during shell execution**
 - [x] Launch in emulator
 - [ ] Export credits
 
