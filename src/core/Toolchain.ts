@@ -21,7 +21,7 @@ const $ToolchainSettingsStore = $SettingsStore.create({
     emulatorExePath: '',
   },
   fileName: 'toolchain.json',
-  schema: ToolchainSettingsStoreSchema,
+  schema: ToolchainSettingsStoreSchema.partial(),
 });
 
 // #endregion Settings

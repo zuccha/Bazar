@@ -1,4 +1,4 @@
-import { ZodType } from 'zod';
+import { ZodObject, ZodType } from 'zod';
 import { $ErrorReport, ErrorReport } from './ErrorReport';
 import { $EitherErrorOr, EitherErrorOr } from './EitherErrorOr';
 import { $FileSystem } from './FileSystem';
@@ -13,7 +13,7 @@ export const $SettingsStore = {
   }: {
     defaults: Schema;
     fileName: string;
-    schema: ZodType<Schema>;
+    schema: ZodType<Partial<Schema>>;
   }): {
     get: <Key extends keyof Schema>(
       key: Key,
@@ -59,7 +59,10 @@ export const $SettingsStore = {
         return $EitherErrorOr.error(error.extend(errorMessage));
       }
 
-      cache = settingsOrError.data;
+      cache = {
+        ...defaults,
+        ...settingsOrError.data,
+      };
       return $EitherErrorOr.value(cache[key]);
     };
 
@@ -90,7 +93,10 @@ export const $SettingsStore = {
         return $EitherErrorOr.error(error.extend(errorMessage));
       }
 
-      cache = settingsOrError.data;
+      cache = {
+        ...defaults,
+        ...settingsOrError.data,
+      };
       return $EitherErrorOr.value(cache);
     };
 

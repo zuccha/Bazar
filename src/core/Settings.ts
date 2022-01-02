@@ -25,7 +25,7 @@ export default class Settings {
 
   private constructor() {
     // Nothing to do here.
-    this.generic = $SettingsStore.create({
+    this.generic = $SettingsStore.create<GenericSettingsStore>({
       defaults: {
         appearanceColorScheme: 'blue',
         newProjectDefaultAuthor: '',
@@ -35,7 +35,7 @@ export default class Settings {
         recentProjects: $PriorityList.create([], 6),
       },
       fileName: 'generic.json',
-      schema: GenericSettingsStoreSchema,
+      schema: GenericSettingsStoreSchema.partial(),
     });
     this.isSavingGeneric = false;
   }

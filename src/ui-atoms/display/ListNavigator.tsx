@@ -52,8 +52,8 @@ export default function ListNavigator<T extends string>({
     return page?.content;
   }, [pages, selectedPage]);
   return (
-    <Flex flex={flex} h={height} w={width} p={10} justifyContent='center'>
-      <Flex borderColor='app.bg1' borderWidth={1}>
+    <Flex flex={flex} h={height} w={width} justifyContent='center'>
+      <Flex flex={1} borderColor='app.bg1' borderWidth={1}>
         <VStack
           spacing={2}
           w={200}
@@ -71,14 +71,7 @@ export default function ListNavigator<T extends string>({
           ))}
         </VStack>
         <Flex bg='app.bg1' w='1px' />
-        <Flex
-          flex={1}
-          minW={600}
-          maxW={800}
-          p={4}
-          flexDir='column'
-          overflow='auto'
-        >
+        <Flex flex={1} p={4} flexDir='column' overflow='auto'>
           {content}
         </Flex>
       </Flex>
