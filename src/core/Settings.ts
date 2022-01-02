@@ -6,6 +6,7 @@ import { $SettingsStore } from '../utils/SettingsStore';
 // #region Settings
 
 const GenericSettingsStoreSchema = z.object({
+  appearanceColorScheme: z.string(),
   newProjectDefaultAuthor: z.string(),
   newProjectDefaultLocationDirPath: z.string(),
   newProjectDefaultRomFilePath: z.string(),
@@ -26,6 +27,7 @@ export default class Settings {
     // Nothing to do here.
     this.generic = $SettingsStore.create({
       defaults: {
+        appearanceColorScheme: 'blue',
         newProjectDefaultAuthor: '',
         newProjectDefaultLocationDirPath: '',
         newProjectDefaultRomFilePath: '',
@@ -43,6 +45,7 @@ export default class Settings {
   }
 
   static loadTriggers = [
+    'Settings.appearanceColorScheme',
     'Settings.newProjectDefaultAuthor',
     'Settings.newProjectDefaultLocationDirPath',
     'Settings.newProjectDefaultRomFilePath',

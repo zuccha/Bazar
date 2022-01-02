@@ -1,3 +1,8 @@
+import { useSettings } from '../core-hooks/Core';
+import { useSetting } from '../core-hooks/Settings';
+
 export default function useColorScheme(): string {
-  return 'pink';
+  const settings = useSettings();
+  const colorScheme = useSetting(settings, 'appearanceColorScheme');
+  return colorScheme;
 }
