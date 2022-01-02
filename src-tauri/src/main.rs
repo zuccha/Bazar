@@ -46,9 +46,17 @@ fn join(path1: String, path2: String) -> String {
   return path.to_string_lossy().to_string();
 }
 
+#[tauri::command]
+fn normalize(path: String) -> String {
+  match std::fs::canonicalize(std::path::Path::new(&path)) {
+    Ok(p) => p.to_string_lossy().to_string(),
+    Err(_) => path,
+  }
+}
+
 fn main() {
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![exists, extract, is_dir, is_file, join])
+    .invoke_handler(tauri::generate_handler![exists, extract, is_dir, is_file, join, normalize])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }

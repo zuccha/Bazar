@@ -19,10 +19,10 @@ export const $FileSystem = {
     basePath: string,
     targetPath: string,
   ): Promise<string> => {
-    const normalizedBasePath = (await Path.normalize(basePath)) + Path.sep;
-    const normalizedTargetPath = await Path.normalize(targetPath);
-    return normalizedTargetPath.startsWith(normalizedBasePath)
-      ? normalizedTargetPath.replace(normalizedBasePath, '')
+    const normalizedBasePath = await $FileSystem.normalize(basePath);
+    const normalizedTargetPath = await $FileSystem.normalize(targetPath);
+    return normalizedTargetPath.startsWith(normalizedBasePath + Path.sep)
+      ? normalizedTargetPath.replace(normalizedBasePath + Path.sep, '')
       : normalizedTargetPath;
   },
 
@@ -93,6 +93,11 @@ export const $FileSystem = {
     } catch {
       return $ErrorReport.make(`Failed to create directory "${path}"`);
     }
+  },
+
+  dirpath: (path: string): string => {
+    const basename = $FileSystem.basename(path);
+    return path.replace(new RegExp(`${basename}$`), '');
   },
 
   downloadFile: async (
@@ -185,6 +190,14 @@ export const $FileSystem = {
     }
   },
 
+  normalize: async (path: string): Promise<string> => {
+    try {
+      return await invoke('normalize', { path });
+    } catch {
+      return path;
+    }
+  },
+
   removeFile: async (filePath: string): Promise<ErrorReport | undefined> => {
     try {
       await FS.removeFile(filePath);
@@ -198,6 +211,36 @@ export const $FileSystem = {
       await FS.removeDir(dirPath, { recursive: true });
     } catch {
       return $ErrorReport.make(`Failed to delete directory "${dirPath}"`);
+    }
+  },
+
+  rename: async (
+    oldPath: string,
+    newPath: string,
+  ): Promise<ErrorReport | undefined> => {
+    let error: ErrorReport | undefined;
+    const errorPrefix = 'FileSystem.rename';
+
+    try {
+      if (await $FileSystem.isDirectory(oldPath)) {
+        error = await $FileSystem.copyDirectory(oldPath, newPath, true);
+        if (error)
+          return error.extend(`${errorPrefix}: failed to copy directory`);
+        error = await $FileSystem.removeDir(oldPath);
+        if (error)
+          return error.extend(`${errorPrefix}: failed to remove old directory`);
+      }
+      if (await $FileSystem.isFile(oldPath)) {
+        error = await $FileSystem.copyFile(oldPath, newPath);
+        if (error) return error.extend(`${errorPrefix}: failed to copy file`);
+        error = await $FileSystem.removeDir(oldPath);
+        if (error)
+          return error.extend(`${errorPrefix}: failed to remove old file`);
+      }
+    } catch {
+      return $ErrorReport.make(
+        `${errorPrefix}: failed to rename "${oldPath}" to "${newPath}"`,
+      );
     }
   },
 
@@ -274,8 +317,8 @@ export const $FileSystem = {
     directoryPath: string,
     filePath: string,
   ): Promise<ErrorReport | undefined> => {
-    const normalizedFilePath = await Path.normalize(filePath);
-    const normalizedDirectoryPath = await Path.normalize(directoryPath);
+    const normalizedFilePath = await $FileSystem.normalize(filePath);
+    const normalizedDirectoryPath = await $FileSystem.normalize(directoryPath);
     return normalizedFilePath.startsWith(normalizedDirectoryPath)
       ? undefined
       : $ErrorReport.make(

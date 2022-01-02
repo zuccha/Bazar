@@ -182,11 +182,59 @@ export default class Patch {
     return this.resource.getInfo();
   };
 
-  static setInfoTriggers = ['Patch.info'];
-  setInfo = async (info: PatchInfo): Promise<ErrorReport | undefined> => {
-    const errorMessage = 'Patch.setInfo: failed to set info';
-    const maybeError = await this.resource.setInfo(info);
-    return maybeError ? maybeError.extend(errorMessage) : undefined;
+  static updateInfoTriggers = ['Patch.info'];
+  updateInfo = async ({
+    name,
+    author,
+    version,
+    mainFilePath,
+  }: {
+    name: string;
+    author: string;
+    version: string;
+    mainFilePath: string;
+  }): Promise<ErrorReport | undefined> => {
+    const errorPrefix = 'Patch.updateInfo';
+    let error: ErrorReport | undefined;
+
+    const mainFileRelativePath = await $FileSystem.computeRelativePath(
+      this.resource.getDirectoryPath(),
+      mainFilePath,
+    );
+
+    if ((error = await $FileSystem.validateExistsFile(mainFilePath))) {
+      const errorMessage = `${errorPrefix}: main file does not exist`;
+      return error.extend(errorMessage);
+    }
+
+    if (
+      (error = await $FileSystem.validateContainsFile(
+        this.resource.getDirectoryPath(),
+        mainFilePath,
+      ))
+    ) {
+      const errorMessage = `${errorPrefix}: main file is not in source directory`;
+      return error.extend(errorMessage);
+    }
+
+    if (name !== this.resource.getInfo().name) {
+      error = await this.resource.rename(name);
+      if (error) {
+        const errorMessage = `${errorPrefix}: failed to rename resource`;
+        return error.extend(errorMessage);
+      }
+    }
+
+    error = await this.resource.setInfo({
+      name,
+      author,
+      version,
+      mainFileRelativePath,
+    });
+    if (error) {
+      const errorMessage = `${errorPrefix}: failed to set new info`;
+      return error.extend(errorMessage);
+    }
   };
 
   getMainFilePath = async (): Promise<string> => {

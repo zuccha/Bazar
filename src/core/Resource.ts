@@ -151,12 +151,49 @@ export default class Resource<Info> {
   /**
    * Delete a resource and its directory.
    *
-   * @param resource The resource to remove.
    * @returns `undefined` if the resource was removed successfully, an error
    * otherwise.
    */
   delete = async (): Promise<ErrorReport | undefined> => {
     return await $FileSystem.removeDir(this.directoryPath);
+  };
+
+  /**
+   * Rename the resource, moving the directory.
+   *
+   * @param name New name of the resource.
+   * @returns `undefined` if the resource was removed successfully, an error
+   * otherwise.
+   */
+  rename = async (name: string): Promise<ErrorReport | undefined> => {
+    const errorPrefix = `Resource.rename`;
+    let error: ErrorReport | undefined;
+
+    const parentDirectoryPath = $FileSystem.dirpath(this.directoryPath);
+    const directoryPath = await $FileSystem.join(parentDirectoryPath, name);
+
+    if ((error = await $FileSystem.validateIsValidName(name))) {
+      const errorMessage = `${errorPrefix}: name is not valid`;
+      return error.extend(errorMessage);
+    }
+
+    if ((error = await $FileSystem.validateExistsDir(this.directoryPath))) {
+      const errorMessage = `${errorPrefix}: this resource does not exist`;
+      return error.extend(errorMessage);
+    }
+
+    if ((error = await $FileSystem.validateNotExists(directoryPath))) {
+      const errorMessage = `${errorPrefix}: resource with new name already exists`;
+      return error.extend(errorMessage);
+    }
+
+    if ((error = await $FileSystem.rename(this.directoryPath, directoryPath))) {
+      const errorMessage = `${errorPrefix}: failed to rename resource`;
+      return error.extend(errorMessage);
+    }
+
+    this.directoryPath = directoryPath;
+    return undefined;
   };
 
   /**
