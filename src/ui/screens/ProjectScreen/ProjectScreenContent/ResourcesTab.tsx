@@ -240,7 +240,7 @@ export default function ResourcesTab<R extends Resource>({
             <Button
               label='Apply all'
               onClick={handleApplyAll.call}
-              isDisabled={!canApply || isApplying}
+              isDisabled={!canApply || isApplying || !rows.length}
             />
             <Button
               label='Add'
