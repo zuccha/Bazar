@@ -2,6 +2,7 @@ import { Flex, Text } from '@chakra-ui/react';
 import { ReactElement, ReactNode } from 'react';
 
 interface Frame {
+  actions?: ReactNode;
   children: ReactNode;
   title: string;
 
@@ -11,6 +12,7 @@ interface Frame {
 }
 
 export default function FrameInfo({
+  actions,
   children,
   title,
   flex,
@@ -23,16 +25,16 @@ export default function FrameInfo({
       height={height}
       width={width}
       flex={flex}
-      overflow='hidden'
-      borderColor={'gray.300'}
+      borderColor='gray.300'
       borderWidth='1px'
+      overflow='hidden'
     >
       <Flex
         h={50}
         alignItems='center'
         justifyContent='space-between'
         bg={'gray.200'}
-        borderColor={'gray.300'}
+        borderColor='gray.300'
         borderBottomWidth='1px'
         px={5}
         py={2}
@@ -40,11 +42,10 @@ export default function FrameInfo({
         <Text textTransform='uppercase' fontWeight='bold' fontSize='xs'>
           {title}
         </Text>
+        {actions}
       </Flex>
 
-      <Flex p={4} overflow='auto'>
-        {children}
-      </Flex>
+      {children}
     </Flex>
   );
 }

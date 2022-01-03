@@ -1,13 +1,23 @@
-import { ArrowForwardIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
-import { HStack, VStack } from '@chakra-ui/react';
+import {
+  ArrowForwardIcon,
+  CopyIcon,
+  DeleteIcon,
+  EditIcon,
+} from '@chakra-ui/icons';
+import { Flex, HStack, VStack } from '@chakra-ui/react';
 import { ReactElement, useCallback, useMemo } from 'react';
 import useAsyncCallback from '../../../../hooks/useAsyncCallback';
+import useCopyToClipboard from '../../../../hooks/useCopyToClipboard';
 import useHandleError from '../../../../hooks/useHandleError';
 import useSafeState from '../../../../hooks/usSafeState';
 import Button from '../../../../ui-atoms/Button';
 import DialogWithDeletion from '../../../../ui-atoms/DialogWithDeletion';
 import Frame from '../../../../ui-atoms/Frame';
-import Output, { OutputChunk } from '../../../../ui-atoms/Output';
+import IconButton from '../../../../ui-atoms/IconButton';
+import Output, {
+  chunksToString,
+  OutputChunk,
+} from '../../../../ui-atoms/Output';
 import Table, {
   TableAction,
   TableColumn,
@@ -224,6 +234,8 @@ export default function ResourcesTab<R extends Resource>({
     resourceToRemove,
   ]);
 
+  const copyToClipboard = useCopyToClipboard();
+
   return (
     <>
       <HStack h='100%' spacing={3} alignItems='stretch'>
@@ -251,18 +263,48 @@ export default function ResourcesTab<R extends Resource>({
         </VStack>
         <VStack flex={1} minW={512} spacing={3}>
           <Frame title='Info' width='100%'>
-            {renderInfo(
-              selectedRowIndex !== undefined
-                ? rows[selectedRowIndex]?.data
-                : undefined,
-            )}
+            <Flex p={4} width='100%'>
+              {renderInfo(
+                selectedRowIndex !== undefined
+                  ? rows[selectedRowIndex]?.data
+                  : undefined,
+              )}
+            </Flex>
           </Frame>
-          <Output
-            chunks={outputChunks}
-            onClear={handleClearOutput}
+          <Frame
+            title='Output'
             flex={1}
             width='100%'
-          />
+            actions={
+              <HStack spacing={1}>
+                <IconButton
+                  icon={<CopyIcon />}
+                  isDisabled={
+                    handleClearOutput.length === 0 || copyToClipboard.isLoading
+                  }
+                  label='Copy'
+                  onClick={() =>
+                    copyToClipboard.call(chunksToString(outputChunks))
+                  }
+                  variant='ghost'
+                />
+                <IconButton
+                  icon={<DeleteIcon />}
+                  isDisabled={outputChunks.length === 0}
+                  label='Clear'
+                  onClick={handleClearOutput}
+                  variant='ghost'
+                />
+              </HStack>
+            }
+          >
+            <Output
+              chunks={outputChunks}
+              width='100%'
+              flex={1}
+              overflow='auto'
+            />
+          </Frame>
         </VStack>
       </HStack>
 
