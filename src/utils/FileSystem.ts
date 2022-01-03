@@ -43,7 +43,11 @@ export const $FileSystem = {
       for (const fileName of fileNames) {
         const sourceFilePath = await $FileSystem.join(sourceDirPath, fileName);
         const targetFilePath = await $FileSystem.join(targetDirPath, fileName);
-        await FS.copyFile(sourceFilePath, targetFilePath);
+        const maybeError = await $FileSystem.copyFile(
+          sourceFilePath,
+          targetFilePath,
+        );
+        if (maybeError) return maybeError;
       }
 
       if (isRecursive) {
@@ -57,7 +61,7 @@ export const $FileSystem = {
             targetDirPath,
             subDirName,
           );
-          const maybeError = $FileSystem.copyDirectory(
+          const maybeError = await $FileSystem.copyDirectory(
             sourceSubDirPath,
             targetSubDirPath,
             true,
@@ -294,7 +298,7 @@ export const $FileSystem = {
   },
 
   validateExistsDir: async (path: string): Promise<ErrorReport | undefined> => {
-    const errorPrefix = 'Directory does not exist';
+    const errorPrefix = 'FileSystem.validateExistsDir';
     return !path
       ? $ErrorReport.make(`${errorPrefix}: path is empty`)
       : !(await $FileSystem.exists(path))
@@ -307,7 +311,7 @@ export const $FileSystem = {
   validateExistsFile: async (
     path: string,
   ): Promise<ErrorReport | undefined> => {
-    const errorPrefix = 'File does not exist';
+    const errorPrefix = 'FileSystem.validateExistsFile';
     return !path
       ? $ErrorReport.make(`${errorPrefix}: path is empty`)
       : !(await $FileSystem.exists(path))
@@ -321,7 +325,7 @@ export const $FileSystem = {
     path: string,
     extension: string,
   ): Promise<ErrorReport | undefined> => {
-    const errorPrefix = 'File does not have extension';
+    const errorPrefix = 'FileSystem.validateHasExtension';
     return !path
       ? $ErrorReport.make(`${errorPrefix}: path is empty`)
       : !path.endsWith(extension)
@@ -337,17 +341,16 @@ export const $FileSystem = {
   ): Promise<ErrorReport | undefined> => {
     const normalizedFilePath = await $FileSystem.normalize(filePath);
     const normalizedDirectoryPath = await $FileSystem.normalize(directoryPath);
+    const errorMessage = `FileSystem.validateContainsFile: directory "${normalizedDirectoryPath}" does not contain file "${normalizedFilePath}"`;
     return normalizedFilePath.startsWith(normalizedDirectoryPath)
       ? undefined
-      : $ErrorReport.make(
-          `Directory "${normalizedDirectoryPath}" does not contain file "${normalizedFilePath}"`,
-        );
+      : $ErrorReport.make(errorMessage);
   },
 
   validateIsValidName: async (
     name: string,
   ): Promise<ErrorReport | undefined> => {
-    const errorPrefix = 'Name is not valid';
+    const errorPrefix = 'FileSystem.validateIsValidName';
     return !name
       ? $ErrorReport.make(`${errorPrefix}: name is empty`)
       : !/^[a-zA-Z0-9_.-]+$/.test(name)
@@ -358,11 +361,29 @@ export const $FileSystem = {
   },
 
   validateNotExists: async (path: string): Promise<ErrorReport | undefined> => {
-    const errorPrefix = 'Path already exists';
+    const errorPrefix = 'FileSystem.validateNotExists';
     return !path
       ? $ErrorReport.make(`${errorPrefix}: path is empty`)
       : (await $FileSystem.exists(path))
       ? $ErrorReport.make(`${errorPrefix}: path "${path}" already exist`)
       : undefined;
+  },
+
+  zip: async (dirPath: string): Promise<ErrorReport | undefined> => {
+    try {
+      if (!(await $FileSystem.exists(dirPath))) {
+        const errorMessage = `FileSystem.zip: directory "${dirPath}" does not exist`;
+        return $ErrorReport.make(errorMessage);
+      }
+      if (await $FileSystem.exists(`${dirPath}.zip`)) {
+        const errorMessage = `FileSystem.zip: zip "${dirPath}.zip" already exists`;
+        return $ErrorReport.make(errorMessage);
+      }
+      await invoke('archive', { dirPath });
+      return undefined;
+    } catch {
+      const errorMessage = `FileSystem.zip: failed to zip directory "${dirPath}"`;
+      return $ErrorReport.make(errorMessage);
+    }
   },
 };

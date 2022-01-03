@@ -72,7 +72,10 @@ export default function ProjectScreenSidebarActions({
       <Button
         isDisabled={handleCreateBackup.isLoading}
         label='Create backup'
-        onClick={handleCreateBackup.call}
+        onClick={async () => {
+          const error = await handleCreateBackup.call();
+          handleError(error, 'Failed to create backup');
+        }}
         w='100%'
       />
       <Button label='Create BPS' onClick={() => null} w='100%' isDisabled />

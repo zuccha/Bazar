@@ -163,6 +163,16 @@ export default class Project {
       return error.extend(errorMessage);
     }
 
+    if ((error = await $FileSystem.zip(backupDirectoryPath))) {
+      const errorMessage = `${errorPrefix}: failed to zip backup directory`;
+      return error.extend(errorMessage);
+    }
+
+    if ((error = await $FileSystem.removeDir(backupDirectoryPath))) {
+      const errorMessage = `${errorPrefix}: failed to remove backup directory`;
+      return error.extend(errorMessage);
+    }
+
     // TODO: Compress backup into zip and delete copied directory.
 
     this.backups.unshift(timestamp);
