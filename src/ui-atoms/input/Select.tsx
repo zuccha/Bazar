@@ -3,14 +3,16 @@ import { LayoutProps, SpaceProps } from '@chakra-ui/react';
 import { ChangeEvent, forwardRef, ReactElement, Ref, useCallback } from 'react';
 import useColorScheme from '../../theme/useColorScheme';
 
+export interface SelectOption {
+  label: string;
+  value: string;
+}
+
 interface SelectProps extends LayoutProps, SpaceProps {
   isDisabled?: boolean;
   isFullWidth?: boolean;
   onChange: (value: string) => void;
-  options: {
-    value: string;
-    label: string;
-  }[];
+  options: SelectOption[];
   placeholder: string;
   value: string;
 }
@@ -42,7 +44,7 @@ function Select(
       borderColor={`${colorScheme}.600`}
       borderRadius='0'
       colorScheme={colorScheme}
-      disabled={isDisabled}
+      disabled={isDisabled || options.length <= 1}
       isFullWidth={isFullWidth}
       onChange={handleChange}
       py={1}
