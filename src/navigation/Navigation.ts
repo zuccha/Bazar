@@ -15,6 +15,8 @@ export enum ProjectRouteName {
   Patches = 'Patches',
   Sprites = 'Sprites',
   UberAsm = 'UberAsm',
+  GFX = 'GFX',
+  ExGFX = 'ExGFX',
   Backups = 'Backups',
   Releases = 'Releases',
 }

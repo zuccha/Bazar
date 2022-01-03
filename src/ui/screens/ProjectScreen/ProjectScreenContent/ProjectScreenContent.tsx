@@ -24,8 +24,10 @@ const projectRouteNameToTabIndex: Record<ProjectRouteName, number> = {
   [ProjectRouteName.Patches]: 2,
   [ProjectRouteName.Sprites]: 3,
   [ProjectRouteName.UberAsm]: 4,
-  [ProjectRouteName.Backups]: 5,
-  [ProjectRouteName.Releases]: 6,
+  [ProjectRouteName.GFX]: 5,
+  [ProjectRouteName.ExGFX]: 6,
+  [ProjectRouteName.Backups]: 7,
+  [ProjectRouteName.Releases]: 8,
 };
 
 const tabIndexToProjectRouteName: Record<number, ProjectRouteName> = {
@@ -34,8 +36,10 @@ const tabIndexToProjectRouteName: Record<number, ProjectRouteName> = {
   2: ProjectRouteName.Patches,
   3: ProjectRouteName.Sprites,
   4: ProjectRouteName.UberAsm,
-  5: ProjectRouteName.Backups,
-  6: ProjectRouteName.Releases,
+  5: ProjectRouteName.GFX,
+  6: ProjectRouteName.ExGFX,
+  7: ProjectRouteName.Backups,
+  8: ProjectRouteName.Releases,
 };
 
 interface ProjectScreenContent {
@@ -80,6 +84,8 @@ export default function ProjectScreenContent({
         <Tab>Patches</Tab>
         <Tab>Sprites</Tab>
         <Tab>UberASM</Tab>
+        <Tab>GFX</Tab>
+        <Tab>ExGFX</Tab>
         <Tab>Backups</Tab>
         <Tab>Releases</Tab>
       </TabList>
@@ -98,6 +104,12 @@ export default function ProjectScreenContent({
         </TabPanel>
         <TabPanel {...tabPanelProps}>
           <ComingSoon title='UberASM' />
+        </TabPanel>
+        <TabPanel {...tabPanelProps}>
+          <ComingSoon title='GFX' />
+        </TabPanel>
+        <TabPanel {...tabPanelProps}>
+          <ComingSoon title='ExGFX' />
         </TabPanel>
         <TabPanel {...tabPanelProps}>
           <ComingSoon title='Backups' />
