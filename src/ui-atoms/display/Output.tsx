@@ -7,11 +7,13 @@ import useHandleError from '../../hooks/useHandleError';
 import { $ErrorReport, ErrorReport } from '../../utils/ErrorReport';
 import IconButton from '../input/IconButton';
 
-export interface OutputChunk {
+export interface OutputParagraph {
   text: string;
   type: 'plain' | 'failure' | 'success' | 'info';
   isBold?: boolean;
 }
+
+export type OutputChunk = OutputParagraph[];
 
 interface OutputProps {
   chunks: OutputChunk[];
@@ -22,7 +24,7 @@ interface OutputProps {
   width?: number | string;
 }
 
-const colorByChunkType = {
+const colorByParagraphType = {
   plain: 'gray.200',
   failure: 'red.400',
   success: 'green.400',
@@ -43,7 +45,11 @@ export default function Output({
     ErrorReport | undefined
   > => {
     try {
-      const text = chunks.map((chunk) => chunk.text).join('\n');
+      const text = chunks
+        .map((chunk) =>
+          chunk.map((paragraph) => paragraph.text).join(Tauri.os.EOL),
+        )
+        .join(`${Tauri.os.EOL}${Tauri.os.EOL}`);
       await Tauri.clipboard.writeText(text);
       toast({
         title: 'Copied to clipboard',
@@ -104,20 +110,28 @@ export default function Output({
         overflow='auto'
         bg='gray.700'
         alignItems='flex-start'
-        spacing={3}
+        spacing={6}
+        divider={<Flex w='100%' h='1px' bg={colorByParagraphType.plain} />}
       >
-        {chunks.map((chunk, index) => (
-          <Flex key={index}>
-            {chunk.text.split('\n').map((line) => (
-              <Text
-                key={line}
-                color={colorByChunkType[chunk.type]}
-                fontWeight={chunk.isBold ? 'bold' : undefined}
+        {chunks.map((chunk, chunkIndex) => (
+          <VStack key={chunkIndex} alignItems='flex-start' spacing={1}>
+            {chunk.map((paragraph, paragraphIndex) => (
+              <VStack
+                key={`${chunkIndex}-${paragraphIndex}`}
+                alignItems='flex-start'
               >
-                {line}
-              </Text>
+                {paragraph.text.split(Tauri.os.EOL).map((line, lineIndex) => (
+                  <Text
+                    key={`${chunkIndex}-${paragraphIndex}-${lineIndex}`}
+                    color={colorByParagraphType[paragraph.type]}
+                    fontWeight={paragraph.isBold ? 'bold' : undefined}
+                  >
+                    {line}
+                  </Text>
+                ))}
+              </VStack>
             ))}
-          </Flex>
+          </VStack>
         ))}
       </VStack>
     </Flex>

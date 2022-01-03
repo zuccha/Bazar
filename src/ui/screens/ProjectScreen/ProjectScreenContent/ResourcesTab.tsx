@@ -79,9 +79,9 @@ export default function ResourcesTab<R extends Resource>({
 
   const apply = useCallback(
     async (resource: R): Promise<OutputChunk[]> => {
-      const newOutputChunks: OutputChunk[] = [];
+      const newOutputChunk: OutputChunk = [];
 
-      newOutputChunks.push({
+      newOutputChunk.push({
         text: `Applying ${name} "${resource.getInfo().name}"`,
         type: 'info',
         isBold: true,
@@ -89,39 +89,39 @@ export default function ResourcesTab<R extends Resource>({
 
       const processOrError = await onApply(resource);
       if (processOrError.isError) {
-        newOutputChunks.push({
+        newOutputChunk.push({
           text: `Failed to apply ${name}`,
           type: 'failure',
           isBold: true,
         });
-        return newOutputChunks;
+        return [newOutputChunk];
       }
 
       if (processOrError.value.stdout) {
-        newOutputChunks.push({
+        newOutputChunk.push({
           text: processOrError.value.stdout,
           type: 'plain',
         });
       }
       if (processOrError.value.stderr) {
-        newOutputChunks.push({
+        newOutputChunk.push({
           text: processOrError.value.stderr,
           type: 'failure',
         });
-        newOutputChunks.push({
+        newOutputChunk.push({
           text: `Failed to apply ${name}`,
           type: 'failure',
           isBold: true,
         });
       } else {
-        newOutputChunks.push({
+        newOutputChunk.push({
           text: `${$String.capitalize(name)} applied successfully`,
           type: 'success',
           isBold: true,
         });
       }
 
-      return newOutputChunks;
+      return [newOutputChunk];
     },
     [onApply],
   );
