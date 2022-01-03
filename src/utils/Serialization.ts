@@ -8,7 +8,7 @@ export const $Serialization = {
     path: string,
     schema: ZodType<T>,
   ): Promise<EitherErrorOr<T>> => {
-    const errorPrefix = 'Could not load';
+    const errorPrefix = 'Serialization.load';
 
     const dataOrError = await $FileSystem.loadJson(path);
     if (dataOrError.isError) {
@@ -28,7 +28,7 @@ export const $Serialization = {
   save: async <T>(path: string, data: T): Promise<ErrorReport | undefined> => {
     const error = await $FileSystem.saveJson(path, data);
     if (error) {
-      const errorMessage = `Could not save data`;
+      const errorMessage = `Serialization.save: failed to save file`;
       return error.extend(errorMessage);
     }
   },

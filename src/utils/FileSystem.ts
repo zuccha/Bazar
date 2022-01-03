@@ -68,9 +68,8 @@ export const $FileSystem = {
         }
       }
     } catch (error) {
-      return $ErrorReport.make(
-        `Copy directory failed: failed to copy directory "${sourceDirPath}" to "${targetDirPath}"`,
-      );
+      const errorMessage = `FileSystem.copyDirectory: failed to copy directory "${sourceDirPath}" to "${targetDirPath}"`;
+      return $ErrorReport.make(errorMessage);
     }
   },
 
@@ -81,9 +80,8 @@ export const $FileSystem = {
     try {
       await FS.copyFile(sourcePath, targetPath);
     } catch (error) {
-      return $ErrorReport.make(
-        `Failed to copy file from "${sourcePath}" to "${targetPath}"`,
-      );
+      const errorMessage = `FileSystem.copyFile: failed to copy file from "${sourcePath}" to "${targetPath}"`;
+      return $ErrorReport.make(errorMessage);
     }
   },
 
@@ -91,7 +89,8 @@ export const $FileSystem = {
     try {
       await FS.createDir(path, { recursive: true });
     } catch {
-      return $ErrorReport.make(`Failed to create directory "${path}"`);
+      const errorMessage = `FileSystem.createDirectory: failed to create directory "${path}"`;
+      return $ErrorReport.make(errorMessage);
     }
   },
 
@@ -184,23 +183,6 @@ export const $FileSystem = {
     return fileNames;
   },
 
-  // a/
-  // - f1
-  // - f2
-  // - b/
-  // - - f3
-  // - - f4
-  // - - c/
-  // - - - f5
-  // - - - f6
-
-  // f1
-  // f2
-  // b/f3
-  // b/f4
-  // b/c/f5
-  // b/c/f6
-
   join: async (...paths: string[]): Promise<string> => {
     try {
       let joinedPath = '';
@@ -218,7 +200,7 @@ export const $FileSystem = {
       const content = await FS.readTextFile(path);
       return $EitherErrorOr.value(JSON.parse(content));
     } catch {
-      const errorMessage = `Failed to load JSON file "${path}"`;
+      const errorMessage = `FileSystem.loadJson: failed to load JSON file "${path}"`;
       return $EitherErrorOr.error($ErrorReport.make(errorMessage));
     }
   },
@@ -235,7 +217,8 @@ export const $FileSystem = {
     try {
       await FS.removeFile(filePath);
     } catch {
-      return $ErrorReport.make(`Failed to delete file "${filePath}"`);
+      const errorMessage = `FileSystem.removeFile: failed to delete file "${filePath}"`;
+      return $ErrorReport.make(errorMessage);
     }
   },
 
@@ -243,7 +226,8 @@ export const $FileSystem = {
     try {
       await FS.removeDir(dirPath, { recursive: true });
     } catch {
-      return $ErrorReport.make(`Failed to delete directory "${dirPath}"`);
+      const errorMessage = `FileSystem.removeDir: failed to delete directory "${dirPath}"`;
+      return $ErrorReport.make(errorMessage);
     }
   },
 
@@ -287,7 +271,8 @@ export const $FileSystem = {
         contents: JSON.stringify(data, null, 2),
       });
     } catch (error) {
-      return $ErrorReport.make(`Failed to save JSON file "${path}"`);
+      const errorMessage = `FileSystem.saveJson: failed to save JSON file "${path}"`;
+      return $ErrorReport.make(errorMessage);
     }
   },
 
@@ -303,7 +288,7 @@ export const $FileSystem = {
       await invoke('extract', { zipPath, targetPath });
       return undefined;
     } catch {
-      const errorMessage = `FileSystem.unzip: Failed to unzip file "${zipPath}"`;
+      const errorMessage = `FileSystem.unzip: failed to unzip file "${zipPath}"`;
       return $ErrorReport.make(errorMessage);
     }
   },

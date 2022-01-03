@@ -1,4 +1,4 @@
-import { ZodObject, ZodType } from 'zod';
+import { ZodType } from 'zod';
 import { $ErrorReport, ErrorReport } from './ErrorReport';
 import { $EitherErrorOr, EitherErrorOr } from './EitherErrorOr';
 import { $FileSystem } from './FileSystem';
@@ -45,7 +45,7 @@ export const $SettingsStore = {
 
       const maybeSettingsOrError = await $FileSystem.loadJson(settingsFilePath);
       if (maybeSettingsOrError.isError) {
-        const errorMessage = 'Settings.get: failed to load settings file';
+        const errorMessage = 'SettingsStore.get: failed to load settings file';
         return $EitherErrorOr.error(
           maybeSettingsOrError.error.extend(errorMessage),
         );
@@ -55,7 +55,7 @@ export const $SettingsStore = {
       const settingsOrError = schema.safeParse(maybeSettings);
       if (!settingsOrError.success) {
         const error = $ErrorReport.make(settingsOrError.error.message);
-        const errorMessage = 'Settings.get: failed to parse settings file';
+        const errorMessage = 'SettingsStore.get: failed to parse settings file';
         return $EitherErrorOr.error(error.extend(errorMessage));
       }
 
@@ -79,7 +79,7 @@ export const $SettingsStore = {
 
       const maybeSettingsOrError = await $FileSystem.loadJson(settingsFilePath);
       if (maybeSettingsOrError.isError) {
-        const errorMessage = 'Settings.getAll: failed to load settings file';
+        const errorMessage = `SettingsStore.getAll: failed to load settings file`;
         return $EitherErrorOr.error(
           maybeSettingsOrError.error.extend(errorMessage),
         );
@@ -89,7 +89,7 @@ export const $SettingsStore = {
       const settingsOrError = schema.safeParse(maybeSettings);
       if (!settingsOrError.success) {
         const error = $ErrorReport.make(settingsOrError.error.message);
-        const errorMessage = 'Settings.getAll: failed to parse settings file';
+        const errorMessage = `SettingsStore.getAll: failed to parse settings file`;
         return $EitherErrorOr.error(error.extend(errorMessage));
       }
 
@@ -110,7 +110,7 @@ export const $SettingsStore = {
 
       const maybeError = await $FileSystem.saveJson(settingsFilePath, cache);
       if (maybeError) {
-        const errorMessage = 'Settings.get: failed to load settings file';
+        const errorMessage = 'SettingsStore.get: failed to load settings file';
         return maybeError.extend(errorMessage);
       }
     };
