@@ -7,7 +7,7 @@ import {
 import { useGetEmbeddedTool } from '../../../../../../core-hooks/Toolchain';
 import Patch from '../../../../../../core/Patch';
 import ProjectSnapshot from '../../../../../../core/ProjectSnapshot';
-import { useGet } from '../../../../../../hooks/useAccessors';
+import { asGlobalDeps, useGet } from '../../../../../../hooks/useAccessors';
 import {
   TableColumn,
   TableRow,
@@ -21,6 +21,11 @@ import PatchesTabInfo from './PatchesTabInfo';
 interface PatchesTabProps {
   projectSnapshot: ProjectSnapshot;
 }
+
+const rowsDeps = [
+  ...ProjectSnapshot.getPatchesDeps,
+  ...asGlobalDeps(Patch.updateInfoTriggers),
+];
 
 export default function PatchesTab({
   projectSnapshot,
@@ -60,7 +65,7 @@ export default function PatchesTab({
         key: patch.getInfo().name,
       }));
     }, [projectSnapshot]),
-    ProjectSnapshot.getPatchesDeps,
+    rowsDeps,
   );
 
   return (

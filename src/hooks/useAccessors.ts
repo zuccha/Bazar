@@ -6,6 +6,7 @@ type Item = unknown;
 type Callback = () => void;
 
 const subscriptions = new PairMap<Item, string, Set<Callback>>();
+const globalSubscriptions = new Map<string, Set<Callback>>();
 
 const subscribe = (
   item: Item,
@@ -13,19 +14,35 @@ const subscribe = (
   callback: () => void,
 ) => {
   for (const dependency of dependencies) {
-    if (!subscriptions.has(item, dependency)) {
-      subscriptions.add(item, dependency, new Set());
+    if (dependency.startsWith('*')) {
+      if (!globalSubscriptions.has(dependency)) {
+        globalSubscriptions.set(dependency, new Set());
+      }
+      const callbacks = globalSubscriptions.get(dependency);
+      callbacks?.add(callback);
+    } else {
+      if (!subscriptions.has(item, dependency)) {
+        subscriptions.add(item, dependency, new Set());
+      }
+      const callbacks = subscriptions.get(item, dependency);
+      callbacks?.add(callback);
     }
-    const callbacks = subscriptions.get(item, dependency);
-    callbacks?.add(callback);
   }
 
   return () => {
     for (const dependency of dependencies) {
-      const callbacks = subscriptions.get(item, dependency);
-      callbacks?.delete(callback);
-      if (callbacks?.size === 0) {
-        subscriptions.delete(item, dependency);
+      if (dependency.startsWith('*')) {
+        const callbacks = globalSubscriptions.get(dependency);
+        callbacks?.delete(callback);
+        if (callbacks?.size === 0) {
+          globalSubscriptions.delete(dependency);
+        }
+      } else {
+        const callbacks = subscriptions.get(item, dependency);
+        callbacks?.delete(callback);
+        if (callbacks?.size === 0) {
+          subscriptions.delete(item, dependency);
+        }
       }
     }
   };
@@ -36,6 +53,13 @@ const notify = (item: Item, triggers: string[]) => {
     const subscription = subscriptions.get(item, trigger);
     if (subscription) {
       for (const callback of subscription) {
+        callback();
+      }
+    }
+
+    const globalSubscription = globalSubscriptions.get(`*${trigger}`);
+    if (globalSubscription) {
+      for (const callback of globalSubscription) {
         callback();
       }
     }
@@ -91,3 +115,7 @@ export const useSetAsync = <T, A extends unknown[]>(
     [item, setter, triggers],
   );
 };
+
+export const asGlobalDep = (dep: string) => `*${dep}`;
+
+export const asGlobalDeps = (deps: string[]) => deps.map(asGlobalDep);
