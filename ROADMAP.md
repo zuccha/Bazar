@@ -72,17 +72,17 @@ There is not necessarily an order of completion. Features will be implemented at
 - [x] Add patch from directory
 - [ ] Add patch from template
 - [x] List patches
-- [ ] Complete patch info
+- [x] Complete patch info
   - [x] Name
-  - [ ] Author
-  - [ ] Version
+  - [x] Author
+  - [x] Version
 - [ ] Check patch integrity
 - [x] Remove patch
 - [x] Apply patch
 - [x] Apply all patches
 - [ ] Open patch in editor
-- [ ] Show patch info
-- [ ] Edit patch info
+- [x] Show patch info
+- [x] Edit patch info
 - [ ] Save patch as template
 
 ## Sprites
