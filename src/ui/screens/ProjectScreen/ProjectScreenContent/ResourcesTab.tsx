@@ -82,7 +82,7 @@ export default function ResourcesTab<R extends Resource>({
       const newOutputChunks: OutputChunk[] = [];
 
       newOutputChunks.push({
-        text: `Applying patch "${resource.getInfo().name}"`,
+        text: `Applying ${name} "${resource.getInfo().name}"`,
         type: 'info',
         isBold: true,
       });
@@ -109,7 +109,7 @@ export default function ResourcesTab<R extends Resource>({
           type: 'failure',
         });
         newOutputChunks.push({
-          text: `Failed to ${name} patch`,
+          text: `Failed to apply ${name}`,
           type: 'failure',
           isBold: true,
         });
@@ -197,23 +197,24 @@ export default function ResourcesTab<R extends Resource>({
       {
         icon: <ArrowForwardIcon />,
         isDisabled: !canApply || isApplying,
-        label: 'Apply patch',
+        label: `Apply ${name}`,
         onClick: (row) => handleApply.call(row.data),
       },
       {
         icon: <EditIcon />,
         isDisabled: !canOpenInEditor || isApplying,
-        label: 'Open in editor',
+        label: `Open ${name} in editor`,
         onClick: (row) => handleOpenInEditor.call(row.data),
       },
       {
         icon: <DeleteIcon />,
         isDisabled: !canRemove || !!resourceToRemove,
-        label: 'Remove',
+        label: `Remove ${name}`,
         onClick: (row) => setResourceToRemove(row.data),
       },
     ];
   }, [
+    name,
     canApply,
     canOpenInEditor,
     canRemove,
