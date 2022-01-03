@@ -228,13 +228,13 @@ export default class ProjectSnapshot {
     author,
     version,
     sourceDirPath,
-    mainFilePath,
+    mainFileRelativePath,
   }: {
     name: string;
     author: string;
     version: string;
     sourceDirPath: string;
-    mainFilePath: string;
+    mainFileRelativePath: string;
   }): Promise<ErrorReport | undefined> => {
     const errorPrefix = 'ProjectSnapshot.addPatchFromDirectory';
 
@@ -251,7 +251,7 @@ export default class ProjectSnapshot {
       author,
       version,
       sourceDirPath,
-      mainFilePath,
+      mainFileRelativePath,
     });
     if (patchOrError.isError) {
       const errorMessage = `${errorPrefix}: failed to create patch "${name}"`;

@@ -26,24 +26,25 @@ export default class Patch {
     author,
     version,
     sourceDirPath,
-    mainFilePath,
+    mainFileRelativePath,
   }: {
     locationDirPath: string;
     name: string;
     author: string;
     version: string;
     sourceDirPath: string;
-    mainFilePath: string;
+    mainFileRelativePath: string;
   }): Promise<EitherErrorOr<Patch>> {
     const errorPrefix = 'Patch.createFromDirectory';
     let error: ErrorReport | undefined;
 
     // Resource
 
-    const mainFileRelativePath = await $FileSystem.computeRelativePath(
+    const mainFilePath = await $FileSystem.join(
       sourceDirPath,
-      mainFilePath,
+      mainFileRelativePath,
     );
+
     const info = { name, author, version, mainFileRelativePath };
     const resourceOrError = await Resource.create(locationDirPath, name, info);
     if (resourceOrError.isError) {
@@ -177,6 +178,11 @@ export default class Patch {
     return undefined;
   };
 
+  static getDirectoryPathDeps = ['Patch.directoryPath'];
+  getDirectoryPath = (): string => {
+    return this.resource.getDirectoryPath();
+  };
+
   static getInfoDeps = ['Patch.info'];
   getInfo = (): PatchInfo => {
     return this.resource.getInfo();
@@ -187,19 +193,19 @@ export default class Patch {
     name,
     author,
     version,
-    mainFilePath,
+    mainFileRelativePath,
   }: {
     name: string;
     author: string;
     version: string;
-    mainFilePath: string;
+    mainFileRelativePath: string;
   }): Promise<ErrorReport | undefined> => {
     const errorPrefix = 'Patch.updateInfo';
     let error: ErrorReport | undefined;
 
-    const mainFileRelativePath = await $FileSystem.computeRelativePath(
-      this.resource.getDirectoryPath(),
-      mainFilePath,
+    const mainFilePath = await $FileSystem.join(
+      this.getDirectoryPath(),
+      mainFileRelativePath,
     );
 
     if ((error = await $FileSystem.validateExistsFile(mainFilePath))) {

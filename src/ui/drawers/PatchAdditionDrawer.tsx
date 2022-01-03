@@ -23,6 +23,7 @@ import FormControl, {
   useFormField,
 } from '../../ui-atoms/input/FormControl';
 import FormError from '../../ui-atoms/input/FormError';
+import SelectFiles from '../../ui-atoms/input/SelectFiles';
 import TextInput from '../../ui-atoms/input/TextInput';
 import Drawer from '../../ui-atoms/overlay/Drawer';
 import { $FileSystem } from '../../utils/FileSystem';
@@ -67,18 +68,11 @@ export default function PatchAdditionDrawer({
     onValidate: $FileSystem.validateExistsDir,
   });
 
-  const mainFilePathField = useFormField({
+  const mainFileRelativePathField = useFormField({
     infoMessage: 'Entry point of the patch',
     initialValue: '',
     isRequired: true,
     label: 'Main file',
-    onValidate: async (value: string) =>
-      (await $FileSystem.validateExistsFile(value)) ||
-      (await $FileSystem.validateContainsFile(
-        sourceDirPathField.value,
-        value,
-      )) ||
-      (await $FileSystem.validateHasExtension(value, '.asm')),
   });
 
   const singleFilePathField = useFormField({
@@ -110,14 +104,14 @@ export default function PatchAdditionDrawer({
             }),
         }
       : {
-          fields: [nameField, mainFilePathField, sourceDirPathField],
+          fields: [nameField, mainFileRelativePathField, sourceDirPathField],
           onSubmit: () =>
             addPatchFromDirectory({
               name: nameField.value.trim(),
               author: authorField.value.trim(),
               version: versionField.value.trim(),
               sourceDirPath: sourceDirPathField.value.trim(),
-              mainFilePath: mainFilePathField.value.trim(),
+              mainFileRelativePath: mainFileRelativePathField.value.trim(),
             }),
         },
   );
@@ -217,15 +211,14 @@ export default function PatchAdditionDrawer({
                     />
                   </FormControl>
 
-                  <FormControl {...mainFilePathField.control}>
-                    <BrowserInput
-                      filters={[{ name: 'Main file', extensions: ['asm'] }]}
+                  <FormControl {...mainFileRelativePathField.control}>
+                    <SelectFiles
+                      directoryPath={sourceDirPathField.value}
+                      extension={['.asm']}
                       isDisabled={form.isSubmitting}
-                      mode='file'
-                      onBlur={mainFilePathField.handleBlur}
-                      onChange={mainFilePathField.handleChange}
-                      placeholder={mainFilePathField.control.label}
-                      value={mainFilePathField.value}
+                      onChange={mainFileRelativePathField.handleChange}
+                      placeholder='Main file'
+                      value={mainFileRelativePathField.value}
                     />
                   </FormControl>
                 </VStack>

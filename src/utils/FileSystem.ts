@@ -161,12 +161,45 @@ export const $FileSystem = {
     return dataPath;
   },
 
-  getFileNames: async (directoryPath: string): Promise<string[]> => {
-    const filesAndDirs = await FS.readDir(directoryPath);
-    return filesAndDirs
+  getFileNames: async (
+    dirPath: string,
+    isRecursive: boolean = false,
+  ): Promise<string[]> => {
+    const filesAndDirs = await FS.readDir(dirPath);
+    const fileNames = filesAndDirs
       .filter((fileOrDir) => !fileOrDir.children)
       .map((file) => file.name ?? '');
+
+    if (isRecursive) {
+      const subDirNames = await $FileSystem.getDirNames(dirPath);
+      for (const subDirName of subDirNames) {
+        const subDirPath = await $FileSystem.join(dirPath, subDirName);
+        const subFileNames = await $FileSystem.getFileNames(subDirPath, true);
+        for (const subFileName of subFileNames) {
+          fileNames.push(await $FileSystem.join(subDirName, subFileName));
+        }
+      }
+    }
+
+    return fileNames;
   },
+
+  // a/
+  // - f1
+  // - f2
+  // - b/
+  // - - f3
+  // - - f4
+  // - - c/
+  // - - - f5
+  // - - - f6
+
+  // f1
+  // f2
+  // b/f3
+  // b/f4
+  // b/c/f5
+  // b/c/f6
 
   join: async (...paths: string[]): Promise<string> => {
     try {
