@@ -280,7 +280,7 @@ export default function ResourcesTab<R extends Resource>({
                 <IconButton
                   icon={<CopyIcon />}
                   isDisabled={
-                    handleClearOutput.length === 0 || copyToClipboard.isLoading
+                    outputChunks.length === 0 || copyToClipboard.isLoading
                   }
                   label='Copy'
                   onClick={() =>
