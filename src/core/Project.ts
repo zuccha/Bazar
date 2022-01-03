@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { $DateTime } from '../utils/DateTime';
 import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
 import { ErrorReport } from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
@@ -19,7 +20,7 @@ export type ProjectInfo = z.infer<typeof ProjectInfoSchema>;
 export default class Project {
   private resource: Resource<ProjectInfo>;
   private latest: ProjectSnapshot;
-  private backups: ProjectSnapshot[];
+  private backups: string[];
 
   private static LATEST_DIR_NAME = 'latest';
   private static BACKUPS_DIR_NAME = 'backups';
@@ -31,7 +32,7 @@ export default class Project {
   }: {
     resource: Resource<ProjectInfo>;
     latest: ProjectSnapshot;
-    backups: ProjectSnapshot[];
+    backups: string[];
   }) {
     this.resource = resource;
     this.latest = latest;
@@ -76,7 +77,7 @@ export default class Project {
 
     // Create backups
     const backupsDirectory = await resource.path(Project.BACKUPS_DIR_NAME);
-    const backups: ProjectSnapshot[] = [];
+    const backups: string[] = [];
     if ((error = await $FileSystem.createDirectory(backupsDirectory))) {
       await resource.delete();
       const errorMessage = `${errorPrefix}: failed to create backups directory`;
@@ -119,7 +120,8 @@ export default class Project {
       return $EitherErrorOr.error(latest.error.extend(errorMessage));
     }
 
-    const backups: ProjectSnapshot[] = [];
+    // TODO: Read backups from file system.
+    const backups: string[] = [];
 
     return $EitherErrorOr.value(
       new Project({
@@ -131,6 +133,42 @@ export default class Project {
   }
 
   // #endregion Constructors
+
+  // #region Backups
+
+  static createBackupTriggers = ['backups'];
+  createBackup = async (): Promise<ErrorReport | undefined> => {
+    const errorPrefix = 'Project.createBackup';
+    let error: ErrorReport | undefined;
+
+    const timestamp = $DateTime.timestamp();
+    const backupDirectoryPath = await this.resource.path(
+      Project.BACKUPS_DIR_NAME,
+      timestamp,
+    );
+
+    if ((error = await $FileSystem.validateNotExists(backupDirectoryPath))) {
+      const errorMessage = `${errorPrefix}: backup directory path already exists`;
+      return error.extend(errorMessage);
+    }
+
+    if (
+      (error = await $FileSystem.copyDirectory(
+        this.latest.getDirectoryPath(),
+        backupDirectoryPath,
+        true,
+      ))
+    ) {
+      const errorMessage = `${errorPrefix}: failed to create backup directory`;
+      return error.extend(errorMessage);
+    }
+
+    // TODO: Compress backup into zip and delete copied directory.
+
+    this.backups.unshift(timestamp);
+  };
+
+  // #endregion
 
   // #region Latest Snapshot
 

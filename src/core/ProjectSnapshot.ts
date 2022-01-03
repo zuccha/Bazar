@@ -199,6 +199,11 @@ export default class ProjectSnapshot {
 
   // #region Info
 
+  static getDirectoryPathDeps = ['ProjectSnapshot.directoryPath'];
+  getDirectoryPath = (): string => {
+    return this.resource.getDirectoryPath();
+  };
+
   static getInfoDeps = ['ProjectSnapshot.info'];
   getInfo = (): ProjectSnapshotInfo => {
     return this.resource.getInfo();
@@ -323,10 +328,8 @@ export default class ProjectSnapshot {
     patch: Patch,
     asarPath: string,
   ): Promise<EitherErrorOr<Process>> => {
-    const errorPrefix = 'ProjectSnapshot.applyPatch';
     const romPath = await this.resource.path(ProjectSnapshot.ROM_FILE_NAME);
     const patchPath = await patch.getMainFilePath();
-
     const process = await $Shell.execute(asarPath, [patchPath, romPath]);
     return $EitherErrorOr.value(process);
   };

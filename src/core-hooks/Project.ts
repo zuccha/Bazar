@@ -16,3 +16,13 @@ export const useSetProjectInfo = (
 ): ((info: ProjectInfo) => Promise<ErrorReport | undefined>) => {
   return useSetAsync(project, project.setInfo, Project.setInfoTriggers);
 };
+
+export const useCreateProjectBackup = (
+  project: Project,
+): (() => Promise<ErrorReport | undefined>) => {
+  return useSetAsync(
+    project,
+    project.createBackup,
+    Project.createBackupTriggers,
+  );
+};

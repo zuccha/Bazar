@@ -202,8 +202,8 @@ export default class Resource<Info> {
    * @param name Name of a directory or file.
    * @returns The path to the directory or file.
    */
-  path = async (name: string): Promise<string> => {
-    return await $FileSystem.join(this.directoryPath, name);
+  path = async (...names: string[]): Promise<string> => {
+    return await $FileSystem.join(this.directoryPath, ...names);
   };
 
   /**

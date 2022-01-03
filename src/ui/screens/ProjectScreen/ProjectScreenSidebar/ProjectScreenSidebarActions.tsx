@@ -1,7 +1,10 @@
 import { VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 import { useToolchain } from '../../../../core-hooks/Core';
-import { useProjectLatestSnapshot } from '../../../../core-hooks/Project';
+import {
+  useCreateProjectBackup,
+  useProjectLatestSnapshot,
+} from '../../../../core-hooks/Project';
 import {
   useLaunchProjectSnapshotInEmulator,
   useOpenProjectSnapshotInLunarMagic,
@@ -30,6 +33,7 @@ export default function ProjectScreenSidebarActions({
   const emulator = useGetCustomTool(toolchain, 'emulator');
   const openInLunarMagic = useOpenProjectSnapshotInLunarMagic(snapshot);
   const launchInEmulator = useLaunchProjectSnapshotInEmulator(snapshot);
+  const createBackup = useCreateProjectBackup(project);
 
   const handleOpenInLunarMagic = useAsyncCallback(
     () => openInLunarMagic(toolchain),
@@ -40,6 +44,8 @@ export default function ProjectScreenSidebarActions({
     () => launchInEmulator(toolchain),
     [toolchain],
   );
+
+  const handleCreateBackup = useAsyncCallback(createBackup, [createBackup]);
 
   return (
     <VStack w='100%'>
@@ -59,11 +65,16 @@ export default function ProjectScreenSidebarActions({
         label='Run on emulator'
         onClick={async () => {
           const error = await handleLaunchInEmulator.call();
-          handleError(error, 'Failed to open in Lunar Magic');
+          handleError(error, 'Failed to run in emulator');
         }}
         w='100%'
       />
-      <Button label='Backup' onClick={() => null} w='100%' isDisabled />
+      <Button
+        isDisabled={handleCreateBackup.isLoading}
+        label='Create backup'
+        onClick={handleCreateBackup.call}
+        w='100%'
+      />
       <Button label='Create BPS' onClick={() => null} w='100%' isDisabled />
     </VStack>
   );
