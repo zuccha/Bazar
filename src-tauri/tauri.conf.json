@@ -1,6 +1,6 @@
 {
   "package": {
-    "productName": "bazar",
+    "productName": "Bazar",
     "version": "0.1.0"
   },
   "build": {
@@ -12,8 +12,8 @@
   "tauri": {
     "bundle": {
       "active": true,
-      "targets": "all",
-      "identifier": "com.tauri.dev",
+      "targets": ["app", "msi"],
+      "identifier": "io.zuccha.bazar",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
@@ -25,7 +25,7 @@
       "externalBin": [],
       "copyright": "",
       "category": "DeveloperTool",
-      "shortDescription": "",
+      "shortDescription": "A project manager for Super Mario World hacks",
       "longDescription": "",
       "deb": {
         "depends": [],
