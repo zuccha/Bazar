@@ -22,7 +22,7 @@ const subscribe = (
       callbacks?.add(callback);
     } else {
       if (!subscriptions.has(item, dependency)) {
-        subscriptions.add(item, dependency, new Set());
+        subscriptions.set(item, dependency, new Set());
       }
       const callbacks = subscriptions.get(item, dependency);
       callbacks?.add(callback);

@@ -15,7 +15,7 @@ export default class PairMap<Key1, Key2, Value> {
     return innerMap !== undefined ? innerMap.get(key2) : undefined;
   }
 
-  add(key1: Key1, key2: Key2, value: Value): void {
+  set(key1: Key1, key2: Key2, value: Value): void {
     let innerMap = this.map.get(key1);
     if (innerMap === undefined) {
       innerMap = new Map();
