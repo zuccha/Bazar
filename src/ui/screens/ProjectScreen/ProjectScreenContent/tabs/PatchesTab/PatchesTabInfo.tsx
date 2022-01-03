@@ -1,7 +1,8 @@
 import { HStack, VStack } from '@chakra-ui/react';
-import { ReactElement, useCallback } from 'react';
+import { ReactElement, useCallback, useEffect } from 'react';
 import {
   usePatchDirectoryPath,
+  usePatchInfo,
   useUpdatePatchInfo,
 } from '../../../../../../core-hooks/Patch';
 import Patch from '../../../../../../core/Patch';
@@ -22,11 +23,12 @@ const PatchesTabInfoWithPatch = ({
   patch,
 }: Required<PatchesTabInfoProps>): ReactElement => {
   const directoryPath = usePatchDirectoryPath(patch);
+  const patchInfo = usePatchInfo(patch);
   const updatePatchInfo = useUpdatePatchInfo(patch);
 
   const nameField = useFormField({
     infoMessage: 'Name of the patch',
-    initialValue: '',
+    initialValue: patchInfo.name,
     isRequired: true,
     label: 'Patch name',
     onValidate: $FileSystem.validateIsValidName,
@@ -34,57 +36,53 @@ const PatchesTabInfoWithPatch = ({
 
   const versionField = useFormField({
     infoMessage: 'Version of the patch',
-    initialValue: '',
+    initialValue: patchInfo.version,
     label: 'Version',
   });
 
   const authorField = useFormField({
     infoMessage: 'Author(s) of the patch',
-    initialValue: '',
+    initialValue: patchInfo.author,
     label: 'Author(s)',
   });
 
   const mainFileRelativePathField = useFormField({
     infoMessage: 'Entry point of the patch',
-    initialValue: '',
+    initialValue: patchInfo.mainFileRelativePath,
     isRequired: true,
     label: 'Main file',
   });
 
   const handleReset = useCallback(() => {
-    if (patch) {
-      nameField.handleChange(patch.getInfo().name);
-      versionField.handleChange(patch.getInfo().version);
-      authorField.handleChange(patch.getInfo().author);
-      mainFileRelativePathField.handleChange(
-        patch.getInfo().mainFileRelativePath,
-      );
-    }
+    nameField.handleChange(patchInfo.name);
+    versionField.handleChange(patchInfo.version);
+    authorField.handleChange(patchInfo.author);
+    mainFileRelativePathField.handleChange(patchInfo.mainFileRelativePath);
     return undefined;
-  }, [patch, nameField, versionField, authorField, mainFileRelativePathField]);
-
-  const handleClear = useCallback(() => {
-    nameField.handleChange('');
-    versionField.handleChange('');
-    authorField.handleChange('');
-    mainFileRelativePathField.handleChange('');
-    return undefined;
-  }, [nameField, versionField, authorField, mainFileRelativePathField]);
+  }, [
+    patchInfo,
+    nameField.handleChange,
+    versionField.handleChange,
+    authorField.handleChange,
+    mainFileRelativePathField.handleChange,
+  ]);
 
   const form = useForm({
     fields: [nameField, mainFileRelativePathField],
-    onSubmit: () =>
-      updatePatchInfo({
+    onSubmit: async () => {
+      const error = await updatePatchInfo({
         name: nameField.value.trim(),
         author: authorField.value.trim(),
         version: versionField.value.trim(),
         mainFileRelativePath: mainFileRelativePathField.value.trim(),
-      }),
+      });
+      if (error) return error;
+    },
   });
 
-  useEffectAsync(async () => {
-    patch ? handleReset() : handleClear();
-  }, [patch]);
+  useEffect(() => {
+    handleReset();
+  }, [patchInfo]);
 
   const error =
     nameField.control.errorReport ||
@@ -118,7 +116,7 @@ const PatchesTabInfoWithPatch = ({
       />
       <SelectorOfFiles
         directoryPath={directoryPath}
-        extension={['.asm']}
+        extensions={['.asm']}
         isDisabled={isDisabled}
         onChange={mainFileRelativePathField.handleChange}
         placeholder='Main file'

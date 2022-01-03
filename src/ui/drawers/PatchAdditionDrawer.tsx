@@ -213,7 +213,7 @@ export default function PatchAdditionDrawer({
                   <FormControl {...mainFileRelativePathField.control}>
                     <SelectorOfFiles
                       directoryPath={sourceDirPathField.value}
-                      extension={['.asm']}
+                      extensions={['.asm']}
                       isDisabled={form.isSubmitting}
                       onChange={mainFileRelativePathField.handleChange}
                       placeholder='Main file'
