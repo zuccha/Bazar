@@ -140,7 +140,7 @@ There is not necessarily an order of completion. Features will be implemented at
 
 ## Backups
 
-- [ ] Create backup
+- [x] Create backup
 - [ ] List backups
 - [ ] Restore backup
 - [ ] Remove backup
