@@ -1,8 +1,8 @@
 import * as Chakra from '@chakra-ui/react';
 import { WarningIcon } from '@chakra-ui/icons';
 import { ReactElement } from 'react';
-import Tooltip from '../overlay/Tooltip';
-import { ErrorReport } from '../../utils/ErrorReport';
+import { ErrorReport } from '../utils/ErrorReport';
+import Tooltip from './Tooltip';
 
 interface FormErrorProps {
   errorReport: ErrorReport;

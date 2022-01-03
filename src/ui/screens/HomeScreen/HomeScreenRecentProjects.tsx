@@ -11,8 +11,8 @@ import Project from '../../../core/Project';
 import useAsyncCallback from '../../../hooks/useAsyncCallback';
 import { useNavigateRoot } from '../../../navigation/hooks';
 import { RootRouteName } from '../../../navigation/Navigation';
-import Button from '../../../ui-atoms/input/Button';
-import FormError from '../../../ui-atoms/input/FormError';
+import Button from '../../../ui-atoms/Button';
+import FormError from '../../../ui-atoms/FormError';
 import { $FileSystem } from '../../../utils/FileSystem';
 
 export default function HomeScreenRecentProjects(): ReactElement {

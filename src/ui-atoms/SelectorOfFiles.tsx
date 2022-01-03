@@ -1,10 +1,10 @@
 import { LayoutProps, SpaceProps } from '@chakra-ui/react';
 import { ReactElement, useState } from 'react';
-import useEffectAsync from '../../hooks/useEffectAsync';
-import { $FileSystem } from '../../utils/FileSystem';
-import Select, { SelectOption } from './Select';
+import useEffectAsync from '../hooks/useEffectAsync';
+import { $FileSystem } from '../utils/FileSystem';
+import Selector, { SelectorOption } from './Selector';
 
-interface SelectFilesProps extends LayoutProps, SpaceProps {
+interface SelectorOfFilesProps extends LayoutProps, SpaceProps {
   directoryPath: string;
   extension?: string[];
   isDisabled?: boolean;
@@ -14,7 +14,7 @@ interface SelectFilesProps extends LayoutProps, SpaceProps {
   value: string;
 }
 
-export default function SelectFiles({
+export default function SelectorOfFiles({
   directoryPath,
   extension = [],
   isDisabled,
@@ -23,8 +23,8 @@ export default function SelectFiles({
   placeholder,
   value,
   ...props
-}: SelectFilesProps): ReactElement {
-  const [options, setOptions] = useState<SelectOption[]>([]);
+}: SelectorOfFilesProps): ReactElement {
+  const [options, setOptions] = useState<SelectorOption[]>([]);
 
   useEffectAsync(async () => {
     onChange('');
@@ -40,7 +40,7 @@ export default function SelectFiles({
   }, [directoryPath]);
 
   return (
-    <Select
+    <Selector
       isDisabled={isDisabled || !options.length}
       isFullWidth={isFullWidth}
       onChange={onChange}

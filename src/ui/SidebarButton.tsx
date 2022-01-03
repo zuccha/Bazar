@@ -1,5 +1,5 @@
 import { ReactElement } from 'react';
-import IconButton from '../ui-atoms/input/IconButton';
+import IconButton from '../ui-atoms/IconButton';
 
 interface SidebarButtonProps {
   icon: ReactElement;

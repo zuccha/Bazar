@@ -1,25 +1,24 @@
 import { Flex, VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
-import BrowserInput from '../../ui-atoms/input/BrowserInput';
-import Button from '../../ui-atoms/input/Button';
-import FormControl, {
-  useForm,
-  useFormField,
-} from '../../ui-atoms/input/FormControl';
-import TextInput from '../../ui-atoms/input/TextInput';
-import Drawer from '../../ui-atoms/overlay/Drawer';
-import FormError from '../../ui-atoms/input/FormError';
-import Alert from '../../ui-atoms/display/Alert';
-import { $FileSystem } from '../../utils/FileSystem';
-import useAsyncCallback from '../../hooks/useAsyncCallback';
 import Project from '../../core/Project';
 import { useSetProject, useSettings } from '../../core-hooks/Core';
 import {
   usePrioritizeRecentProject,
   useSetting,
 } from '../../core-hooks/Settings';
-import { useNavigateRoot } from '../../navigation/hooks';
+import useAsyncCallback from '../../hooks/useAsyncCallback';
 import { RootRouteName } from '../../navigation/Navigation';
+import { useNavigateRoot } from '../../navigation/hooks';
+import TextEditorOfPath from '../../ui-atoms/TextEditorOfPath';
+import Alert from '../../ui-atoms/Alert';
+import Button from '../../ui-atoms/Button';
+import Drawer from '../../ui-atoms/Drawer';
+import FormControl from '../../ui-atoms/FormControl';
+import FormError from '../../ui-atoms/FormError';
+import TextEditor from '../../ui-atoms/TextEditor';
+import { $FileSystem } from '../../utils/FileSystem';
+import useForm from '../../hooks/useForm';
+import useFormField from '../../hooks/useFormField';
 
 interface ProjectCreationFromSourceProps {
   onClose: () => void;
@@ -129,7 +128,7 @@ export default function ProjectCreationFromSourceDrawer({
       <Flex direction='column' h='100%'>
         <VStack width='100%' spacing={4} flex={1}>
           <FormControl {...nameField.control}>
-            <TextInput
+            <TextEditor
               isDisabled={handleCreate.isLoading}
               onBlur={nameField.handleBlur}
               onChange={nameField.handleChange}
@@ -139,7 +138,7 @@ export default function ProjectCreationFromSourceDrawer({
           </FormControl>
 
           <FormControl {...authorField.control}>
-            <TextInput
+            <TextEditor
               isDisabled={handleCreate.isLoading}
               onBlur={authorField.handleBlur}
               onChange={authorField.handleChange}
@@ -149,7 +148,7 @@ export default function ProjectCreationFromSourceDrawer({
           </FormControl>
 
           <FormControl {...locationDirPathField.control}>
-            <BrowserInput
+            <TextEditorOfPath
               isDisabled={handleCreate.isLoading}
               mode='directory'
               onBlur={locationDirPathField.handleBlur}
@@ -160,7 +159,7 @@ export default function ProjectCreationFromSourceDrawer({
           </FormControl>
 
           <FormControl {...romFilePathField.control}>
-            <BrowserInput
+            <TextEditorOfPath
               isDisabled={handleCreate.isLoading}
               filters={[{ name: 'ROM', extensions: ['smc'] }]}
               mode='file'

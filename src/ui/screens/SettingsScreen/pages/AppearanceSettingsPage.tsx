@@ -1,7 +1,7 @@
-import { Text, VStack } from '@chakra-ui/react';
+import { VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
-import FormControl from '../../../../ui-atoms/input/FormControl';
-import Select from '../../../../ui-atoms/input/Select';
+import FormControl from '../../../../ui-atoms/FormControl';
+import Selector from '../../../../ui-atoms/Selector';
 import useSettingField from '../useSettingsField';
 
 const appearanceColorSchemeOptions = [
@@ -25,7 +25,7 @@ export default function AppearanceSettingsPage(): ReactElement {
   return (
     <VStack spacing={4} alignItems='flex-start'>
       <FormControl {...colorScheme.field.control}>
-        <Select
+        <Selector
           isDisabled={colorScheme.isSaving}
           onChange={colorScheme.set}
           options={appearanceColorSchemeOptions}

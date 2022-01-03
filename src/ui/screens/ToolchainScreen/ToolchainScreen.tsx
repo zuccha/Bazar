@@ -5,7 +5,7 @@ import {
   useToolchainRoute,
 } from '../../../navigation/hooks';
 import { ToolchainRouteName } from '../../../navigation/Navigation';
-import ListNavigator from '../../../ui-atoms/display/ListNavigator';
+import NavigatorWithList from '../../../ui-atoms/NavigatorWithList';
 import CustomToolsPage from './pages/CustomToolsPage';
 import EmbeddedToolsPage from './pages/EmbeddedToolsPage';
 
@@ -29,7 +29,7 @@ export default function ToolchainScreen(): ReactElement {
   return (
     <Flex flex={1} h='100%' p={10} justifyContent='center'>
       <Flex w='100%' minW={600} maxW={800} position='relative'>
-        <ListNavigator
+        <NavigatorWithList
           selectedPage={toolchainRoute}
           pages={pages}
           onSelectPage={navigateToolchain}

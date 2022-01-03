@@ -1,23 +1,23 @@
 import * as Chakra from '@chakra-ui/react';
 import { LayoutProps, SpaceProps } from '@chakra-ui/react';
 import { ChangeEvent, forwardRef, ReactElement, Ref, useCallback } from 'react';
-import useColorScheme from '../../theme/useColorScheme';
+import useColorScheme from '../theme/useColorScheme';
 
-export interface SelectOption {
+export interface SelectorOption {
   label: string;
   value: string;
 }
 
-interface SelectProps extends LayoutProps, SpaceProps {
+interface SelectorProps extends LayoutProps, SpaceProps {
   isDisabled?: boolean;
   isFullWidth?: boolean;
   onChange: (value: string) => void;
-  options: SelectOption[];
+  options: SelectorOption[];
   placeholder: string;
   value: string;
 }
 
-function Select(
+function Selector(
   {
     isDisabled,
     isFullWidth = false,
@@ -26,7 +26,7 @@ function Select(
     placeholder,
     value,
     ...props
-  }: SelectProps,
+  }: SelectorProps,
   ref: Ref<HTMLSelectElement>,
 ): ReactElement {
   const colorScheme = useColorScheme();
@@ -63,4 +63,4 @@ function Select(
   );
 }
 
-export default forwardRef(Select);
+export default forwardRef(Selector);

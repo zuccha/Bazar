@@ -1,6 +1,5 @@
 import { VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
-import { useCore } from '../../../../contexts/CoreContext';
 import { useToolchain } from '../../../../core-hooks/Core';
 import { useProjectLatestSnapshot } from '../../../../core-hooks/Project';
 import {
@@ -11,12 +10,10 @@ import {
   useGetCustomTool,
   useGetEmbeddedTool,
 } from '../../../../core-hooks/Toolchain';
-import Core from '../../../../core/Core';
 import Project from '../../../../core/Project';
-import { useGet, useSetAsync } from '../../../../hooks/useAccessors';
 import useAsyncCallback from '../../../../hooks/useAsyncCallback';
 import useHandleError from '../../../../hooks/useHandleError';
-import Button from '../../../../ui-atoms/input/Button';
+import Button from '../../../../ui-atoms/Button';
 
 interface ProjectScreenSidebarActionsProps {
   project: Project;

@@ -2,9 +2,8 @@ import { Flex, Heading, Text } from '@chakra-ui/react';
 import { ReactElement, useCallback } from 'react';
 import useAsyncCallback from '../../../../../hooks/useAsyncCallback';
 import useHandleError from '../../../../../hooks/useHandleError';
-import BrowserInput from '../../../../../ui-atoms/input/BrowserInput';
-import FormControl from '../../../../../ui-atoms/input/FormControl';
-import { $Dialog } from '../../../../../utils/Dialog';
+import FormControl from '../../../../../ui-atoms/FormControl';
+import TextEditorOfPath from '../../../../../ui-atoms/TextEditorOfPath';
 
 interface CustomToolItemProps {
   description: string;
@@ -48,7 +47,7 @@ export default function CustomToolItem({
         infoMessage='The path to the executable of the tool'
         label='Executable'
       >
-        <BrowserInput
+        <TextEditorOfPath
           isDisabled={handleBrowse.isLoading || isDisabled}
           isManualEditDisabled
           filters={[{ name: 'Executable', extensions: ['exe'] }]}

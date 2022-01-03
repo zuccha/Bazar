@@ -1,18 +1,18 @@
 import { ArrowForwardIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
-import { Flex, HStack, VStack } from '@chakra-ui/react';
+import { HStack, VStack } from '@chakra-ui/react';
 import { ReactElement, useCallback, useMemo } from 'react';
 import useAsyncCallback from '../../../../hooks/useAsyncCallback';
 import useHandleError from '../../../../hooks/useHandleError';
 import useSafeState from '../../../../hooks/usSafeState';
-import Info from '../../../../ui-atoms/display/Info';
-import Output, { OutputChunk } from '../../../../ui-atoms/display/Output';
+import Button from '../../../../ui-atoms/Button';
+import DialogWithDeletion from '../../../../ui-atoms/DialogWithDeletion';
+import Frame from '../../../../ui-atoms/Frame';
+import Output, { OutputChunk } from '../../../../ui-atoms/Output';
 import Table, {
   TableAction,
   TableColumn,
   TableRow,
-} from '../../../../ui-atoms/display/Table';
-import Button from '../../../../ui-atoms/input/Button';
-import AlertDelete from '../../../../ui-atoms/overlay/AlertDelete';
+} from '../../../../ui-atoms/Table';
 import { EitherErrorOr } from '../../../../utils/EitherErrorOr';
 import { $ErrorReport, ErrorReport } from '../../../../utils/ErrorReport';
 import { Process } from '../../../../utils/Shell';
@@ -250,13 +250,13 @@ export default function ResourcesTab<R extends Resource>({
           </HStack>
         </VStack>
         <VStack flex={1} minW={512} spacing={3}>
-          <Info width='100%'>
+          <Frame title='Info' width='100%'>
             {renderInfo(
               selectedRowIndex !== undefined
                 ? rows[selectedRowIndex]?.data
                 : undefined,
             )}
-          </Info>
+          </Frame>
           <Output
             chunks={outputChunks}
             onClear={handleClearOutput}
@@ -272,7 +272,7 @@ export default function ResourcesTab<R extends Resource>({
         })}
 
       {!!resourceToRemove && (
-        <AlertDelete
+        <DialogWithDeletion
           isDisabled={handleRemove.isLoading}
           onClose={() => setResourceToRemove(undefined)}
           onDelete={() => handleRemove.call(resourceToRemove)}

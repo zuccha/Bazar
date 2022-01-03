@@ -1,11 +1,11 @@
 import * as Chakra from '@chakra-ui/react';
 import { useToast } from '@chakra-ui/react';
 import { ReactElement, useCallback } from 'react';
-import { $Dialog } from '../../utils/Dialog';
+import { $Dialog } from '../utils/Dialog';
 import Button from './Button';
-import TextInput from './TextInput';
+import TextEditor from './TextEditor';
 
-interface BrowserInputProps {
+interface TextEditorOfPathProps {
   filters?: { name: string; extensions: string[] }[];
   isDisabled?: boolean;
   isInvalid?: boolean;
@@ -18,7 +18,7 @@ interface BrowserInputProps {
   value: string;
 }
 
-export default function BrowserInput({
+export default function TextEditorOfPath({
   filters,
   isDisabled,
   isInvalid,
@@ -29,7 +29,7 @@ export default function BrowserInput({
   onChange,
   placeholder,
   value,
-}: BrowserInputProps): ReactElement {
+}: TextEditorOfPathProps): ReactElement {
   const toast = useToast();
 
   const handleBrowse = useCallback(async () => {
@@ -53,7 +53,7 @@ export default function BrowserInput({
   return (
     <Chakra.HStack width='100%'>
       <Chakra.Flex flex={1}>
-        <TextInput
+        <TextEditor
           isDisabled={isDisabled}
           isInvalid={isInvalid}
           isReadonly={isManualEditDisabled}

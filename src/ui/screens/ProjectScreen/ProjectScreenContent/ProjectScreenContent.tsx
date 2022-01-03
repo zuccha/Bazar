@@ -8,7 +8,7 @@ import {
 } from '../../../../navigation/hooks';
 import { ProjectRouteName } from '../../../../navigation/Navigation';
 import useColorScheme from '../../../../theme/useColorScheme';
-import ComingSoon from '../../../../ui-atoms/other/ComingSoon';
+import ComingSoon from '../../../../ui-atoms/ComingSoon';
 import PatchesTab from './tabs/PatchesTab';
 
 const tabPanelProps = {

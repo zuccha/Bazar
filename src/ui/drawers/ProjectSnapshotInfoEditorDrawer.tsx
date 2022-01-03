@@ -3,13 +3,12 @@ import { ReactElement } from 'react';
 import { useProjectInfo, useSetProjectInfo } from '../../core-hooks/Project';
 import Project from '../../core/Project';
 import useAsyncCallback from '../../hooks/useAsyncCallback';
-import Button from '../../ui-atoms/input/Button';
-import FormControl, {
-  useForm,
-  useFormField,
-} from '../../ui-atoms/input/FormControl';
-import TextInput from '../../ui-atoms/input/TextInput';
-import Drawer from '../../ui-atoms/overlay/Drawer';
+import useForm from '../../hooks/useForm';
+import useFormField from '../../hooks/useFormField';
+import Button from '../../ui-atoms/Button';
+import Drawer from '../../ui-atoms/Drawer';
+import FormControl from '../../ui-atoms/FormControl';
+import TextEditor from '../../ui-atoms/TextEditor';
 import { $FileSystem } from '../../utils/FileSystem';
 
 interface ProjectSnapshotInfoEditorDrawerProps {
@@ -66,7 +65,7 @@ export default function ProjectSnapshotInfoEditorDrawer({
     >
       <VStack flex={1}>
         <FormControl {...nameField.control}>
-          <TextInput
+          <TextEditor
             onBlur={nameField.handleBlur}
             onChange={nameField.handleChange}
             placeholder={nameField.control.label}
@@ -75,7 +74,7 @@ export default function ProjectSnapshotInfoEditorDrawer({
         </FormControl>
 
         <FormControl {...authorField.control}>
-          <TextInput
+          <TextEditor
             onBlur={authorField.handleBlur}
             onChange={authorField.handleChange}
             placeholder={authorField.control.label}

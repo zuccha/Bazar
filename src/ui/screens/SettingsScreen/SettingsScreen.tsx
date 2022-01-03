@@ -7,7 +7,7 @@ import {
   useSettingsRoute,
 } from '../../../navigation/hooks';
 import { SettingsRouteName } from '../../../navigation/Navigation';
-import ListNavigator from '../../../ui-atoms/display/ListNavigator';
+import NavigatorWithList from '../../../ui-atoms/NavigatorWithList';
 import AppearanceSettingsPage from './pages/AppearanceSettingsPage';
 import NewProjectSettingsPage from './pages/NewProjectSettingsPage';
 
@@ -49,7 +49,7 @@ export default function SettingsScreen(): ReactElement {
   return (
     <Flex flex={1} h='100%' p={10} justifyContent='center'>
       <Flex w='100%' minW={600} maxW={800} position='relative'>
-        <ListNavigator
+        <NavigatorWithList
           selectedPage={settingsRoute}
           pages={pages}
           onSelectPage={navigateSettings}

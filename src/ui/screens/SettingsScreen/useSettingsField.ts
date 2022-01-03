@@ -6,12 +6,11 @@ import {
   useSetting,
 } from '../../../core-hooks/Settings';
 import { GenericSetting, GenericSettingsStore } from '../../../core/Settings';
-import useHandleError from '../../../hooks/useHandleError';
-import {
+import useFormField, {
   FormField,
   FormFieldParams,
-  useFormField,
-} from '../../../ui-atoms/input/FormControl';
+} from '../../../hooks/useFormField';
+import useHandleError from '../../../hooks/useHandleError';
 import { $Function } from '../../../utils/Function';
 
 interface Options {

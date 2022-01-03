@@ -14,18 +14,17 @@ import {
   useAddPatchToProjectSnapshotFromFile,
 } from '../../core-hooks/ProjectSnapshot';
 import ProjectSnapshot from '../../core/ProjectSnapshot';
+import useForm from '../../hooks/useForm';
+import useFormField from '../../hooks/useFormField';
 import useColorScheme from '../../theme/useColorScheme';
-import Alert from '../../ui-atoms/display/Alert';
-import BrowserInput from '../../ui-atoms/input/BrowserInput';
-import Button from '../../ui-atoms/input/Button';
-import FormControl, {
-  useForm,
-  useFormField,
-} from '../../ui-atoms/input/FormControl';
-import FormError from '../../ui-atoms/input/FormError';
-import SelectFiles from '../../ui-atoms/input/SelectFiles';
-import TextInput from '../../ui-atoms/input/TextInput';
-import Drawer from '../../ui-atoms/overlay/Drawer';
+import Alert from '../../ui-atoms/Alert';
+import Button from '../../ui-atoms/Button';
+import Drawer from '../../ui-atoms/Drawer';
+import FormControl from '../../ui-atoms/FormControl';
+import FormError from '../../ui-atoms/FormError';
+import SelectorOfFiles from '../../ui-atoms/SelectorOfFiles';
+import TextEditor from '../../ui-atoms/TextEditor';
+import TextEditorOfPath from '../../ui-atoms/TextEditorOfPath';
 import { $FileSystem } from '../../utils/FileSystem';
 
 interface PatchAdditionDrawerProps {
@@ -144,7 +143,7 @@ export default function PatchAdditionDrawer({
         <VStack w='100%' spacing={4} flex={1}>
           <HStack w='100%'>
             <FormControl {...nameField.control}>
-              <TextInput
+              <TextEditor
                 isDisabled={form.isSubmitting}
                 onBlur={nameField.handleBlur}
                 onChange={nameField.handleChange}
@@ -153,7 +152,7 @@ export default function PatchAdditionDrawer({
               />
             </FormControl>
             <FormControl {...versionField.control} width={150}>
-              <TextInput
+              <TextEditor
                 isDisabled={form.isSubmitting}
                 onBlur={versionField.handleBlur}
                 onChange={versionField.handleChange}
@@ -164,7 +163,7 @@ export default function PatchAdditionDrawer({
           </HStack>
 
           <FormControl {...authorField.control}>
-            <TextInput
+            <TextEditor
               isDisabled={form.isSubmitting}
               onBlur={authorField.handleBlur}
               onChange={authorField.handleChange}
@@ -187,7 +186,7 @@ export default function PatchAdditionDrawer({
             <TabPanels>
               <TabPanel paddingBottom={0} paddingX={0}>
                 <FormControl {...singleFilePathField.control}>
-                  <BrowserInput
+                  <TextEditorOfPath
                     filters={[{ name: 'File', extensions: ['asm'] }]}
                     isDisabled={form.isSubmitting}
                     mode='file'
@@ -201,7 +200,7 @@ export default function PatchAdditionDrawer({
               <TabPanel paddingBottom={0} paddingX={0}>
                 <VStack width='100%' spacing={4} flex={1}>
                   <FormControl {...sourceDirPathField.control}>
-                    <BrowserInput
+                    <TextEditorOfPath
                       isDisabled={form.isSubmitting}
                       mode='directory'
                       onBlur={sourceDirPathField.handleBlur}
@@ -212,7 +211,7 @@ export default function PatchAdditionDrawer({
                   </FormControl>
 
                   <FormControl {...mainFileRelativePathField.control}>
-                    <SelectFiles
+                    <SelectorOfFiles
                       directoryPath={sourceDirPathField.value}
                       extension={['.asm']}
                       isDisabled={form.isSubmitting}

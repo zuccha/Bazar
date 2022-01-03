@@ -1,7 +1,7 @@
 import { Flex, Heading, Progress, Text } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 import useColorScheme from '../../../../../theme/useColorScheme';
-import Button from '../../../../../ui-atoms/input/Button';
+import Button from '../../../../../ui-atoms/Button';
 
 interface EmbeddedToolItemProps {
   name: string;

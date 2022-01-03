@@ -1,7 +1,7 @@
 import * as Chakra from '@chakra-ui/react';
 import { LayoutProps, SpaceProps } from '@chakra-ui/react';
 import { forwardRef, ReactElement, Ref } from 'react';
-import useColorScheme from '../../theme/useColorScheme';
+import useColorScheme from '../theme/useColorScheme';
 
 interface ButtonProps extends LayoutProps, SpaceProps {
   isDisabled?: boolean;

@@ -1,7 +1,7 @@
 import { Center, Flex, HStack, Text } from '@chakra-ui/react';
 import { ReactElement, useMemo } from 'react';
-import useColorScheme from '../../theme/useColorScheme';
-import IconButton from '../input/IconButton';
+import useColorScheme from '../theme/useColorScheme';
+import IconButton from './IconButton';
 
 export interface TableRow<T> {
   key: string;

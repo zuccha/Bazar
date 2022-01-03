@@ -1,8 +1,8 @@
-import { Button, Flex, Text, VStack } from '@chakra-ui/react';
+import { Button, Flex, VStack } from '@chakra-ui/react';
 import { ReactElement, ReactNode, useMemo } from 'react';
-import useColorScheme from '../../theme/useColorScheme';
+import useColorScheme from '../theme/useColorScheme';
 
-interface ListNavigatorProps<T extends string> {
+interface NavigatorWithListProps<T extends string> {
   selectedPage: T;
   pages: {
     id: T;
@@ -16,29 +16,7 @@ interface ListNavigatorProps<T extends string> {
   width?: number | string;
 }
 
-const ListNavigatorButton = ({
-  label,
-  onClick,
-  isSelected,
-}: {
-  label: string;
-  onClick: () => void;
-  isSelected: boolean;
-}): ReactElement => {
-  const colorScheme = useColorScheme();
-  return (
-    <Button
-      onClick={onClick}
-      variant='link'
-      colorScheme={isSelected ? colorScheme : 'black'}
-      fontWeight={isSelected ? 'bold' : 'normal'}
-    >
-      {label}
-    </Button>
-  );
-};
-
-export default function ListNavigator<T extends string>({
+export default function NavigatorWithList<T extends string>({
   selectedPage,
   pages,
   onSelectPage,
@@ -46,7 +24,9 @@ export default function ListNavigator<T extends string>({
   flex,
   height,
   width,
-}: ListNavigatorProps<T>): ReactElement {
+}: NavigatorWithListProps<T>): ReactElement {
+  const colorScheme = useColorScheme();
+
   const content = useMemo(() => {
     const page = pages.find((page) => page.id === selectedPage);
     return page?.content;
@@ -61,14 +41,20 @@ export default function ListNavigator<T extends string>({
           alignItems='flex-start'
           overflow='auto'
         >
-          {pages.map((page) => (
-            <ListNavigatorButton
-              key={page.id}
-              label={page.label}
-              onClick={() => onSelectPage(page.id)}
-              isSelected={page.id === selectedPage}
-            />
-          ))}
+          {pages.map((page) => {
+            const isSelected = page.id === selectedPage;
+            return (
+              <Button
+                key={page.id}
+                onClick={() => onSelectPage(page.id)}
+                variant='link'
+                colorScheme={isSelected ? colorScheme : 'black'}
+                fontWeight={isSelected ? 'bold' : 'normal'}
+              >
+                {page.label}
+              </Button>
+            );
+          })}
         </VStack>
         <Flex bg='app.bg1' w='1px' />
         <Flex flex={1} p={4} flexDir='column' overflow='auto'>

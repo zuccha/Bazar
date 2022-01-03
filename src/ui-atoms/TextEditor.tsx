@@ -1,8 +1,8 @@
 import * as Chakra from '@chakra-ui/react';
 import { ChangeEvent, ReactElement, useCallback } from 'react';
-import useColorScheme from '../../theme/useColorScheme';
+import useColorScheme from '../theme/useColorScheme';
 
-interface TextInputProps extends Chakra.LayoutProps {
+interface TextEditorProps extends Chakra.LayoutProps {
   isDisabled?: boolean;
   isInvalid?: boolean;
   isReadonly?: boolean;
@@ -13,7 +13,7 @@ interface TextInputProps extends Chakra.LayoutProps {
   value: string;
 }
 
-export default function TextInput({
+export default function TextEditor({
   isDisabled,
   isInvalid,
   isReadonly,
@@ -23,7 +23,7 @@ export default function TextInput({
   placeholder,
   value,
   ...props
-}: TextInputProps): ReactElement {
+}: TextEditorProps): ReactElement {
   const colorScheme = useColorScheme();
 
   const handleChange = useCallback(

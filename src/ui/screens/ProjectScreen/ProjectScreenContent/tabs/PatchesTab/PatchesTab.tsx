@@ -8,10 +8,7 @@ import { useGetEmbeddedTool } from '../../../../../../core-hooks/Toolchain';
 import Patch from '../../../../../../core/Patch';
 import ProjectSnapshot from '../../../../../../core/ProjectSnapshot';
 import { asGlobalDeps, useGet } from '../../../../../../hooks/useAccessors';
-import {
-  TableColumn,
-  TableRow,
-} from '../../../../../../ui-atoms/display/Table';
+import { TableColumn, TableRow } from '../../../../../../ui-atoms/Table';
 import { $EitherErrorOr } from '../../../../../../utils/EitherErrorOr';
 import { $ErrorReport } from '../../../../../../utils/ErrorReport';
 import PatchAdditionDrawer from '../../../../../drawers/PatchAdditionDrawer';

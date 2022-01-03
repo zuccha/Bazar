@@ -2,10 +2,10 @@ import { CopyIcon, DeleteIcon } from '@chakra-ui/icons';
 import { Flex, HStack, Text, useToast, VStack } from '@chakra-ui/react';
 import * as Tauri from '@tauri-apps/api';
 import { ReactElement } from 'react';
-import useAsyncCallback from '../../hooks/useAsyncCallback';
-import useHandleError from '../../hooks/useHandleError';
-import { $ErrorReport, ErrorReport } from '../../utils/ErrorReport';
-import IconButton from '../input/IconButton';
+import useAsyncCallback from '../hooks/useAsyncCallback';
+import useHandleError from '../hooks/useHandleError';
+import { $ErrorReport, ErrorReport } from '../utils/ErrorReport';
+import IconButton from './IconButton';
 
 export interface OutputParagraph {
   text: string;

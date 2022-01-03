@@ -1,6 +1,6 @@
 import * as Chakra from '@chakra-ui/react';
 import { ReactElement, useRef } from 'react';
-import Button from '../input/Button';
+import Button from './Button';
 
 interface AlertDeleteProps {
   isDisabled?: boolean;
@@ -9,7 +9,7 @@ interface AlertDeleteProps {
   title: string;
 }
 
-export default function AlertDelete({
+export default function DialogWithDeletion({
   isDisabled,
   onClose,
   onDelete,

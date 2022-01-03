@@ -1,9 +1,8 @@
 import { VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
-import BrowserInput from '../../../../ui-atoms/input/BrowserInput';
-import FormControl from '../../../../ui-atoms/input/FormControl';
-import TextInput from '../../../../ui-atoms/input/TextInput';
-import { $FileSystem } from '../../../../utils/FileSystem';
+import FormControl from '../../../../ui-atoms/FormControl';
+import TextEditor from '../../../../ui-atoms/TextEditor';
+import TextEditorOfPath from '../../../../ui-atoms/TextEditorOfPath';
 import useSettingField from '../useSettingsField';
 
 export default function NewProjectSettingsPage(): ReactElement {
@@ -29,7 +28,7 @@ export default function NewProjectSettingsPage(): ReactElement {
   return (
     <VStack spacing={4} alignItems='flex-start'>
       <FormControl {...author.field.control}>
-        <TextInput
+        <TextEditor
           isDisabled={author.isSaving}
           onChange={author.set}
           placeholder={author.field.control.label}
@@ -38,7 +37,7 @@ export default function NewProjectSettingsPage(): ReactElement {
       </FormControl>
 
       <FormControl {...locationDirPath.field.control}>
-        <BrowserInput
+        <TextEditorOfPath
           isDisabled={locationDirPath.isSaving}
           isManualEditDisabled
           mode='directory'
@@ -50,7 +49,7 @@ export default function NewProjectSettingsPage(): ReactElement {
       </FormControl>
 
       <FormControl {...romFilePath.field.control}>
-        <BrowserInput
+        <TextEditorOfPath
           isDisabled={romFilePath.isSaving}
           isManualEditDisabled
           filters={[{ name: 'ROM', extensions: ['smc'] }]}

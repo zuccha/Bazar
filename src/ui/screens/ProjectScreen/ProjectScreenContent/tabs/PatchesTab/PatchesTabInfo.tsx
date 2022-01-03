@@ -5,16 +5,13 @@ import {
   useUpdatePatchInfo,
 } from '../../../../../../core-hooks/Patch';
 import Patch from '../../../../../../core/Patch';
-import useAsyncCallback from '../../../../../../hooks/useAsyncCallback';
 import useEffectAsync from '../../../../../../hooks/useEffectAsync';
-import Button from '../../../../../../ui-atoms/input/Button';
-import {
-  useForm,
-  useFormField,
-} from '../../../../../../ui-atoms/input/FormControl';
-import FormError from '../../../../../../ui-atoms/input/FormError';
-import SelectFiles from '../../../../../../ui-atoms/input/SelectFiles';
-import TextInput from '../../../../../../ui-atoms/input/TextInput';
+import useForm from '../../../../../../hooks/useForm';
+import useFormField from '../../../../../../hooks/useFormField';
+import Button from '../../../../../../ui-atoms/Button';
+import FormError from '../../../../../../ui-atoms/FormError';
+import SelectorOfFiles from '../../../../../../ui-atoms/SelectorOfFiles';
+import TextEditor from '../../../../../../ui-atoms/TextEditor';
 import { $FileSystem } from '../../../../../../utils/FileSystem';
 
 interface PatchesTabInfoProps {
@@ -99,13 +96,13 @@ const PatchesTabInfoWithPatch = ({
   return (
     <VStack spacing={2} flex={1} alignItems='flex-start'>
       <HStack w='100%'>
-        <TextInput
+        <TextEditor
           isDisabled={isDisabled}
           onChange={nameField.handleChange}
           placeholder='Name'
           value={nameField.value}
         />
-        <TextInput
+        <TextEditor
           isDisabled={isDisabled}
           onChange={versionField.handleChange}
           placeholder='Version'
@@ -113,13 +110,13 @@ const PatchesTabInfoWithPatch = ({
           width={150}
         />
       </HStack>
-      <TextInput
+      <TextEditor
         isDisabled={isDisabled}
         onChange={authorField.handleChange}
         placeholder='Author(s)'
         value={authorField.value}
       />
-      <SelectFiles
+      <SelectorOfFiles
         directoryPath={directoryPath}
         extension={['.asm']}
         isDisabled={isDisabled}
@@ -149,8 +146,13 @@ const PatchesTabInfoWithoutPatch = (): ReactElement => {
   return (
     <VStack spacing={2} flex={1}>
       <HStack w='100%'>
-        <TextInput isDisabled onChange={() => {}} placeholder='Name' value='' />
-        <TextInput
+        <TextEditor
+          isDisabled
+          onChange={() => {}}
+          placeholder='Name'
+          value=''
+        />
+        <TextEditor
           isDisabled
           onChange={() => {}}
           placeholder='Version'
@@ -158,13 +160,13 @@ const PatchesTabInfoWithoutPatch = (): ReactElement => {
           width={150}
         />
       </HStack>
-      <TextInput
+      <TextEditor
         isDisabled
         onChange={() => {}}
         placeholder='Author(s)'
         value=''
       />
-      <SelectFiles
+      <SelectorOfFiles
         directoryPath=''
         isDisabled
         onChange={() => {}}

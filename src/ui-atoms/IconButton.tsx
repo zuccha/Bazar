@@ -1,7 +1,7 @@
 import * as Chakra from '@chakra-ui/react';
 import { ReactElement } from 'react';
-import useColorScheme from '../../theme/useColorScheme';
-import Tooltip from '../overlay/Tooltip';
+import useColorScheme from '../theme/useColorScheme';
+import Tooltip from './Tooltip';
 
 interface IconButtonProps {
   icon: ReactElement;

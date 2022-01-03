@@ -1,20 +1,22 @@
 import { Flex, Text } from '@chakra-ui/react';
 import { ReactElement, ReactNode } from 'react';
 
-interface InfoProps {
+interface Frame {
   children: ReactNode;
+  title: string;
 
   flex?: number;
   height?: number | string;
   width?: number | string;
 }
 
-export default function Info({
+export default function FrameInfo({
   children,
+  title,
   flex,
   height,
   width,
-}: InfoProps): ReactElement {
+}: Frame): ReactElement {
   return (
     <Flex
       flexDir='column'
@@ -36,7 +38,7 @@ export default function Info({
         py={2}
       >
         <Text textTransform='uppercase' fontWeight='bold' fontSize='xs'>
-          Info
+          {title}
         </Text>
       </Flex>
 

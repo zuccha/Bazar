@@ -7,8 +7,8 @@ import useAsyncCallback from '../../../hooks/useAsyncCallback';
 import useSafeState from '../../../hooks/usSafeState';
 import { useNavigateRoot } from '../../../navigation/hooks';
 import { RootRouteName } from '../../../navigation/Navigation';
-import Button from '../../../ui-atoms/input/Button';
-import FormError from '../../../ui-atoms/input/FormError';
+import Button from '../../../ui-atoms/Button';
+import FormError from '../../../ui-atoms/FormError';
 import { $Dialog } from '../../../utils/Dialog';
 import ProjectCreationFromSourceDrawer from '../../drawers/ProjectCreationFromSourceDrawer';
 

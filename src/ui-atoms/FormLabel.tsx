@@ -1,7 +1,7 @@
 import * as Chakra from '@chakra-ui/react';
 import { QuestionIcon } from '@chakra-ui/icons';
 import { ReactElement } from 'react';
-import Tooltip from '../overlay/Tooltip';
+import Tooltip from './Tooltip';
 
 interface FormLabelProps {
   infoMessage?: string;
