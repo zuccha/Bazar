@@ -57,11 +57,11 @@ export default function PatchesTab({
   const rows: TableRow<Patch>[] = useGet(
     projectSnapshot,
     useCallback(() => {
-      return projectSnapshot.getPatches().map((patch) => ({
+      return patches.map((patch) => ({
         data: patch,
         key: patch.getInfo().name,
       }));
-    }, [projectSnapshot]),
+    }, [patches]),
     rowsDeps,
   );
 
