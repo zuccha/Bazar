@@ -37,7 +37,7 @@ export default function SelectorOfFiles({
       setOptions(newOptions);
     }
     return undefined;
-  }, [directoryPath, extensions]);
+  }, [directoryPath, ...extensions]);
 
   useEffect(() => {
     computeOptions.call();
