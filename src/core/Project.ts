@@ -140,10 +140,10 @@ export default class Project {
 
   // #region Backups
 
-  static getBackupsDeps = ['backups'];
+  static getBackupsDeps = ['Project.backups'];
   getBackups = (): string[] => this.backups;
 
-  static createBackupTriggers = ['backups'];
+  static createBackupTriggers = ['Project.backups'];
   createBackup = async (): Promise<ErrorReport | undefined> => {
     const errorPrefix = 'Project.createBackup';
     let error: ErrorReport | undefined;
@@ -183,7 +183,7 @@ export default class Project {
     this.backups.unshift(timestamp);
   };
 
-  static deleteBackupTriggers = ['backups'];
+  static deleteBackupTriggers = ['Project.backups'];
   deleteBackup = async (backup: string): Promise<ErrorReport | undefined> => {
     const errorPrefix = 'Project.deleteBackup';
     let error: ErrorReport | undefined;
@@ -207,12 +207,50 @@ export default class Project {
     }
   };
 
-  static restoreBackupTriggers = ['backups'];
+  static restoreBackupTriggers = ['Project.backups', 'Project.latest'];
   restoreBackup = async (backup: string): Promise<ErrorReport | undefined> => {
     const errorPrefix = 'Project.restoreBackup';
     let error: ErrorReport | undefined;
-    // TODO: Implement.
-    return undefined;
+
+    const backupDirPath = await this.resource.path(
+      Project.BACKUPS_DIR_NAME,
+      backup,
+    );
+
+    const backupFilePath = await this.resource.path(
+      Project.BACKUPS_DIR_NAME,
+      `${backup}.zip`,
+    );
+
+    if ((error = await $FileSystem.unzip(backupFilePath, backupDirPath))) {
+      const errorMessage = `${errorPrefix}: Failed to unzip backup`;
+      return error.extend(errorMessage);
+    }
+
+    if ((error = await $FileSystem.removeDir(this.latest.getDirectoryPath()))) {
+      const errorMessage = `${errorPrefix}: Failed to remove latest directory`;
+      return error.extend(errorMessage);
+    }
+
+    if (
+      (error = await $FileSystem.rename(
+        backupDirPath,
+        this.latest.getDirectoryPath(),
+      ))
+    ) {
+      const errorMessage = `${errorPrefix}: Failed to replace latest with backup`;
+      return error.extend(errorMessage);
+    }
+
+    const eitherErrorOrLatest = await ProjectSnapshot.open({
+      directoryPath: this.latest.getDirectoryPath(),
+    });
+    if (eitherErrorOrLatest.isError) {
+      const errorMessage = `${errorPrefix}: Failed to load backup`;
+      return eitherErrorOrLatest.error.extend(errorMessage);
+    }
+
+    this.latest = eitherErrorOrLatest.value;
   };
 
   // #endregion
