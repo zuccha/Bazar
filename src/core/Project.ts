@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { $DateTime } from '../utils/DateTime';
 import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
-import { ErrorReport } from '../utils/ErrorReport';
+import { $ErrorReport, ErrorReport } from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
 import ProjectSnapshot from './ProjectSnapshot';
 import Resource from './Resource';
@@ -180,9 +180,39 @@ export default class Project {
       return error.extend(errorMessage);
     }
 
-    // TODO: Compress backup into zip and delete copied directory.
-
     this.backups.unshift(timestamp);
+  };
+
+  static deleteBackupTriggers = ['backups'];
+  deleteBackup = async (backup: string): Promise<ErrorReport | undefined> => {
+    const errorPrefix = 'Project.deleteBackup';
+    let error: ErrorReport | undefined;
+
+    const backupFilePath = await this.resource.path(
+      Project.BACKUPS_DIR_NAME,
+      `${backup}.zip`,
+    );
+
+    const backupIndex = this.backups.indexOf(backup);
+    if (backupIndex === -1) {
+      const errorMessage = `${errorPrefix}: backup not found`;
+      return $ErrorReport.make(errorMessage);
+    }
+
+    this.backups.splice(backupIndex, 1);
+
+    if ((error = await $FileSystem.removeFile(backupFilePath))) {
+      const errorMessage = `${errorPrefix}: failed to remove backup directory`;
+      return error.extend(errorMessage);
+    }
+  };
+
+  static restoreBackupTriggers = ['backups'];
+  restoreBackup = async (backup: string): Promise<ErrorReport | undefined> => {
+    const errorPrefix = 'Project.restoreBackup';
+    let error: ErrorReport | undefined;
+    // TODO: Implement.
+    return undefined;
   };
 
   // #endregion

@@ -30,3 +30,23 @@ export const useCreateProjectBackup = (
     Project.createBackupTriggers,
   );
 };
+
+export const useDeleteProjectBackup = (
+  project: Project,
+): ((backup: string) => Promise<ErrorReport | undefined>) => {
+  return useSetAsync(
+    project,
+    project.deleteBackup,
+    Project.deleteBackupTriggers,
+  );
+};
+
+export const useRestoreProjectBackup = (
+  project: Project,
+): ((backup: string) => Promise<ErrorReport | undefined>) => {
+  return useSetAsync(
+    project,
+    project.restoreBackup,
+    Project.restoreBackupTriggers,
+  );
+};

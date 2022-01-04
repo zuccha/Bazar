@@ -11,7 +11,7 @@ import useCopyToClipboard from '../../../../hooks/useCopyToClipboard';
 import useHandleError from '../../../../hooks/useHandleError';
 import useSafeState from '../../../../hooks/usSafeState';
 import Button from '../../../../ui-atoms/Button';
-import DialogWithDeletion from '../../../../ui-atoms/DialogWithDeletion';
+import DialogWithIrreversibleAction from '../../../../ui-atoms/DialogWithIrreversibleAction';
 import Frame from '../../../../ui-atoms/Frame';
 import IconButton from '../../../../ui-atoms/IconButton';
 import Output, {
@@ -314,7 +314,8 @@ export default function ResourcesTab<R extends Resource>({
         })}
 
       {!!resourceToRemove && (
-        <DialogWithDeletion
+        <DialogWithIrreversibleAction
+          action='Remove'
           isDisabled={handleRemove.isLoading}
           onClose={() => setResourceToRemove(undefined)}
           onDelete={() => handleRemove.call(resourceToRemove)}
