@@ -120,8 +120,12 @@ export default class Project {
       return $EitherErrorOr.error(latest.error.extend(errorMessage));
     }
 
-    // TODO: Read backups from file system.
-    const backups: string[] = [];
+    const backupsDirectoryPath = await resource.path(Project.BACKUPS_DIR_NAME);
+    const fileNames = await $FileSystem.getFileNames(backupsDirectoryPath);
+    const zipNames = fileNames
+      .filter((fileName) => fileName.endsWith('.zip'))
+      .map((fileName) => fileName.slice(0, -4));
+    const backups: string[] = zipNames.reverse();
 
     return $EitherErrorOr.value(
       new Project({
@@ -135,6 +139,9 @@ export default class Project {
   // #endregion Constructors
 
   // #region Backups
+
+  static getBackupsDeps = ['backups'];
+  getBackups = (): string[] => this.backups;
 
   static createBackupTriggers = ['backups'];
   createBackup = async (): Promise<ErrorReport | undefined> => {

@@ -8,6 +8,7 @@ import {
 import { ProjectRouteName } from '../../../../navigation/Navigation';
 import ComingSoon from '../../../../ui-atoms/ComingSoon';
 import NavigatorWithTabs from '../../../../ui-atoms/NavigatorWithTabs';
+import BackupsTab from './tabs/BackupsTab/BackupsTab';
 import PatchesTab from './tabs/PatchesTab';
 
 interface ProjectScreenContent {
@@ -62,7 +63,7 @@ export default function ProjectScreenContent({
       {
         id: ProjectRouteName.Backups,
         label: 'Backups',
-        content: <ComingSoon title='Backups' />,
+        content: <BackupsTab project={project} />,
       },
       {
         id: ProjectRouteName.Releases,

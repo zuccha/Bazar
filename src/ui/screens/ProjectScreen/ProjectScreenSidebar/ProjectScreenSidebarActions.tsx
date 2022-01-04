@@ -1,4 +1,4 @@
-import { VStack } from '@chakra-ui/react';
+import { toast, useToast, VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 import { useToolchain } from '../../../../core-hooks/Core';
 import {
@@ -45,6 +45,7 @@ export default function ProjectScreenSidebarActions({
     [toolchain],
   );
 
+  const toast = useToast();
   const handleCreateBackup = useAsyncCallback(createBackup, [createBackup]);
 
   return (
@@ -74,7 +75,8 @@ export default function ProjectScreenSidebarActions({
         label='Create backup'
         onClick={async () => {
           const error = await handleCreateBackup.call();
-          handleError(error, 'Failed to create backup');
+          if (error) handleError(error, 'Failed to create backup');
+          else toast({ title: 'Backup created!', status: 'success' });
         }}
         w='100%'
       />
