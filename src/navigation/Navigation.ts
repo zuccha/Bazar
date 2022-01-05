@@ -6,6 +6,7 @@ export enum RootRouteName {
   Home = 'Home',
   Project = 'Project',
   Settings = 'Settings',
+  Templates = 'Templates',
   Toolchain = 'Toolchain',
 }
 
