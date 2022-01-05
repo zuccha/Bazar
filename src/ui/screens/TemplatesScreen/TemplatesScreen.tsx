@@ -1,4 +1,4 @@
-import { Flex } from '@chakra-ui/react';
+import { Flex, Heading } from '@chakra-ui/react';
 import { ReactElement, useMemo } from 'react';
 import {
   useNavigateTemplates,
@@ -6,6 +6,7 @@ import {
 } from '../../../navigation/hooks';
 import { TemplatesRouteName } from '../../../navigation/Navigation';
 import ComingSoon from '../../../ui-atoms/ComingSoon';
+import Header from '../../../ui-atoms/Header';
 import NavigatorWithList from '../../../ui-atoms/NavigatorWithList';
 
 export default function TemplatesScreen(): ReactElement {
@@ -67,13 +68,14 @@ export default function TemplatesScreen(): ReactElement {
 
   return (
     <Flex flex={1} h='100%' p={10} justifyContent='center'>
-      <Flex w='100%' minW={600} maxW={800}>
+      <Flex w='100%' minW={600} maxW={800} flexDir='column'>
+        <Header title='Templates' hideBorderBottom />
         <NavigatorWithList
           selectedPage={projectRoute}
           pages={pages}
           onSelectPage={navigateTemplates}
           flex={1}
-          height='100%'
+          height={1}
         />
       </Flex>
     </Flex>
