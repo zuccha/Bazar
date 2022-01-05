@@ -1,4 +1,4 @@
-import { Button, Flex, VStack } from '@chakra-ui/react';
+import { Button, Flex, Text, VStack } from '@chakra-ui/react';
 import { ReactElement, ReactNode, useMemo } from 'react';
 import useColorScheme from '../theme/useColorScheme';
 
@@ -8,6 +8,7 @@ interface NavigatorWithListProps<T extends string> {
     id: T;
     label: string;
     content: ReactNode;
+    isDisabled?: boolean;
   }[];
   onSelectPage: (page: T) => void;
 
@@ -46,10 +47,12 @@ export default function NavigatorWithList<T extends string>({
             return (
               <Button
                 key={page.id}
-                onClick={() => onSelectPage(page.id)}
-                variant='link'
                 colorScheme={isSelected ? colorScheme : 'black'}
                 fontWeight={isSelected ? 'bold' : 'normal'}
+                isDisabled={page.isDisabled}
+                onClick={() => onSelectPage(page.id)}
+                minW={0}
+                variant='link'
               >
                 {page.label}
               </Button>

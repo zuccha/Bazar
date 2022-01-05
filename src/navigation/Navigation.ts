@@ -27,6 +27,17 @@ export enum SettingsRouteName {
   NewProject = 'NewProject',
 }
 
+export enum TemplatesRouteName {
+  Projects = 'Projects',
+  Blocks = 'Blocks',
+  Music = 'Music',
+  Patches = 'Patches',
+  Sprites = 'Sprites',
+  UberAsm = 'UberAsm',
+  GFX = 'GFX',
+  ExGFX = 'ExGFX',
+}
+
 export enum ToolchainRouteName {
   Custom = 'Custom',
   Embedded = 'Embedded',
@@ -36,6 +47,7 @@ export default class Navigation {
   private root: Router<RootRouteName>;
   private project: Router<ProjectRouteName>;
   private settings: Router<SettingsRouteName>;
+  private templates: Router<TemplatesRouteName>;
   private toolchain: Router<ToolchainRouteName>;
 
   private constructor() {
@@ -43,6 +55,9 @@ export default class Navigation {
     this.project = Router.create<ProjectRouteName>(ProjectRouteName.Patches);
     this.settings = Router.create<SettingsRouteName>(
       SettingsRouteName.Appearance,
+    );
+    this.templates = Router.create<TemplatesRouteName>(
+      TemplatesRouteName.Projects,
     );
     this.toolchain = Router.create<ToolchainRouteName>(
       ToolchainRouteName.Embedded,
@@ -61,6 +76,9 @@ export default class Navigation {
 
   static getSettingsDeps = ['Navigation.settings'];
   getSettings = (): Router<SettingsRouteName> => this.settings;
+
+  static getTemplatesDeps = ['Navigation.templates'];
+  getTemplates = (): Router<TemplatesRouteName> => this.templates;
 
   static getToolchainDeps = ['Navigation.toolchain'];
   getToolchain = (): Router<ToolchainRouteName> => this.toolchain;

@@ -4,6 +4,7 @@ import Navigation, {
   ProjectRouteName,
   RootRouteName,
   SettingsRouteName,
+  TemplatesRouteName,
   ToolchainRouteName,
 } from './Navigation';
 import Router from './Router';
@@ -64,6 +65,31 @@ export const useNavigateSettings = (): ((route: SettingsRouteName) => void) => {
 };
 
 // #endregion Settings
+
+// #region Templates
+
+const useTemplates = (): Router<TemplatesRouteName> => {
+  const navigation = useNavigation();
+  return useGet(
+    navigation,
+    navigation.getTemplates,
+    Navigation.getTemplatesDeps,
+  );
+};
+
+export const useTemplatesRoute = (): TemplatesRouteName => {
+  const templates = useTemplates();
+  return useGet(templates, templates.getRoute, Router.getRouteDeps);
+};
+
+export const useNavigateTemplates = (): ((
+  route: TemplatesRouteName,
+) => void) => {
+  const templates = useTemplates();
+  return useSet(templates, templates.navigate, Router.navigateTriggers);
+};
+
+// #endregion Toolchain
 
 // #region Toolchain
 
