@@ -141,9 +141,9 @@ There is not necessarily an order of completion. Features will be implemented at
 ## Backups
 
 - [x] Create backup
-- [ ] List backups
-- [ ] Restore backup
-- [ ] Remove backup
+- [x] List backups
+- [x] Restore backup
+- [x] Remove backup
 
 ## Releases
 
@@ -210,3 +210,9 @@ There is not necessarily an order of completion. Features will be implemented at
 ## Help
 
 - [ ] Write "help"
+
+## Quality of life
+
+- [ ] Sortable table rows
+- [ ] Row selection with arrows
+- [ ] Copy-to-clipboard errors
