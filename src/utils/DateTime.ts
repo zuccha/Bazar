@@ -9,6 +9,18 @@ export enum DateTimeFormat {
 }
 
 export const $DateTime = {
+  compareTimestampsLt: (timestamp1: string, timestamp2: string): number => {
+    if (timestamp1 < timestamp2) return -1;
+    if (timestamp1 > timestamp2) return 1;
+    return 0;
+  },
+
+  compareTimestampsGt: (timestamp1: string, timestamp2: string): number => {
+    if (timestamp1 < timestamp2) return 1;
+    if (timestamp1 > timestamp2) return -1;
+    return 0;
+  },
+
   isISODate: (date: unknown): boolean => {
     return typeof date === 'string' && ISO_DATE_REGEXP.test(date);
   },

@@ -122,10 +122,10 @@ export default class Project {
 
     const backupsDirectoryPath = await resource.path(Project.BACKUPS_DIR_NAME);
     const fileNames = await $FileSystem.getFileNames(backupsDirectoryPath);
-    const zipNames = fileNames
+    const backups: string[] = fileNames
       .filter((fileName) => fileName.endsWith('.zip'))
-      .map((fileName) => fileName.slice(0, -4));
-    const backups: string[] = zipNames.reverse();
+      .map((fileName) => fileName.slice(0, -4))
+      .sort($DateTime.compareTimestampsGt);
 
     return $EitherErrorOr.value(
       new Project({
