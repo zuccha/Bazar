@@ -8,6 +8,7 @@ interface NavigatorWithTabsProps<T extends string> {
     id: T;
     label: string;
     content: ReactNode;
+    isDisabled?: boolean;
   }[];
   onSelectPage: (page: T) => void;
 
@@ -53,7 +54,7 @@ export default function NavigatorWithTabs<T extends string>({
     >
       <TabList>
         {pages.map((page) => (
-          <Tab key={page.id} w={100}>
+          <Tab key={page.id} w={100} isDisabled={page.isDisabled}>
             {page.label}
           </Tab>
         ))}

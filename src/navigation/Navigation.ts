@@ -39,7 +39,7 @@ export default class Navigation {
 
   private constructor() {
     this.root = Router.create<RootRouteName>(RootRouteName.Home);
-    this.project = Router.create<ProjectRouteName>(ProjectRouteName.Blocks);
+    this.project = Router.create<ProjectRouteName>(ProjectRouteName.Patches);
     this.settings = Router.create<SettingsRouteName>(
       SettingsRouteName.Appearance,
     );
