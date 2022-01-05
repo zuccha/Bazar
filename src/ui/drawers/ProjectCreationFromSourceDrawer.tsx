@@ -39,7 +39,7 @@ export default function ProjectCreationFromSourceDrawer({
 
   const defaultAuthor = useSetting(settings, 'newProjectDefaultAuthor');
   const authorField = useFormField({
-    infoMessage: 'Author of the project.',
+    infoMessage: 'Author of the project',
     initialValue: defaultAuthor,
     isRequired: false,
     label: 'Author',
@@ -50,7 +50,7 @@ export default function ProjectCreationFromSourceDrawer({
     'newProjectDefaultLocationDirPath',
   );
   const locationDirPathField = useFormField({
-    infoMessage: 'The project will be created in this directory.',
+    infoMessage: 'The project will be created in this directory',
     initialValue: defaultLocationDirPath,
     isRequired: true,
     label: 'Destination directory',
@@ -62,7 +62,7 @@ export default function ProjectCreationFromSourceDrawer({
     'newProjectDefaultRomFilePath',
   );
   const romFilePathField = useFormField({
-    infoMessage: 'ROM used for the project (a copy will be made).',
+    infoMessage: 'ROM used for the project (a copy will be made)',
     initialValue: defaultRomFilePath,
     isRequired: true,
     label: 'ROM file',
