@@ -7,14 +7,14 @@ import Toolchain from './Toolchain';
 export default class Core {
   public readonly TypeName = 'Core';
 
-  private project: Project | undefined;
-  private settings: Settings;
-  private toolchain: Toolchain;
+  private _project: Project | undefined;
+  private _settings: Settings;
+  private _toolchain: Toolchain;
 
   private constructor() {
-    this.project = undefined;
-    this.settings = Settings.create();
-    this.toolchain = Toolchain.create();
+    this._project = undefined;
+    this._settings = Settings.create();
+    this._toolchain = Toolchain.create();
   }
 
   static create(): Core {
@@ -22,22 +22,22 @@ export default class Core {
   }
 
   getProject = getter(['project'], (): Project | undefined => {
-    return this.project;
+    return this._project;
   });
 
   setProject = setter(
     ['project'],
     (project: Project): ErrorReport | undefined => {
-      this.project = project;
+      this._project = project;
       return undefined;
     },
   );
 
   getSettings = getter(['settings'], (): Settings => {
-    return this.settings;
+    return this._settings;
   });
 
   getToolchain = getter(['toolchain'], (): Toolchain => {
-    return this.toolchain;
+    return this._toolchain;
   });
 }
