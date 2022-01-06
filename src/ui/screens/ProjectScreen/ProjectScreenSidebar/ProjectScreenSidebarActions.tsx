@@ -1,6 +1,7 @@
 import { useToast, VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
-import { useToolchain } from '../../../../core-hooks/Core';
+import { useAddProjectSnapshotToCollection } from '../../../../core-hooks/Collection';
+import { useCollection, useToolchain } from '../../../../core-hooks/Core';
 import {
   useCreateProjectBackup,
   useProjectLatestSnapshot,
@@ -25,28 +26,54 @@ interface ProjectScreenSidebarActionsProps {
 export default function ProjectScreenSidebarActions({
   project,
 }: ProjectScreenSidebarActionsProps): ReactElement {
-  const toolchain = useToolchain();
   const handleError = useHandleError();
-
-  const snapshot = useProjectLatestSnapshot(project);
-  const lunarMagic = useGetEmbeddedTool(toolchain, 'lunarMagic');
-  const emulator = useGetCustomTool(toolchain, 'emulator');
-  const openInLunarMagic = useOpenProjectSnapshotInLunarMagic(snapshot);
-  const launchInEmulator = useLaunchProjectSnapshotInEmulator(snapshot);
-  const createBackup = useCreateProjectBackup(project);
-
-  const handleOpenInLunarMagic = useAsyncCallback(
-    () => openInLunarMagic(toolchain),
-    [toolchain],
-  );
-
-  const handleLaunchInEmulator = useAsyncCallback(
-    () => launchInEmulator(toolchain),
-    [toolchain],
-  );
-
   const toast = useToast();
-  const handleCreateBackup = useAsyncCallback(createBackup, [createBackup]);
+
+  const collection = useCollection();
+  const snapshot = useProjectLatestSnapshot(project);
+  const toolchain = useToolchain();
+
+  const lunarMagic = useGetEmbeddedTool(toolchain, 'lunarMagic');
+  const openInLunarMagic = useOpenProjectSnapshotInLunarMagic(snapshot);
+  const handleOpenInLunarMagic = useAsyncCallback(async () => {
+    const error = await openInLunarMagic(toolchain);
+    handleError(error, 'Failed to open in Lunar Magic');
+    return error;
+  }, [toolchain, openInLunarMagic, handleError]);
+
+  const emulator = useGetCustomTool(toolchain, 'emulator');
+  const launchInEmulator = useLaunchProjectSnapshotInEmulator(snapshot);
+  const handleLaunchInEmulator = useAsyncCallback(async () => {
+    const error = await launchInEmulator(toolchain);
+    handleError(error, 'Failed to run emulator');
+    return error;
+  }, [toolchain, launchInEmulator, handleError]);
+
+  const createBackup = useCreateProjectBackup(project);
+  const handleCreateBackup = useAsyncCallback(async () => {
+    const error = await createBackup();
+    if (error) handleError(error, 'Failed to create backup');
+    else toast({ title: 'Backup created!', status: 'success' });
+    return error;
+  }, [createBackup, handleError, toast]);
+
+  const addProjectSnapshotToCollection =
+    useAddProjectSnapshotToCollection(collection);
+  const handleAddProjectSnapshotToCollection = useAsyncCallback(async () => {
+    const error = await addProjectSnapshotToCollection(
+      project.getName(),
+      snapshot,
+    );
+    if (error) handleError(error, 'Failed to add project to collection');
+    else toast({ title: 'Project saved as template', status: 'success' });
+    return error;
+  }, [
+    snapshot,
+    project.getName(),
+    addProjectSnapshotToCollection,
+    handleError,
+    toast,
+  ]);
 
   return (
     <VStack w='100%'>
@@ -55,32 +82,28 @@ export default function ProjectScreenSidebarActions({
           lunarMagic.status !== 'installed' || handleOpenInLunarMagic.isLoading
         }
         label='Open in Lunar Magic'
-        onClick={async () => {
-          const error = await handleOpenInLunarMagic.call();
-          handleError(error, 'Failed to open in Lunar Magic');
-        }}
+        onClick={handleOpenInLunarMagic.call}
         w='100%'
       />
       <Button
         isDisabled={!emulator.exePath || handleLaunchInEmulator.isLoading}
         label='Run on emulator'
-        onClick={async () => {
-          const error = await handleLaunchInEmulator.call();
-          handleError(error, 'Failed to run in emulator');
-        }}
+        onClick={handleLaunchInEmulator.call}
         w='100%'
       />
       <Button
         isDisabled={handleCreateBackup.isLoading}
         label='Create backup'
-        onClick={async () => {
-          const error = await handleCreateBackup.call();
-          if (error) handleError(error, 'Failed to create backup');
-          else toast({ title: 'Backup created!', status: 'success' });
-        }}
+        onClick={handleCreateBackup.call}
         w='100%'
       />
       <Button label='Create BPS' onClick={() => null} w='100%' isDisabled />
+      <Button
+        isDisabled={handleAddProjectSnapshotToCollection.isLoading}
+        label='Save as template'
+        onClick={handleAddProjectSnapshotToCollection.call}
+        w='100%'
+      />
     </VStack>
   );
 }

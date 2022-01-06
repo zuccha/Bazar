@@ -1,9 +1,15 @@
 import { useCore } from '../contexts/CoreContext';
+import Collection from '../core/Collection';
 import Project from '../core/Project';
 import Settings from '../core/Settings';
 import Toolchain from '../core/Toolchain';
-import { useGet, useSet, useSetAsync } from '../hooks/useAccessors';
+import { useGet, useSet } from '../hooks/useAccessors';
 import { ErrorReport } from '../utils/ErrorReport';
+
+export const useCollection = (): Collection => {
+  const core = useCore();
+  return useGet(core, core.getCollection);
+};
 
 export const useProject = (): Project | undefined => {
   const core = useCore();
