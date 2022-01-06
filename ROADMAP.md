@@ -31,6 +31,7 @@ There is not necessarily an order of completion. Features will be implemented at
 - [ ] Add block from file
 - [ ] Add block from directory
 - [ ] Add block from template
+- [ ] Add block and apply
 - [ ] List blocks
 - [ ] Complete block info
   - [ ] Name
@@ -51,6 +52,7 @@ There is not necessarily an order of completion. Features will be implemented at
 - [ ] Add music from file
 - [ ] Add music from directory
 - [ ] Add music from template
+- [ ] Add music and apply
 - [ ] List musics
 - [ ] Complete music info
   - [ ] Name
@@ -71,6 +73,7 @@ There is not necessarily an order of completion. Features will be implemented at
 - [x] Add patch from file
 - [x] Add patch from directory
 - [ ] Add patch from template
+- [ ] Add patch and apply
 - [x] List patches
 - [x] Complete patch info
   - [x] Name
@@ -90,6 +93,7 @@ There is not necessarily an order of completion. Features will be implemented at
 - [ ] Add sprite from file
 - [ ] Add sprite from directory
 - [ ] Add sprite from template
+- [ ] Add sprite and apply
 - [ ] List sprites
 - [ ] Complete sprite info
   - [ ] Name
@@ -110,6 +114,7 @@ There is not necessarily an order of completion. Features will be implemented at
 - [ ] Add uberASM from file
 - [ ] Add uberASM from directory
 - [ ] Add uberASM from template
+- [ ] Add uberASM and apply
 - [ ] List uberASMs
 - [ ] Complete uberASM info
   - [ ] Name
