@@ -27,7 +27,7 @@ export default function HomeScreenRecentProjects(): ReactElement {
 
   const handleOpenRecentProject = useAsyncCallback(
     async (path: string) => {
-      const errorOrProject = await Project.open({ directoryPath: path });
+      const errorOrProject = await Project.open(path);
       if (errorOrProject.isError) {
         await removeRecentProject(path);
         return errorOrProject.error;

@@ -7,7 +7,7 @@ import {
   useRestoreProjectBackup,
 } from '../../../../../../core-hooks/Project';
 import Project from '../../../../../../core/Project';
-import { useGet } from '../../../../../../hooks/useAccessors';
+import { useGet, useList } from '../../../../../../hooks/useAccessors';
 import useAsyncCallback from '../../../../../../hooks/useAsyncCallback';
 import useHandleError from '../../../../../../hooks/useHandleError';
 import DialogWithIrreversibleAction from '../../../../../../ui-atoms/DialogWithIrreversibleAction';
@@ -16,6 +16,7 @@ import Table, {
   TableColumn,
   TableRow,
 } from '../../../../../../ui-atoms/Table';
+import { getter } from '../../../../../../utils/Accessors';
 import { $DateTime, DateTimeFormat } from '../../../../../../utils/DateTime';
 
 interface BackupsTabProps {
@@ -80,16 +81,10 @@ export default function BackupsTab({ project }: BackupsTabProps): ReactElement {
     ];
   }, []);
 
-  const rows: TableRow<string>[] = useGet(
-    project,
-    useCallback(() => {
-      return backups.map((backup) => ({
-        data: backup,
-        key: backup,
-      }));
-    }, [backups]),
-    Project.getBackupsDeps,
-  );
+  const rows: TableRow<string>[] = useList(backups).map((backup) => ({
+    data: backup,
+    key: backup,
+  }));
 
   return (
     <>

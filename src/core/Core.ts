@@ -1,9 +1,12 @@
+import { getter, setter } from '../utils/Accessors';
 import { ErrorReport } from '../utils/ErrorReport';
 import Project from './Project';
 import Settings from './Settings';
 import Toolchain from './Toolchain';
 
 export default class Core {
+  public readonly TypeName = 'Core';
+
   private project: Project | undefined;
   private settings: Settings;
   private toolchain: Toolchain;
@@ -18,24 +21,23 @@ export default class Core {
     return new Core();
   }
 
-  static getProjectDeps = ['Core.project'];
-  getProject = (): Project | undefined => {
+  getProject = getter(['project'], (): Project | undefined => {
     return this.project;
-  };
+  });
 
-  static setProjectTriggers = ['Core.project'];
-  setProject = (project: Project): ErrorReport | undefined => {
-    this.project = project;
-    return undefined;
-  };
+  setProject = setter(
+    ['project'],
+    (project: Project): ErrorReport | undefined => {
+      this.project = project;
+      return undefined;
+    },
+  );
 
-  static getSettingsDeps = ['Core.settings'];
-  getSettings = (): Settings => {
+  getSettings = getter(['settings'], (): Settings => {
     return this.settings;
-  };
+  });
 
-  static getToolchainDeps = ['Core.toolchain'];
-  getToolchain = (): Toolchain => {
+  getToolchain = getter(['toolchain'], (): Toolchain => {
     return this.toolchain;
-  };
+  });
 }

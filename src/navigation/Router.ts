@@ -1,3 +1,5 @@
+import { getter, setter } from '../utils/Accessors';
+
 export default class Router<T> {
   private route: T;
 
@@ -9,14 +11,12 @@ export default class Router<T> {
     return new Router(initialRoute);
   }
 
-  static getRouteDeps = ['Router.route'];
-  getRoute = () => {
+  getRoute = getter(['Router.route'], () => {
     return this.route;
-  };
+  });
 
-  static navigateTriggers = ['Router.route'];
-  navigate = (route: T): undefined => {
+  navigate = setter(['Router.route'], (route: T): undefined => {
     this.route = route;
     return undefined;
-  };
+  });
 }

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { setter } from '../utils/Accessors';
 import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
 import { ErrorReport } from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
@@ -161,6 +162,8 @@ export type ToolchainEmbedded =
   | 'uberAsm';
 
 export default class Toolchain {
+  public readonly TypeName = 'Toolchain';
+
   private editor: ToolCustom;
   private emulator: ToolCustom;
 
@@ -213,43 +216,45 @@ export default class Toolchain {
     });
   }
 
-  static loadTriggers = [
-    'Toolchain.editor',
-    'Toolchain.emulator',
-    'Toolchain.lunarMagic',
-    'Toolchain.asar',
-    'Toolchain.flips',
-    'Toolchain.gps',
-    'Toolchain.pixi',
-    'Toolchain.uberAsm',
-  ];
-  load = async (): Promise<ErrorReport | undefined> => {
-    const editorOrError = await readCustom(EDITOR_OPTIONS);
-    if (editorOrError.isError) return editorOrError.error;
-    const emulatorOrError = await readCustom(EMULATOR_OPTIONS);
-    if (emulatorOrError.isError) return emulatorOrError.error;
-    const lunarMagicOrError = await readEmbedded(LUNAR_MAGIC_OPTIONS);
-    if (lunarMagicOrError.isError) return lunarMagicOrError.error;
-    const asarOrError = await readEmbedded(ASAR_OPTIONS);
-    if (asarOrError.isError) return asarOrError.error;
-    const flipsOrError = await readEmbedded(FLIPS_OPTIONS);
-    if (flipsOrError.isError) return flipsOrError.error;
-    const gpsOrError = await readEmbedded(GPS_OPTIONS);
-    if (gpsOrError.isError) return gpsOrError.error;
-    const pixiOrError = await readEmbedded(PIXI_OPTIONS);
-    if (pixiOrError.isError) return pixiOrError.error;
-    const uberAsmOrError = await readEmbedded(UBER_ASM_OPTIONS);
-    if (uberAsmOrError.isError) return uberAsmOrError.error;
+  load = setter(
+    [
+      'editor',
+      'emulator',
+      'lunarMagic',
+      'asar',
+      'flips',
+      'gps',
+      'pixi',
+      'uberAsm',
+    ],
+    async (): Promise<ErrorReport | undefined> => {
+      const editorOrError = await readCustom(EDITOR_OPTIONS);
+      if (editorOrError.isError) return editorOrError.error;
+      const emulatorOrError = await readCustom(EMULATOR_OPTIONS);
+      if (emulatorOrError.isError) return emulatorOrError.error;
+      const lunarMagicOrError = await readEmbedded(LUNAR_MAGIC_OPTIONS);
+      if (lunarMagicOrError.isError) return lunarMagicOrError.error;
+      const asarOrError = await readEmbedded(ASAR_OPTIONS);
+      if (asarOrError.isError) return asarOrError.error;
+      const flipsOrError = await readEmbedded(FLIPS_OPTIONS);
+      if (flipsOrError.isError) return flipsOrError.error;
+      const gpsOrError = await readEmbedded(GPS_OPTIONS);
+      if (gpsOrError.isError) return gpsOrError.error;
+      const pixiOrError = await readEmbedded(PIXI_OPTIONS);
+      if (pixiOrError.isError) return pixiOrError.error;
+      const uberAsmOrError = await readEmbedded(UBER_ASM_OPTIONS);
+      if (uberAsmOrError.isError) return uberAsmOrError.error;
 
-    this.editor = editorOrError.value;
-    this.emulator = emulatorOrError.value;
-    this.lunarMagic = lunarMagicOrError.value;
-    this.asar = asarOrError.value;
-    this.flips = flipsOrError.value;
-    this.gps = gpsOrError.value;
-    this.pixi = pixiOrError.value;
-    this.uberAsm = uberAsmOrError.value;
-  };
+      this.editor = editorOrError.value;
+      this.emulator = emulatorOrError.value;
+      this.lunarMagic = lunarMagicOrError.value;
+      this.asar = asarOrError.value;
+      this.flips = flipsOrError.value;
+      this.gps = gpsOrError.value;
+      this.pixi = pixiOrError.value;
+      this.uberAsm = uberAsmOrError.value;
+    },
+  );
 
   editCustom = async (
     toolCustom: ToolchainCustom,

@@ -7,8 +7,9 @@ import {
 import { useGetEmbeddedTool } from '../../../../../../core-hooks/Toolchain';
 import Patch from '../../../../../../core/Patch';
 import ProjectSnapshot from '../../../../../../core/ProjectSnapshot';
-import { asGlobalDeps, useGet } from '../../../../../../hooks/useAccessors';
+import { useGet, useList } from '../../../../../../hooks/useAccessors';
 import { TableColumn, TableRow } from '../../../../../../ui-atoms/Table';
+import { getter } from '../../../../../../utils/Accessors';
 import { $EitherErrorOr } from '../../../../../../utils/EitherErrorOr';
 import { $ErrorReport } from '../../../../../../utils/ErrorReport';
 import PatchAdditionDrawer from '../../../../../drawers/PatchAdditionDrawer';
@@ -18,11 +19,6 @@ import PatchesTabInfo from './PatchesTabInfo';
 interface PatchesTabProps {
   projectSnapshot: ProjectSnapshot;
 }
-
-const rowsDeps = [
-  ...ProjectSnapshot.getPatchesDeps,
-  ...asGlobalDeps(Patch.updateInfoTriggers),
-];
 
 export default function PatchesTab({
   projectSnapshot,
@@ -54,16 +50,10 @@ export default function PatchesTab({
     ];
   }, []);
 
-  const rows: TableRow<Patch>[] = useGet(
-    projectSnapshot,
-    useCallback(() => {
-      return patches.map((patch) => ({
-        data: patch,
-        key: patch.getInfo().name,
-      }));
-    }, [patches]),
-    rowsDeps,
-  );
+  const rows: TableRow<Patch>[] = useList(patches).map((patch) => ({
+    data: patch,
+    key: patch.getInfo().name,
+  }));
 
   return (
     <ResourcesTab

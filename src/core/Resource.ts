@@ -1,25 +1,34 @@
 import { ZodType } from 'zod';
+import { getter, setter } from '../utils/Accessors';
 import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
 import { ErrorReport } from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
 import { $Serialization } from '../utils/Serialization';
 
-export default class Resource<Info> {
-  private directoryPath: string;
-  private info: Info;
+export interface ResourceFields<Info> {
+  path?: string;
+  directoryPath: string;
+  name: string;
+  info: Info;
+}
+
+export default abstract class Resource<Info> {
+  public abstract readonly TypeName: string;
+
+  private _path: string;
+  private _directoryPath: string;
+  private _name: string;
+  private _info: Info;
 
   private static INFO_FILE_NAME = 'info.json';
 
   // #region Private
 
-  static async loadInfo<Info>(
-    directoryPath: string,
+  private static async loadInfo<Info>(
+    path: string,
     infoSchema: ZodType<Info>,
   ): Promise<EitherErrorOr<Info>> {
-    const infoFilePath = await $FileSystem.join(
-      directoryPath,
-      this.INFO_FILE_NAME,
-    );
+    const infoFilePath = await $FileSystem.join(path, this.INFO_FILE_NAME);
     const dataOrError = await $Serialization.load(infoFilePath, infoSchema);
     if (dataOrError.isError) {
       const errorMessage = 'Resource.loadInfo: failed to load info';
@@ -28,14 +37,11 @@ export default class Resource<Info> {
     return dataOrError;
   }
 
-  static async saveInfo<Info>(
-    directoryPath: string,
+  private static async saveInfo<Info>(
+    path: string,
     info: Info,
   ): Promise<ErrorReport | undefined> {
-    const infoFilePath = await $FileSystem.join(
-      directoryPath,
-      this.INFO_FILE_NAME,
-    );
+    const infoFilePath = await $FileSystem.join(path, this.INFO_FILE_NAME);
     const error = await $Serialization.save(infoFilePath, info);
     if (error) {
       const errorMessage = 'Resource.saveInfo: failed to save info';
@@ -43,110 +49,81 @@ export default class Resource<Info> {
     }
   }
 
-  private constructor({
-    directoryPath,
-    info,
-  }: {
-    directoryPath: string;
-    info: Info;
-  }) {
-    this.directoryPath = directoryPath;
-    this.info = info;
+  constructor({ path, directoryPath, name, info }: ResourceFields<Info>) {
+    this._path = path ?? '';
+    this._directoryPath = directoryPath;
+    this._name = name;
+    this._info = info;
   }
 
   // #endregion
 
   /**
-   * Create a directory for the resource, along its info file.
-   *
-   * @param locationDirPath Directory into which the resource directory will be
-   * created.
-   * @param name Name of the resource. This will be the name of the directory
-   * that will be created in the location directory.
-   * @param info Object containing the info of the resource. Can be any valid
-   * JSON object.
-   * @returns A resource, or an error if there is any problem creating the
-   * resource, its directory, or its info file.
+   * Open a resource's info.
    */
-  static async create<Info>(
-    locationDirPath: string,
-    name: string,
-    info: Info,
-  ): Promise<EitherErrorOr<Resource<Info>>> {
-    const errorPrefix = `Resource.create`;
-    let error: ErrorReport | undefined;
-    const resource = new Resource({
-      directoryPath: await $FileSystem.join(locationDirPath, name),
-      info,
-    });
-
-    // Validation
-    if ((error = await $FileSystem.validateIsValidName(name))) {
-      const errorMessage = `${errorPrefix}: name is not valid`;
-      return $EitherErrorOr.error(error.extend(errorMessage));
-    }
-
-    if ((error = await $FileSystem.validateExistsDir(locationDirPath))) {
-      const errorMessage = `${errorPrefix}: location does not exist`;
-      return $EitherErrorOr.error(error.extend(errorMessage));
-    }
-
-    if ((error = await $FileSystem.validateNotExists(resource.directoryPath))) {
-      const errorMessage = `${errorPrefix}: resource already exists`;
-      return $EitherErrorOr.error(error.extend(errorMessage));
-    }
-
-    // Create directory
-    if ((error = await $FileSystem.createDirectory(resource.directoryPath))) {
-      const errorMessage = `${errorPrefix}: failed to create directory`;
-      return $EitherErrorOr.error(error.extend(errorMessage));
-    }
-
-    // Create info file
-    if (
-      (error = await Resource.saveInfo(resource.directoryPath, resource.info))
-    ) {
-      await $FileSystem.removeDir(resource.directoryPath);
-      const errorMessage = `${errorPrefix}: failed to save info`;
-      return $EitherErrorOr.error(error.extend(errorMessage));
-    }
-
-    // Return resource
-    return $EitherErrorOr.value(resource);
-  }
-
-  /**
-   * Open a resource, given its directory.
-   *
-   * @param directoryPath Directory of the resource. It must contain an info.json
-   * file that contains the correct info.
-   * @returns A resource, or an error if there is any problem opening the info
-   * file.
-   */
-  static async open<Info>(
-    directoryPath: string,
+  protected static async load<Info>(
+    path: string,
     infoSchema: ZodType<Info>,
-  ): Promise<EitherErrorOr<Resource<Info>>> {
-    const errorPrefix = `Resource.open`;
+  ): Promise<EitherErrorOr<ResourceFields<Info>>> {
+    const errorPrefix = `Resource.load`;
     let error: ErrorReport | undefined;
 
-    if ((error = await $FileSystem.validateExistsDir(directoryPath))) {
+    const directoryPath = $FileSystem.dirpath(path);
+    const name = $FileSystem.basename(path);
+
+    if ((error = await $FileSystem.validateExistsDir(path))) {
       const errorMessage = `${errorPrefix}: directory does not exist`;
       return $EitherErrorOr.error(error.extend(errorMessage));
     }
 
-    const info = await Resource.loadInfo(directoryPath, infoSchema);
-    if (info.isError) {
+    const eitherErrorOrInfo = await Resource.loadInfo(path, infoSchema);
+    if (eitherErrorOrInfo.isError) {
       const errorMessage = `${errorPrefix}: failed to load info`;
-      return $EitherErrorOr.error(info.error.extend(errorMessage));
+      return $EitherErrorOr.error(eitherErrorOrInfo.error.extend(errorMessage));
     }
 
-    const resource = new Resource({
-      info: info.value,
-      directoryPath,
-    });
-    return $EitherErrorOr.value(resource);
+    const info = eitherErrorOrInfo.value;
+    return $EitherErrorOr.value({ path, directoryPath, name, info });
   }
+
+  /**
+   * Create a directory for the resource, along with its info file.
+   */
+  protected save = async (): Promise<ErrorReport | undefined> => {
+    const errorPrefix = `${this.TypeName}.save`;
+    let error: ErrorReport | undefined;
+
+    this._path = await $FileSystem.join(this._directoryPath, this._name);
+
+    // Validation
+    if ((error = await $FileSystem.validateIsValidName(this._name))) {
+      const errorMessage = `${errorPrefix}: name is not valid`;
+      return error.extend(errorMessage);
+    }
+
+    if ((error = await $FileSystem.validateExistsDir(this._directoryPath))) {
+      const errorMessage = `${errorPrefix}: destination directory does not exist`;
+      return error.extend(errorMessage);
+    }
+
+    if ((error = await $FileSystem.validateNotExists(this._path))) {
+      const errorMessage = `${errorPrefix}: resource with this name already exists in destination directory`;
+      return error.extend(errorMessage);
+    }
+
+    // Create directory
+    if ((error = await $FileSystem.createDirectory(this._path))) {
+      const errorMessage = `${errorPrefix}: failed to create directory`;
+      return error.extend(errorMessage);
+    }
+
+    // Create info file
+    if ((error = await Resource.saveInfo(this._path, this._info))) {
+      await $FileSystem.removeDir(this._path);
+      const errorMessage = `${errorPrefix}: failed to save info`;
+      return error.extend(errorMessage);
+    }
+  };
 
   /**
    * Delete a resource and its directory.
@@ -155,7 +132,11 @@ export default class Resource<Info> {
    * otherwise.
    */
   delete = async (): Promise<ErrorReport | undefined> => {
-    return await $FileSystem.removeDir(this.directoryPath);
+    const error = await $FileSystem.removeDir(this._path);
+    if (error) {
+      const errorMessage = `${this.TypeName}.delete: failed to delete resource`;
+      return error.extend(errorMessage);
+    }
   };
 
   /**
@@ -165,66 +146,120 @@ export default class Resource<Info> {
    * @returns `undefined` if the resource was removed successfully, an error
    * otherwise.
    */
-  rename = async (name: string): Promise<ErrorReport | undefined> => {
-    const errorPrefix = `Resource.rename`;
-    let error: ErrorReport | undefined;
+  rename = setter(
+    ['name', 'path'],
+    async (name: string): Promise<ErrorReport | undefined> => {
+      const errorPrefix = `${this.TypeName}.rename`;
+      let error: ErrorReport | undefined;
 
-    const parentDirectoryPath = $FileSystem.dirpath(this.directoryPath);
-    const directoryPath = await $FileSystem.join(parentDirectoryPath, name);
+      const path = await $FileSystem.join(this._directoryPath, name);
 
-    if ((error = await $FileSystem.validateIsValidName(name))) {
-      const errorMessage = `${errorPrefix}: name is not valid`;
-      return error.extend(errorMessage);
-    }
+      if ((error = await $FileSystem.validateIsValidName(name))) {
+        const errorMessage = `${errorPrefix}: name is not valid`;
+        return error.extend(errorMessage);
+      }
 
-    if ((error = await $FileSystem.validateExistsDir(this.directoryPath))) {
-      const errorMessage = `${errorPrefix}: this resource does not exist`;
-      return error.extend(errorMessage);
-    }
+      if ((error = await $FileSystem.validateExistsDir(this._path))) {
+        const errorMessage = `${errorPrefix}: this resource does not exist`;
+        return error.extend(errorMessage);
+      }
 
-    if ((error = await $FileSystem.validateNotExists(directoryPath))) {
-      const errorMessage = `${errorPrefix}: resource with new name already exists`;
-      return error.extend(errorMessage);
-    }
+      if ((error = await $FileSystem.validateNotExists(path))) {
+        const errorMessage = `${errorPrefix}: resource with new name already exists`;
+        return error.extend(errorMessage);
+      }
 
-    if ((error = await $FileSystem.rename(this.directoryPath, directoryPath))) {
-      const errorMessage = `${errorPrefix}: failed to rename resource`;
-      return error.extend(errorMessage);
-    }
+      if ((error = await $FileSystem.rename(this._path, path))) {
+        const errorMessage = `${errorPrefix}: failed to rename resource`;
+        return error.extend(errorMessage);
+      }
 
-    this.directoryPath = directoryPath;
-    return undefined;
-  };
+      this._path = path;
+      this._name = name;
+      return undefined;
+    },
+  );
 
   /**
-   * Join current directory with given name.
+   * Move the resource to another directory.
    *
-   * @param name Name of a directory or file.
+   * @param name New directory containing the resource.
+   * @returns `undefined` if the resource was moved successfully, an error
+   * otherwise.
+   */
+  move = setter(
+    ['directoryPath', 'path'],
+    async (directoryPath: string): Promise<ErrorReport | undefined> => {
+      const errorPrefix = `${this.TypeName}.move`;
+      let error: ErrorReport | undefined;
+
+      const path = await $FileSystem.join(directoryPath, this._name);
+
+      if ((error = await $FileSystem.validateExistsDir(this._path))) {
+        const errorMessage = `${errorPrefix}: this resource does not exist`;
+        return error.extend(errorMessage);
+      }
+
+      if ((error = await $FileSystem.validateExistsDir(directoryPath))) {
+        const errorMessage = `${errorPrefix}: the destination directory does not exist`;
+        return error.extend(errorMessage);
+      }
+
+      if ((error = await $FileSystem.validateNotExists(path))) {
+        const errorMessage = `${errorPrefix}: resource with this name already exists in destination directory`;
+        return error.extend(errorMessage);
+      }
+
+      if ((error = await $FileSystem.rename(this._path, path))) {
+        const errorMessage = `${errorPrefix}: failed to rename resource`;
+        return error.extend(errorMessage);
+      }
+
+      this._path = path;
+      this._directoryPath = directoryPath;
+      return undefined;
+    },
+  );
+
+  /**
+   * Get path to the resource.
+   *
+   * @returns The path of the resource.
+   */
+  getPath = getter(['directoryPath', 'name', 'path'], (): string => {
+    return this._path;
+  });
+
+  /**
+   * Join current path with given name(s).
+   *
+   * @param names Name(s) of a directory or file.
    * @returns The path to the directory or file.
    */
-  path = async (...names: string[]): Promise<string> => {
-    return await $FileSystem.join(this.directoryPath, ...names);
-  };
-
-  /**
-   * The directory of the resource.
-   *
-   * @returns The directory containing the resource's info file.
-   */
-  static getDirectoryPathDeps = ['Resource.directoryPath'];
-  getDirectoryPath = (): string => {
-    return this.directoryPath;
-  };
+  getSubPath = getter(
+    ['directoryPath', 'name', 'path'],
+    async (...names: string[]): Promise<string> => {
+      return await $FileSystem.join(this._path, ...names);
+    },
+  );
 
   /**
    * Get the info of the resource. The info should be a valid JSON object.
    *
    * @returns The info of the resource.
    */
-  static getInfoPathDeps = ['Resource.info'];
-  getInfo = (): Info => {
-    return this.info;
-  };
+  getName = getter(['name'], (): string => {
+    return this._name;
+  });
+
+  /**
+   * Get the info of the resource. The info should be a valid JSON object.
+   *
+   * @returns The info of the resource.
+   */
+  getInfo = getter(['info'], (): Info => {
+    return this._info;
+  });
 
   /**
    * Update the info of a resource.
@@ -232,10 +267,18 @@ export default class Resource<Info> {
    * @param info The new info of the resource.
    * @returns The updated resource, with the new info.
    */
-  static setInfoPathTriggers = ['Resource.info'];
-  setInfo = async (info: Info): Promise<ErrorReport | undefined> => {
-    const error = await Resource.saveInfo(this.directoryPath, info);
-    if (error) return error;
-    this.info = info;
-  };
+  setInfo = setter(
+    ['info'],
+    async (info: Info): Promise<ErrorReport | undefined> => {
+      const errorPrefix = `${this.TypeName}.setInfo`;
+      let error: ErrorReport | undefined;
+
+      if ((error = await Resource.saveInfo(this._path, info))) {
+        const errorMessage = `${errorPrefix}: failed to save info`;
+        return error.extend(errorMessage);
+      }
+
+      this._info = info;
+    },
+  );
 }

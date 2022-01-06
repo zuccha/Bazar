@@ -1,121 +1,143 @@
-import { useCallback, useLayoutEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { Getter, Setter } from '../utils/Accessors';
 import { ErrorReport } from '../utils/ErrorReport';
 import PairMap from '../utils/PairMap';
 
 type Item = unknown;
 type Callback = () => void;
 
-const subscriptions = new PairMap<Item, string, Set<Callback>>();
-const globalSubscriptions = new Map<string, Set<Callback>>();
+const propertySubscriptions = new PairMap<Item, string, Set<Callback>>();
+const objectSubscriptions = new Map<Item, Set<Callback>>();
 
-const subscribe = (
+const subscribeToProperty = (
   item: Item,
   dependencies: string[],
   callback: () => void,
 ) => {
   for (const dependency of dependencies) {
-    if (dependency.startsWith('*')) {
-      if (!globalSubscriptions.has(dependency)) {
-        globalSubscriptions.set(dependency, new Set());
-      }
-      const callbacks = globalSubscriptions.get(dependency);
-      callbacks?.add(callback);
-    } else {
-      if (!subscriptions.has(item, dependency)) {
-        subscriptions.set(item, dependency, new Set());
-      }
-      const callbacks = subscriptions.get(item, dependency);
-      callbacks?.add(callback);
+    if (!propertySubscriptions.has(item, dependency)) {
+      propertySubscriptions.set(item, dependency, new Set());
     }
+    const callbacks = propertySubscriptions.get(item, dependency);
+    callbacks?.add(callback);
   }
 
   return () => {
     for (const dependency of dependencies) {
-      if (dependency.startsWith('*')) {
-        const callbacks = globalSubscriptions.get(dependency);
-        callbacks?.delete(callback);
-        if (callbacks?.size === 0) {
-          globalSubscriptions.delete(dependency);
-        }
-      } else {
-        const callbacks = subscriptions.get(item, dependency);
-        callbacks?.delete(callback);
-        if (callbacks?.size === 0) {
-          subscriptions.delete(item, dependency);
-        }
+      const callbacks = propertySubscriptions.get(item, dependency);
+      callbacks?.delete(callback);
+      if (callbacks?.size === 0) {
+        propertySubscriptions.delete(item, dependency);
       }
+    }
+  };
+};
+
+const subscribeToObject = (item: Item, callback: () => void) => {
+  if (!objectSubscriptions.has(item)) {
+    objectSubscriptions.set(item, new Set());
+  }
+  const callbacks = objectSubscriptions.get(item);
+  callbacks?.add(callback);
+
+  return () => {
+    const callbacks = objectSubscriptions.get(item);
+    callbacks?.delete(callback);
+    if (callbacks?.size === 0) {
+      objectSubscriptions.delete(item);
     }
   };
 };
 
 const notify = (item: Item, triggers: string[]) => {
   for (const trigger of triggers) {
-    const subscription = subscriptions.get(item, trigger);
-    if (subscription) {
-      for (const callback of subscription) {
-        callback();
-      }
-    }
-
-    const globalSubscription = globalSubscriptions.get(`*${trigger}`);
-    if (globalSubscription) {
-      for (const callback of globalSubscription) {
+    const propertySubscription = propertySubscriptions.get(item, trigger);
+    if (propertySubscription) {
+      for (const callback of propertySubscription) {
         callback();
       }
     }
   }
+
+  const objectSubscription = objectSubscriptions.get(item);
+  if (objectSubscription) {
+    for (const callback of objectSubscription) {
+      callback();
+    }
+  }
 };
 
-export const useGet = <T, R>(
-  item: T,
-  getter: () => R,
-  dependencies: string[],
-): R => {
+export const useObject = <T extends Item>(item: T): T => {
   const [, setRenderCount] = useState(0);
 
   useLayoutEffect(() => {
     const render = () => setRenderCount((renderCount) => renderCount + 1);
-    const unsubscribe = subscribe(item, dependencies, render);
+    const unsubscribe = subscribeToObject(item, render);
     return unsubscribe;
-  }, [item, getter, dependencies]);
+  }, [item]);
+
+  return item;
+};
+
+export const useList = <T extends Item>(list: T[]): T[] => {
+  const [, setRenderCount] = useState(0);
+
+  useLayoutEffect(() => {
+    const render = () => setRenderCount((renderCount) => renderCount + 1);
+    const unsubscribes = list.map((item) => {
+      return subscribeToObject(item, render);
+    });
+    return () => {
+      for (const unsubscribe of unsubscribes) {
+        unsubscribe();
+      }
+    };
+  }, list);
+
+  return list;
+};
+
+export const useGet = <T extends Item, Return>(
+  item: T,
+  getter: Getter<[], Return>,
+): Return => {
+  const [, setRenderCount] = useState(0);
+
+  useLayoutEffect(() => {
+    const render = () => setRenderCount((renderCount) => renderCount + 1);
+    const unsubscribe = subscribeToProperty(item, getter.deps, render);
+    return unsubscribe;
+  }, [item, getter]);
 
   return getter();
 };
 
-export const useSet = <T, A extends unknown[]>(
+export const useSet = <T extends Item, Args extends unknown[]>(
   item: T,
-  setter: (...args: A) => ErrorReport | undefined,
-  triggers: string[],
-): ((...args: Parameters<typeof setter>) => ErrorReport | undefined) => {
+  setter: Setter<Args, ErrorReport | undefined>,
+): ((...args: Args) => ErrorReport | undefined) => {
   return useCallback(
     (...args: Parameters<typeof setter>): ErrorReport | undefined => {
       const error = setter(...args);
       if (error) return error;
-      notify(item, triggers);
+      notify(item, setter.triggers);
     },
-    [item, setter, triggers],
+    [item, setter],
   );
 };
 
-export const useSetAsync = <T, A extends unknown[]>(
+export const useSetAsync = <T extends Item, Args extends unknown[]>(
   item: T,
-  setter: (...args: A) => Promise<ErrorReport | undefined>,
-  triggers: string[],
-): ((
-  ...args: Parameters<typeof setter>
-) => Promise<ErrorReport | undefined>) => {
+  setter: Setter<Args, Promise<ErrorReport | undefined>>,
+): ((...args: Args) => Promise<ErrorReport | undefined>) => {
   return useCallback(
     async function (
       ...args: Parameters<typeof setter>
     ): Promise<ErrorReport | undefined> {
       const error = await setter(...args);
       if (error) return error;
-      notify(item, triggers);
+      notify(item, setter.triggers);
     },
-    [item, setter, triggers],
+    [item, setter],
   );
 };
-
-export const asGlobalDep = (dep: string) => `*${dep}`;
-
-export const asGlobalDeps = (deps: string[]) => deps.map(asGlobalDep);

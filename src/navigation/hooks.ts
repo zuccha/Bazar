@@ -13,17 +13,17 @@ import Router from './Router';
 
 const useRoot = (): Router<RootRouteName> => {
   const navigation = useNavigation();
-  return useGet(navigation, navigation.getRoot, Navigation.getRootDeps);
+  return useGet(navigation, navigation.getRoot);
 };
 
 export const useRootRoute = (): RootRouteName => {
   const root = useRoot();
-  return useGet(root, root.getRoute, Router.getRouteDeps);
+  return useGet(root, root.getRoute);
 };
 
 export const useNavigateRoot = (): ((route: RootRouteName) => void) => {
   const root = useRoot();
-  return useSet(root, root.navigate, Router.navigateTriggers);
+  return useSet(root, root.navigate);
 };
 
 // #endregion Root
@@ -32,17 +32,17 @@ export const useNavigateRoot = (): ((route: RootRouteName) => void) => {
 
 const useProject = (): Router<ProjectRouteName> => {
   const navigation = useNavigation();
-  return useGet(navigation, navigation.getProject, Navigation.getProjectDeps);
+  return useGet(navigation, navigation.getProject);
 };
 
 export const useProjectRoute = (): ProjectRouteName => {
   const project = useProject();
-  return useGet(project, project.getRoute, Router.getRouteDeps);
+  return useGet(project, project.getRoute);
 };
 
 export const useNavigateProject = (): ((route: ProjectRouteName) => void) => {
   const project = useProject();
-  return useSet(project, project.navigate, Router.navigateTriggers);
+  return useSet(project, project.navigate);
 };
 
 // #endregion Project
@@ -51,17 +51,17 @@ export const useNavigateProject = (): ((route: ProjectRouteName) => void) => {
 
 const useSettings = (): Router<SettingsRouteName> => {
   const navigation = useNavigation();
-  return useGet(navigation, navigation.getSettings, Navigation.getSettingsDeps);
+  return useGet(navigation, navigation.getSettings);
 };
 
 export const useSettingsRoute = (): SettingsRouteName => {
   const settings = useSettings();
-  return useGet(settings, settings.getRoute, Router.getRouteDeps);
+  return useGet(settings, settings.getRoute);
 };
 
 export const useNavigateSettings = (): ((route: SettingsRouteName) => void) => {
   const settings = useSettings();
-  return useSet(settings, settings.navigate, Router.navigateTriggers);
+  return useSet(settings, settings.navigate);
 };
 
 // #endregion Settings
@@ -70,23 +70,19 @@ export const useNavigateSettings = (): ((route: SettingsRouteName) => void) => {
 
 const useTemplates = (): Router<TemplatesRouteName> => {
   const navigation = useNavigation();
-  return useGet(
-    navigation,
-    navigation.getTemplates,
-    Navigation.getTemplatesDeps,
-  );
+  return useGet(navigation, navigation.getTemplates);
 };
 
 export const useTemplatesRoute = (): TemplatesRouteName => {
   const templates = useTemplates();
-  return useGet(templates, templates.getRoute, Router.getRouteDeps);
+  return useGet(templates, templates.getRoute);
 };
 
 export const useNavigateTemplates = (): ((
   route: TemplatesRouteName,
 ) => void) => {
   const templates = useTemplates();
-  return useSet(templates, templates.navigate, Router.navigateTriggers);
+  return useSet(templates, templates.navigate);
 };
 
 // #endregion Toolchain
@@ -95,23 +91,19 @@ export const useNavigateTemplates = (): ((
 
 const useToolchain = (): Router<ToolchainRouteName> => {
   const navigation = useNavigation();
-  return useGet(
-    navigation,
-    navigation.getToolchain,
-    Navigation.getToolchainDeps,
-  );
+  return useGet(navigation, navigation.getToolchain);
 };
 
 export const useToolchainRoute = (): ToolchainRouteName => {
   const toolchain = useToolchain();
-  return useGet(toolchain, toolchain.getRoute, Router.getRouteDeps);
+  return useGet(toolchain, toolchain.getRoute);
 };
 
 export const useNavigateToolchain = (): ((
   route: ToolchainRouteName,
 ) => void) => {
   const toolchain = useToolchain();
-  return useSet(toolchain, toolchain.navigate, Router.navigateTriggers);
+  return useSet(toolchain, toolchain.navigate);
 };
 
 // #endregion Toolchain

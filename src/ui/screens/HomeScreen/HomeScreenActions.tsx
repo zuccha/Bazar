@@ -32,9 +32,7 @@ export default function HomeScreenActions(): ReactElement {
     const pathOrError = await $Dialog.open({ type: 'directory' });
     if (pathOrError.isError) return pathOrError.error;
     if (!pathOrError.value) return undefined;
-    const errorOrProject = await Project.open({
-      directoryPath: pathOrError.value,
-    });
+    const errorOrProject = await Project.open(pathOrError.value);
     if (errorOrProject.isError) return errorOrProject.error;
     const maybeError = setProject(errorOrProject.value);
     if (maybeError) return maybeError;

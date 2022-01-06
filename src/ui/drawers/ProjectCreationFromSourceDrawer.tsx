@@ -80,12 +80,14 @@ export default function ProjectCreationFromSourceDrawer({
   const form = useForm({
     fields: [nameField, romFilePathField, locationDirPathField],
     onSubmit: async () => {
-      const errorOrProject = await Project.createFromSource({
-        name: nameField.value.trim(),
-        author: authorField.value.trim(),
-        romFilePath: romFilePathField.value.trim(),
-        locationDirPath: locationDirPathField.value.trim(),
-      });
+      const errorOrProject = await Project.createFromSource(
+        locationDirPathField.value.trim(),
+        {
+          name: nameField.value.trim(),
+          author: authorField.value.trim(),
+          romFilePath: romFilePathField.value.trim(),
+        },
+      );
       if (errorOrProject.isError) return errorOrProject.error;
       const maybeError = setProject(errorOrProject.value);
       if (maybeError) return maybeError;

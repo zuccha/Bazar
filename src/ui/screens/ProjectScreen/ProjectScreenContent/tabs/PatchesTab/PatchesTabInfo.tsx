@@ -3,10 +3,9 @@ import { ReactElement, useCallback, useEffect } from 'react';
 import {
   usePatchDirectoryPath,
   usePatchInfo,
-  useUpdatePatchInfo,
+  useRenameSetPatchInfo,
 } from '../../../../../../core-hooks/Patch';
 import Patch from '../../../../../../core/Patch';
-import useEffectAsync from '../../../../../../hooks/useEffectAsync';
 import useForm from '../../../../../../hooks/useForm';
 import useFormField from '../../../../../../hooks/useFormField';
 import Button from '../../../../../../ui-atoms/Button';
@@ -24,7 +23,7 @@ const PatchesTabInfoWithPatch = ({
 }: Required<PatchesTabInfoProps>): ReactElement => {
   const directoryPath = usePatchDirectoryPath(patch);
   const patchInfo = usePatchInfo(patch);
-  const updatePatchInfo = useUpdatePatchInfo(patch);
+  const updatePatchInfo = useRenameSetPatchInfo(patch);
 
   const nameField = useFormField({
     infoMessage: 'Name of the patch',

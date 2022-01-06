@@ -1,7 +1,6 @@
 import {
   CopyIcon,
   DragHandleIcon,
-  HamburgerIcon,
   InfoIcon,
   LinkIcon,
   QuestionIcon,

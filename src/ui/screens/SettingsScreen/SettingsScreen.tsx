@@ -1,5 +1,5 @@
 import { Flex, Spinner, Text } from '@chakra-ui/react';
-import { ReactElement, useMemo } from 'react';
+import { ReactElement } from 'react';
 import { useSettings } from '../../../core-hooks/Core';
 import { useIsSavingSettings } from '../../../core-hooks/Settings';
 import {

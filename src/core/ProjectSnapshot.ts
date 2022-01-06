@@ -1,134 +1,118 @@
 import { z } from 'zod';
+import { getter, setter } from '../utils/Accessors';
 import { $DateTime } from '../utils/DateTime';
 import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
 import { $ErrorReport, ErrorReport } from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
 import { $Shell, Process } from '../utils/Shell';
 import Patch from './Patch';
-import Resource from './Resource';
+import Resource, { ResourceFields } from './Resource';
 import Toolchain from './Toolchain';
 
 // #region Info
 
-const ProjectSnapshotInfoSchema = z.object({
+const infoSchema = z.object({
   creationDate: z.string().refine($DateTime.isISODate),
 });
 
-export type ProjectSnapshotInfo = z.infer<typeof ProjectSnapshotInfoSchema>;
+export type ProjectSnapshotInfo = z.infer<typeof infoSchema>;
 
 // #endregion Info
 
-export default class ProjectSnapshot {
-  private resource: Resource<ProjectSnapshotInfo>;
-  private patches: Patch[];
+export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
+  public readonly TypeName = 'ProjectSnapshot';
+
+  private patches!: Patch[];
 
   private static ROM_FILE_NAME = 'rom.smc';
   private static PATCHES_DIR_NAME = 'patches';
 
-  private constructor({
-    resource,
-    patches,
-  }: {
-    resource: Resource<ProjectSnapshotInfo>;
-    patches: Patch[];
-  }) {
-    this.resource = resource;
-    this.patches = patches;
+  private constructor(props: ResourceFields<ProjectSnapshotInfo>) {
+    super(props);
   }
 
   // #region Constructors
 
-  static async create({
-    locationDirPath,
-    romFilePath,
-    name,
-  }: {
-    locationDirPath: string;
-    romFilePath: string;
-    name: string;
-  }): Promise<EitherErrorOr<ProjectSnapshot>> {
+  static async create(
+    directoryPath: string,
+    {
+      romFilePath,
+      name,
+    }: {
+      romFilePath: string;
+      name: string;
+    },
+  ): Promise<EitherErrorOr<ProjectSnapshot>> {
     const errorPrefix = 'ProjectSnapshot.create';
     let error: ErrorReport | undefined;
 
     // Resource
-
     const info = { creationDate: new Date().toISOString() };
-    const resourceOrError = await Resource.create(locationDirPath, name, info);
-    if (resourceOrError.isError) {
+    const projectSnapshot = new ProjectSnapshot({ directoryPath, name, info });
+    if ((error = await projectSnapshot.save())) {
       const errorMessage = `${errorPrefix}: failed to create resource`;
-      return $EitherErrorOr.error(resourceOrError.error.extend(errorMessage));
+      return $EitherErrorOr.error(error.extend(errorMessage));
     }
-    const resource = resourceOrError.value;
 
     // Copy ROM file
     if (
       (error = await $FileSystem.copyFile(
         romFilePath,
-        await $FileSystem.join(
-          resource.getDirectoryPath(),
-          ProjectSnapshot.ROM_FILE_NAME,
-        ),
+        await projectSnapshot.getSubPath(ProjectSnapshot.ROM_FILE_NAME),
       ))
     ) {
-      resource.delete();
+      projectSnapshot.delete();
       const errorMessage = `${errorPrefix}: failed to copy ROM file`;
       return $EitherErrorOr.error(error.extend(errorMessage));
     }
 
     // Patches
-
     const patches: Patch[] = [];
-    const patchesDirectory = await resource.path(
+    const patchesDirectory = await projectSnapshot.getSubPath(
       ProjectSnapshot.PATCHES_DIR_NAME,
     );
     if ((error = await $FileSystem.createDirectory(patchesDirectory))) {
-      resource.delete();
+      projectSnapshot.delete();
       const errorMessage = `${errorPrefix}: failed to create patches directory`;
       return $EitherErrorOr.error(error.extend(errorMessage));
     }
 
-    // Instantiate snapshot
-
-    const snapshot = new ProjectSnapshot({ resource, patches });
-    return $EitherErrorOr.value(snapshot);
+    // Return snapshot
+    projectSnapshot.patches = patches;
+    return $EitherErrorOr.value(projectSnapshot);
   }
 
-  static async open({
-    directoryPath,
-  }: {
-    directoryPath: string;
-  }): Promise<EitherErrorOr<ProjectSnapshot>> {
+  static async open(path: string): Promise<EitherErrorOr<ProjectSnapshot>> {
     const errorPrefix = 'ProjectSnapshot.open';
     let error: ErrorReport | undefined;
 
     // Resource
-
-    const resourceOrError = await Resource.open(
-      directoryPath,
-      ProjectSnapshotInfoSchema,
-    );
-    if (resourceOrError.isError) {
-      const errorMessage = `${errorPrefix}: failed to open project snapshot info`;
-      return $EitherErrorOr.error(resourceOrError.error.extend(errorMessage));
+    const errorOrFields = await Resource.load(path, infoSchema);
+    if (errorOrFields.isError) {
+      const errorMessage = `${errorPrefix}: failed to open patch info`;
+      return $EitherErrorOr.error(errorOrFields.error.extend(errorMessage));
     }
-    const resource = resourceOrError.value;
+    const projectSnapshot = new ProjectSnapshot(errorOrFields.value);
 
-    const romFilePath = await resource.path(ProjectSnapshot.ROM_FILE_NAME);
+    // ROM
+    const romFilePath = await projectSnapshot.getSubPath(
+      ProjectSnapshot.ROM_FILE_NAME,
+    );
     if ((error = await $FileSystem.validateExistsFile(romFilePath))) {
       const errorMessage = `${errorPrefix}: ROM file does not exist`;
       return $EitherErrorOr.error(error.extend(errorMessage));
     }
 
     // Patches
-
     const patches: Patch[] = [];
-    const patchesDirPath = await resource.path(
+    const patchesDirPath = await $FileSystem.join(
+      path,
       ProjectSnapshot.PATCHES_DIR_NAME,
     );
     const patchNames = await $FileSystem.getDirNames(patchesDirPath);
     for (const patchName of patchNames) {
       const patchDirPath = await $FileSystem.join(patchesDirPath, patchName);
-      const patchOrError = await Patch.open({ directoryPath: patchDirPath });
+      const patchOrError = await Patch.open(patchDirPath);
       if (patchOrError.isError) {
         const errorMessage = `${errorPrefix}: failed to open patch "${patchName}"`;
         return $EitherErrorOr.error(patchOrError.error.extend(errorMessage));
@@ -136,203 +120,174 @@ export default class ProjectSnapshot {
       patches.push(patchOrError.value);
     }
 
-    // Instantiate snapshot
-
-    const snapshot = new ProjectSnapshot({ resource, patches });
-    return $EitherErrorOr.value(snapshot);
+    // Return snapshot
+    projectSnapshot.patches = patches;
+    return $EitherErrorOr.value(projectSnapshot);
   }
 
   // #endregion Constructors
 
   // #region Generic
 
-  static openInLunarMagicTriggers = [];
-  openInLunarMagic = async (
-    toolchain: Toolchain,
-  ): Promise<ErrorReport | undefined> => {
-    const errorPrefix = 'ProjectSnapshot.openInLunarMagic';
-    let error: ErrorReport | undefined;
-    const lunarMagic = toolchain.getEmbedded('lunarMagic');
+  openInLunarMagic = setter(
+    [],
+    async (toolchain: Toolchain): Promise<ErrorReport | undefined> => {
+      const errorPrefix = `${this.TypeName}.openInLunarMagic`;
+      let error: ErrorReport | undefined;
+      const lunarMagic = toolchain.getEmbedded('lunarMagic');
 
-    if (lunarMagic.status !== 'installed') {
-      const errorMessage = `${errorPrefix}: Lunar Magic is not installed`;
-      return $ErrorReport.make(errorMessage);
-    }
+      if (lunarMagic.status !== 'installed') {
+        const errorMessage = `${errorPrefix}: Lunar Magic is not installed`;
+        return $ErrorReport.make(errorMessage);
+      }
 
-    if ((error = await $FileSystem.validateExistsFile(lunarMagic.exePath))) {
-      const errorMessage = `${errorPrefix}: Lunar Magic is not available`;
-      return error.extend(errorMessage);
-    }
+      if ((error = await $FileSystem.validateExistsFile(lunarMagic.exePath))) {
+        const errorMessage = `${errorPrefix}: Lunar Magic is not available`;
+        return error.extend(errorMessage);
+      }
 
-    const process = await $Shell.execute(lunarMagic.exePath, [
-      await this.resource.path(ProjectSnapshot.ROM_FILE_NAME),
-    ]);
-    if (process.code !== 0) {
-      const errorMessage = `${errorPrefix}: Could not open project snapshot in Lunar Magic`;
-      return $ErrorReport.make(errorMessage);
-    }
-  };
+      const process = await $Shell.execute(lunarMagic.exePath, [
+        await this.getSubPath(ProjectSnapshot.ROM_FILE_NAME),
+      ]);
+      if (process.code !== 0) {
+        const errorMessage = `${errorPrefix}: Could not open project snapshot in Lunar Magic`;
+        return $ErrorReport.make(errorMessage);
+      }
+    },
+  );
 
-  static launchInEmulatorTriggers = [];
-  launchInEmulator = async (
-    toolchain: Toolchain,
-  ): Promise<ErrorReport | undefined> => {
-    const errorPrefix = 'ProjectSnapshot.launchInEmulator';
-    let error: ErrorReport | undefined;
-    const emulator = toolchain.getCustom('emulator');
+  launchInEmulator = setter(
+    [],
+    async (toolchain: Toolchain): Promise<ErrorReport | undefined> => {
+      const errorPrefix = `${this.TypeName}.launchInEmulator`;
+      let error: ErrorReport | undefined;
+      const emulator = toolchain.getCustom('emulator');
 
-    if ((error = await $FileSystem.validateExistsFile(emulator.exePath))) {
-      const errorMessage = `${errorPrefix}: Emulator is not available`;
-      return error.extend(errorMessage);
-    }
+      if ((error = await $FileSystem.validateExistsFile(emulator.exePath))) {
+        const errorMessage = `${errorPrefix}: Emulator is not available`;
+        return error.extend(errorMessage);
+      }
 
-    const process = await $Shell.execute(emulator.exePath, [
-      await this.resource.path(ProjectSnapshot.ROM_FILE_NAME),
-    ]);
-    if (process.code !== 0) {
-      const errorMessage = `${errorPrefix}: Could not launch project snapshot in emulator`;
-      return $ErrorReport.make(errorMessage);
-    }
-  };
+      const process = await $Shell.execute(emulator.exePath, [
+        await this.getSubPath(ProjectSnapshot.ROM_FILE_NAME),
+      ]);
+      if (process.code !== 0) {
+        const errorMessage = `${errorPrefix}: Could not launch project snapshot in emulator`;
+        return $ErrorReport.make(errorMessage);
+      }
+    },
+  );
 
   // #endregion Generic
 
-  // #region Info
-
-  static getDirectoryPathDeps = ['ProjectSnapshot.directoryPath'];
-  getDirectoryPath = (): string => {
-    return this.resource.getDirectoryPath();
-  };
-
-  static getInfoDeps = ['ProjectSnapshot.info'];
-  getInfo = (): ProjectSnapshotInfo => {
-    return this.resource.getInfo();
-  };
-
-  static setInfoTriggers = ['ProjectSnapshot.info'];
-  setInfo = async (
-    info: ProjectSnapshotInfo,
-  ): Promise<ErrorReport | undefined> => {
-    const errorMessage = 'ProjectSnapshot.setInfo: failed to set info';
-    const maybeError = await this.resource.setInfo(info);
-    return maybeError ? maybeError.extend(errorMessage) : undefined;
-  };
-
-  // #endregion Info
-
   // #region Patches
 
-  static getPatchesDeps = ['ProjectSnapshot.patches'];
-  getPatches = (): Patch[] => {
+  getPatches = getter(['patches'], (): Patch[] => {
     return this.patches;
-  };
+  });
 
-  static addPatchFromDirectoryTriggers = ['ProjectSnapshot.patches'];
-  addPatchFromDirectory = async ({
-    name,
-    author,
-    version,
-    sourceDirPath,
-    mainFileRelativePath,
-  }: {
-    name: string;
-    author: string;
-    version: string;
-    sourceDirPath: string;
-    mainFileRelativePath: string;
-  }): Promise<ErrorReport | undefined> => {
-    const errorPrefix = 'ProjectSnapshot.addPatchFromDirectory';
-
-    if (this.patches.some((patch) => patch.getInfo().name === name)) {
-      const errorMessage = `${errorPrefix}: patch with name "${name}" already exists`;
-      return $ErrorReport.make(errorMessage);
-    }
-
-    const patchOrError = await Patch.createFromDirectory({
-      locationDirPath: await this.resource.path(
-        ProjectSnapshot.PATCHES_DIR_NAME,
-      ),
+  addPatchFromDirectory = setter(
+    ['patches'],
+    async ({
       name,
       author,
       version,
       sourceDirPath,
       mainFileRelativePath,
-    });
-    if (patchOrError.isError) {
-      const errorMessage = `${errorPrefix}: failed to create patch "${name}"`;
-      return patchOrError.error.extend(errorMessage);
-    }
+    }: {
+      name: string;
+      author: string;
+      version: string;
+      sourceDirPath: string;
+      mainFileRelativePath: string;
+    }): Promise<ErrorReport | undefined> => {
+      const errorPrefix = `${this.TypeName}.addPatchFromDirectory`;
 
-    this.patches.push(patchOrError.value);
-  };
+      if (this.patches.some((patch) => patch.getInfo().name === name)) {
+        const errorMessage = `${errorPrefix}: patch with name "${name}" already exists`;
+        return $ErrorReport.make(errorMessage);
+      }
 
-  static addPatchFromFileTriggers = ['ProjectSnapshot.patches'];
-  addPatchFromFile = async ({
-    name,
-    author,
-    version,
-    filePath,
-  }: {
-    name: string;
-    author: string;
-    version: string;
-    filePath: string;
-  }): Promise<ErrorReport | undefined> => {
-    const errorPrefix = 'ProjectSnapshot.addPatchFromFile';
+      const patchOrError = await Patch.createFromDirectory(
+        await this.getSubPath(ProjectSnapshot.PATCHES_DIR_NAME),
+        { name, author, version, sourceDirPath, mainFileRelativePath },
+      );
+      if (patchOrError.isError) {
+        const errorMessage = `${errorPrefix}: failed to create patch "${name}"`;
+        return patchOrError.error.extend(errorMessage);
+      }
 
-    if (this.patches.some((patch) => patch.getInfo().name === name)) {
-      const errorMessage = `${errorPrefix}: patch with name "${name}" already exists`;
-      return $ErrorReport.make(errorMessage);
-    }
+      this.patches.push(patchOrError.value);
+    },
+  );
 
-    const patchOrError = await Patch.createFromFile({
-      locationDirPath: await this.resource.path(
-        ProjectSnapshot.PATCHES_DIR_NAME,
-      ),
+  addPatchFromFile = setter(
+    ['patches'],
+    async ({
       name,
       author,
       version,
       filePath,
-    });
-    if (patchOrError.isError) {
-      const errorMessage = `${errorPrefix}: failed to create patch "${name}"`;
-      return patchOrError.error.extend(errorMessage);
-    }
+    }: {
+      name: string;
+      author: string;
+      version: string;
+      filePath: string;
+    }): Promise<ErrorReport | undefined> => {
+      const errorPrefix = `${this.TypeName}.addPatchFromFile`;
 
-    this.patches.push(patchOrError.value);
-  };
+      if (this.patches.some((patch) => patch.getInfo().name === name)) {
+        const errorMessage = `${errorPrefix}: patch with name "${name}" already exists`;
+        return $ErrorReport.make(errorMessage);
+      }
 
-  static removePatchTriggers = ['ProjectSnapshot.patches'];
-  removePatch = async (patch: Patch): Promise<ErrorReport | undefined> => {
-    const errorPrefix = 'ProjectSnapshot.removePatch';
+      const patchOrError = await Patch.createFromFile(
+        await this.getSubPath(ProjectSnapshot.PATCHES_DIR_NAME),
+        { name, author, version, filePath },
+      );
+      if (patchOrError.isError) {
+        const errorMessage = `${errorPrefix}: failed to create patch "${name}"`;
+        return patchOrError.error.extend(errorMessage);
+      }
 
-    const name = patch.getInfo().name;
-    const patchIndex = this.patches.findIndex((p) => p.getInfo().name === name);
+      this.patches.push(patchOrError.value);
+    },
+  );
 
-    if (patchIndex === -1) {
-      const errorMessage = `${errorPrefix}: patch "${name}" does not exist`;
-      return $ErrorReport.make(errorMessage);
-    }
+  removePatch = setter(
+    ['patches'],
+    async (patch: Patch): Promise<ErrorReport | undefined> => {
+      const errorPrefix = `${this.TypeName}.removePatch`;
 
-    const error = await patch.delete();
-    if (error) {
-      const errorMessage = `${errorPrefix}: failed to remove patch "${name}"`;
-      return error.extend(errorMessage);
-    }
+      const name = patch.getInfo().name;
+      const patchIndex = this.patches.findIndex(
+        (p) => p.getInfo().name === name,
+      );
 
-    this.patches.splice(patchIndex, 1);
-  };
+      if (patchIndex === -1) {
+        const errorMessage = `${errorPrefix}: patch "${name}" does not exist`;
+        return $ErrorReport.make(errorMessage);
+      }
 
-  // Non-mutable
-  applyPatch = async (
-    patch: Patch,
-    asarPath: string,
-  ): Promise<EitherErrorOr<Process>> => {
-    const romPath = await this.resource.path(ProjectSnapshot.ROM_FILE_NAME);
-    const patchPath = await patch.getMainFilePath();
-    const process = await $Shell.execute(asarPath, [patchPath, romPath]);
-    return $EitherErrorOr.value(process);
-  };
+      const error = await patch.delete();
+      if (error) {
+        const errorMessage = `${errorPrefix}: failed to remove patch "${name}"`;
+        return error.extend(errorMessage);
+      }
+
+      this.patches.splice(patchIndex, 1);
+    },
+  );
+
+  applyPatch = setter(
+    [],
+    async (patch: Patch, asarPath: string): Promise<EitherErrorOr<Process>> => {
+      const romPath = await this.getSubPath(ProjectSnapshot.ROM_FILE_NAME);
+      const patchPath = await patch.getMainFilePath();
+      const process = await $Shell.execute(asarPath, [patchPath, romPath]);
+      return $EitherErrorOr.value(process);
+    },
+  );
 
   // #endregion Patches
 }

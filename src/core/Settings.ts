@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { getter, setter } from '../utils/Accessors';
 import { ErrorReport } from '../utils/ErrorReport';
 import { $PriorityList } from '../utils/PriorityList';
 import { $SettingsStore } from '../utils/SettingsStore';
@@ -20,6 +21,8 @@ export type GenericSetting = keyof GenericSettingsStore;
 // #endregion Settings
 
 export default class Settings {
+  public readonly TypeName = 'Settings';
+
   private generic;
   private isSavingGeneric;
 
@@ -44,20 +47,22 @@ export default class Settings {
     return new Settings();
   }
 
-  static loadTriggers = [
-    'Settings.appearanceColorScheme',
-    'Settings.newProjectDefaultAuthor',
-    'Settings.newProjectDefaultLocationDirPath',
-    'Settings.newProjectDefaultRomFilePath',
-    'Settings.patchAskConfirmationBeforeApply',
-    'Settings.recentProjects',
-  ];
-  load = async (): Promise<ErrorReport | undefined> => {
-    const errorMessage = `Settings.load: failed to load settings`;
-    const settingsOrError = await this.generic.getAll();
-    if (settingsOrError.isError)
-      return settingsOrError.error.extend(errorMessage);
-  };
+  load = setter(
+    [
+      'appearanceColorScheme',
+      'newProjectDefaultAuthor',
+      'newProjectDefaultLocationDirPath',
+      'newProjectDefaultRomFilePath',
+      'patchAskConfirmationBeforeApply',
+      'recentProjects',
+    ],
+    async (): Promise<ErrorReport | undefined> => {
+      const errorMessage = `Settings.load: failed to load settings`;
+      const settingsOrError = await this.generic.getAll();
+      if (settingsOrError.isError)
+        return settingsOrError.error.extend(errorMessage);
+    },
+  );
 
   get = <Setting extends keyof GenericSettingsStore>(
     key: Setting,
@@ -74,42 +79,39 @@ export default class Settings {
     if (error) return error.extend(errorMessage);
   };
 
-  static prioritizeRecentProjectTriggers = ['Settings.recentProjects'];
-  prioritizeRecentProject = async (
-    dirPath: string,
-  ): Promise<ErrorReport | undefined> => {
-    const errorMessage = `Settings.prioritizeRecentProject: failed to prioritize recent project`;
-    const recentProjects = this.generic.getCache('recentProjects');
-    const value = $PriorityList.prioritize(recentProjects, dirPath);
-    const error = await this.generic.set('recentProjects', value);
-    if (error) return error.extend(errorMessage);
-  };
+  prioritizeRecentProject = setter(
+    ['recentProjects'],
+    async (dirPath: string): Promise<ErrorReport | undefined> => {
+      const errorMessage = `Settings.prioritizeRecentProject: failed to prioritize recent project`;
+      const recentProjects = this.generic.getCache('recentProjects');
+      const value = $PriorityList.prioritize(recentProjects, dirPath);
+      const error = await this.generic.set('recentProjects', value);
+      if (error) return error.extend(errorMessage);
+    },
+  );
 
-  static removeRecentProjectTriggers = ['Settings.recentProjects'];
-  removeRecentProject = async (
-    dirPath: string,
-  ): Promise<ErrorReport | undefined> => {
-    const errorMessage = `Settings.removeRecentProject: failed to remove recent project`;
-    const recentProjects = this.generic.getCache('recentProjects');
-    const value = $PriorityList.remove(recentProjects, dirPath);
-    const error = await this.generic.set('recentProjects', value);
-    if (error) return error.extend(errorMessage);
-  };
+  removeRecentProject = setter(
+    ['recentProjects'],
+    async (dirPath: string): Promise<ErrorReport | undefined> => {
+      const errorMessage = `Settings.removeRecentProject: failed to remove recent project`;
+      const recentProjects = this.generic.getCache('recentProjects');
+      const value = $PriorityList.remove(recentProjects, dirPath);
+      const error = await this.generic.set('recentProjects', value);
+      if (error) return error.extend(errorMessage);
+    },
+  );
 
-  static getIsSavingGenericDeps = ['Settings.isSavingGeneric'];
-  getIsSavingGeneric = (): boolean => {
+  getIsSavingGeneric = getter(['isSavingGeneric'], (): boolean => {
     return this.isSavingGeneric;
-  };
+  });
 
-  static startSavingTriggers = ['Settings.isSavingGeneric'];
-  startSavingGeneric = (): undefined => {
+  startSavingGeneric = setter(['isSavingGeneric'], (): undefined => {
     this.isSavingGeneric = true;
     return undefined;
-  };
+  });
 
-  static stopSavingTriggers = ['Settings.isSavingGeneric'];
-  stopSavingGeneric = (): undefined => {
+  stopSavingGeneric = setter(['isSavingGeneric'], (): undefined => {
     this.isSavingGeneric = false;
     return undefined;
-  };
+  });
 }

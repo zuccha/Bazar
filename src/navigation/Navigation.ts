@@ -1,3 +1,4 @@
+import { getter } from '../utils/Accessors';
 import Router from './Router';
 
 export enum RootRouteName {
@@ -68,18 +69,25 @@ export default class Navigation {
     return new Navigation();
   }
 
-  static getRootDeps = ['Navigation.root'];
-  getRoot = (): Router<RootRouteName> => this.root;
+  getRoot = getter(['Navigation.root'], (): Router<RootRouteName> => this.root);
 
-  static getProjectDeps = ['Navigation.project'];
-  getProject = (): Router<ProjectRouteName> => this.project;
+  getProject = getter(
+    ['Navigation.project'],
+    (): Router<ProjectRouteName> => this.project,
+  );
 
-  static getSettingsDeps = ['Navigation.settings'];
-  getSettings = (): Router<SettingsRouteName> => this.settings;
+  getSettings = getter(
+    ['Navigation.settings'],
+    (): Router<SettingsRouteName> => this.settings,
+  );
 
-  static getTemplatesDeps = ['Navigation.templates'];
-  getTemplates = (): Router<TemplatesRouteName> => this.templates;
+  getTemplates = getter(
+    ['Navigation.templates'],
+    (): Router<TemplatesRouteName> => this.templates,
+  );
 
-  static getToolchainDeps = ['Navigation.toolchain'];
-  getToolchain = (): Router<ToolchainRouteName> => this.toolchain;
+  getToolchain = getter(
+    ['Navigation.toolchain'],
+    (): Router<ToolchainRouteName> => this.toolchain,
+  );
 }
