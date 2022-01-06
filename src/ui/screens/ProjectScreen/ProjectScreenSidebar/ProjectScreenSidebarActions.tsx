@@ -17,7 +17,9 @@ import {
 import Project from '../../../../core/Project';
 import useAsyncCallback from '../../../../hooks/useAsyncCallback';
 import useHandleError from '../../../../hooks/useHandleError';
+import useSafeState from '../../../../hooks/usSafeState';
 import Button from '../../../../ui-atoms/Button';
+import ProjectAdditionToCollectionDrawer from '../../../drawers/ProjectAdditionToCollectionDrawer';
 
 interface ProjectScreenSidebarActionsProps {
   project: Project;
@@ -28,6 +30,11 @@ export default function ProjectScreenSidebarActions({
 }: ProjectScreenSidebarActionsProps): ReactElement {
   const handleError = useHandleError();
   const toast = useToast();
+
+  const [
+    isProjectAdditionToCollectionDrawerVisible,
+    setIsProjectAdditionToCollectionDrawerVisible,
+  ] = useSafeState(false);
 
   const collection = useCollection();
   const snapshot = useProjectLatestSnapshot(project);
@@ -59,51 +66,55 @@ export default function ProjectScreenSidebarActions({
 
   const addProjectSnapshotToCollection =
     useAddProjectSnapshotToCollection(collection);
-  const handleAddProjectSnapshotToCollection = useAsyncCallback(async () => {
-    const error = await addProjectSnapshotToCollection(
-      project.getName(),
-      snapshot,
-    );
-    if (error) handleError(error, 'Failed to add project to collection');
-    else toast({ title: 'Project saved as template', status: 'success' });
-    return error;
-  }, [
-    snapshot,
-    project.getName(),
-    addProjectSnapshotToCollection,
-    handleError,
-    toast,
-  ]);
+  const handleAddProjectSnapshotToCollection = useAsyncCallback(
+    async (name: string) => {
+      const error = await addProjectSnapshotToCollection(name, snapshot);
+      if (error) handleError(error, 'Failed to add project to collection');
+      else toast({ title: 'Project saved as template', status: 'success' });
+      return error;
+    },
+    [snapshot, addProjectSnapshotToCollection, handleError, toast],
+  );
 
   return (
-    <VStack w='100%'>
-      <Button
-        isDisabled={
-          lunarMagic.status !== 'installed' || handleOpenInLunarMagic.isLoading
-        }
-        label='Open in Lunar Magic'
-        onClick={handleOpenInLunarMagic.call}
-        w='100%'
-      />
-      <Button
-        isDisabled={!emulator.exePath || handleLaunchInEmulator.isLoading}
-        label='Run on emulator'
-        onClick={handleLaunchInEmulator.call}
-        w='100%'
-      />
-      <Button
-        isDisabled={handleCreateBackup.isLoading}
-        label='Create backup'
-        onClick={handleCreateBackup.call}
-        w='100%'
-      />
-      <Button label='Create BPS' onClick={() => null} w='100%' isDisabled />
-      <Button
-        isDisabled={handleAddProjectSnapshotToCollection.isLoading}
-        label='Save as template'
-        onClick={handleAddProjectSnapshotToCollection.call}
-        w='100%'
-      />
-    </VStack>
+    <>
+      <VStack w='100%'>
+        <Button
+          isDisabled={
+            lunarMagic.status !== 'installed' ||
+            handleOpenInLunarMagic.isLoading
+          }
+          label='Open in Lunar Magic'
+          onClick={handleOpenInLunarMagic.call}
+          w='100%'
+        />
+        <Button
+          isDisabled={!emulator.exePath || handleLaunchInEmulator.isLoading}
+          label='Run on emulator'
+          onClick={handleLaunchInEmulator.call}
+          w='100%'
+        />
+        <Button
+          isDisabled={handleCreateBackup.isLoading}
+          label='Create backup'
+          onClick={handleCreateBackup.call}
+          w='100%'
+        />
+        <Button label='Create BPS' onClick={() => null} w='100%' isDisabled />
+        <Button
+          isDisabled={handleAddProjectSnapshotToCollection.isLoading}
+          label='Save as template'
+          onClick={() => setIsProjectAdditionToCollectionDrawerVisible(true)}
+          w='100%'
+        />
+      </VStack>
+
+      {isProjectAdditionToCollectionDrawerVisible && (
+        <ProjectAdditionToCollectionDrawer
+          onClose={() => setIsProjectAdditionToCollectionDrawerVisible(false)}
+          onAdd={handleAddProjectSnapshotToCollection.call}
+        />
+      )}
+    </>
   );
 }
