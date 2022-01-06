@@ -1,14 +1,8 @@
 import { Flex, VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 import Project from '../../core/Project';
-import { useSetProject, useSettings } from '../../core-hooks/Core';
-import {
-  usePrioritizeRecentProject,
-  useSetting,
-} from '../../core-hooks/Settings';
-import useAsyncCallback from '../../hooks/useAsyncCallback';
-import { RootRouteName } from '../../navigation/Navigation';
-import { useNavigateRoot } from '../../navigation/hooks';
+import { useSettings } from '../../core-hooks/Core';
+import { useSetting } from '../../core-hooks/Settings';
 import TextEditorOfPath from '../../ui-atoms/TextEditorOfPath';
 import Alert from '../../ui-atoms/Alert';
 import Button from '../../ui-atoms/Button';
@@ -19,13 +13,16 @@ import TextEditor from '../../ui-atoms/TextEditor';
 import { $FileSystem } from '../../utils/FileSystem';
 import useForm from '../../hooks/useForm';
 import useFormField from '../../hooks/useFormField';
+import { ErrorReport } from '../../utils/ErrorReport';
 
 interface ProjectCreationFromSourceProps {
   onClose: () => void;
+  onCreate: (project: Project) => Promise<ErrorReport | undefined>;
 }
 
 export default function ProjectCreationFromSourceDrawer({
   onClose,
+  onCreate,
 }: ProjectCreationFromSourceProps): ReactElement {
   const settings = useSettings();
 
@@ -71,12 +68,6 @@ export default function ProjectCreationFromSourceDrawer({
       (await $FileSystem.validateHasExtension(value, '.smc')),
   });
 
-  const setProject = useSetProject();
-
-  const prioritizeRecentProject = usePrioritizeRecentProject(settings);
-
-  const navigateRoot = useNavigateRoot();
-
   const form = useForm({
     fields: [nameField, romFilePathField, locationDirPathField],
     onSubmit: async () => {
@@ -89,38 +80,28 @@ export default function ProjectCreationFromSourceDrawer({
         },
       );
       if (errorOrProject.isError) return errorOrProject.error;
-      const maybeError = setProject(errorOrProject.value);
-      if (maybeError) return maybeError;
-      const projectDirPath = await $FileSystem.join(
-        locationDirPathField.value,
-        nameField.value,
-      );
-      await prioritizeRecentProject(projectDirPath);
+      return onCreate(errorOrProject.value);
     },
   });
-
-  const handleCreate = useAsyncCallback(async () => {
-    const maybeError = await form.handleSubmit();
-    if (maybeError) return maybeError;
-    navigateRoot(RootRouteName.Project);
-    onClose();
-  }, [form, navigateRoot, onClose]);
 
   return (
     <Drawer
       buttons={
         <>
           <Button
-            isDisabled={handleCreate.isLoading}
+            isDisabled={form.isSubmitting}
             label='Cancel'
             onClick={onClose}
             variant='outline'
             mr={3}
           />
           <Button
-            isDisabled={!form.isValid || handleCreate.isLoading}
+            isDisabled={!form.isValid || form.isSubmitting}
             label='Create'
-            onClick={handleCreate.call}
+            onClick={async () => {
+              const maybeError = await form.handleSubmit();
+              if (!maybeError) onClose();
+            }}
           />
         </>
       }
@@ -131,7 +112,7 @@ export default function ProjectCreationFromSourceDrawer({
         <VStack width='100%' spacing={4} flex={1}>
           <FormControl {...nameField.control}>
             <TextEditor
-              isDisabled={handleCreate.isLoading}
+              isDisabled={form.isSubmitting}
               onBlur={nameField.handleBlur}
               onChange={nameField.handleChange}
               placeholder={nameField.control.label}
@@ -141,7 +122,7 @@ export default function ProjectCreationFromSourceDrawer({
 
           <FormControl {...authorField.control}>
             <TextEditor
-              isDisabled={handleCreate.isLoading}
+              isDisabled={form.isSubmitting}
               onBlur={authorField.handleBlur}
               onChange={authorField.handleChange}
               placeholder={authorField.control.label}
@@ -151,7 +132,7 @@ export default function ProjectCreationFromSourceDrawer({
 
           <FormControl {...locationDirPathField.control}>
             <TextEditorOfPath
-              isDisabled={handleCreate.isLoading}
+              isDisabled={form.isSubmitting}
               mode='directory'
               onBlur={locationDirPathField.handleBlur}
               onChange={locationDirPathField.handleChange}
@@ -162,7 +143,7 @@ export default function ProjectCreationFromSourceDrawer({
 
           <FormControl {...romFilePathField.control}>
             <TextEditorOfPath
-              isDisabled={handleCreate.isLoading}
+              isDisabled={form.isSubmitting}
               filters={[{ name: 'ROM', extensions: ['smc'] }]}
               mode='file'
               onBlur={romFilePathField.handleBlur}

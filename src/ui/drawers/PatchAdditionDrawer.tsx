@@ -9,11 +9,6 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { ReactElement, useState } from 'react';
-import {
-  useAddPatchToProjectSnapshotFromDirectory,
-  useAddPatchToProjectSnapshotFromFile,
-} from '../../core-hooks/ProjectSnapshot';
-import ProjectSnapshot from '../../core/ProjectSnapshot';
 import useForm from '../../hooks/useForm';
 import useFormField from '../../hooks/useFormField';
 import useColorScheme from '../../theme/useColorScheme';
@@ -25,16 +20,30 @@ import FormError from '../../ui-atoms/FormError';
 import SelectorOfFiles from '../../ui-atoms/SelectorOfFiles';
 import TextEditor from '../../ui-atoms/TextEditor';
 import TextEditorOfPath from '../../ui-atoms/TextEditorOfPath';
+import { ErrorReport } from '../../utils/ErrorReport';
 import { $FileSystem } from '../../utils/FileSystem';
 
 interface PatchAdditionDrawerProps {
   onClose: () => void;
-  projectSnapshot: ProjectSnapshot;
+  onAddFromDirectory: (args: {
+    name: string;
+    author: string;
+    version: string;
+    sourceDirPath: string;
+    mainFileRelativePath: string;
+  }) => Promise<ErrorReport | undefined>;
+  onAddFromFile: (args: {
+    name: string;
+    author: string;
+    version: string;
+    filePath: string;
+  }) => Promise<ErrorReport | undefined>;
 }
 
 export default function PatchAdditionDrawer({
   onClose,
-  projectSnapshot,
+  onAddFromDirectory,
+  onAddFromFile,
 }: PatchAdditionDrawerProps): ReactElement {
   const colorScheme = useColorScheme();
   const [isSingleFile, setIsSingleFile] = useState(true);
@@ -84,18 +93,12 @@ export default function PatchAdditionDrawer({
       $FileSystem.validateHasExtension(value, '.asm'),
   });
 
-  const addPatchFromFile =
-    useAddPatchToProjectSnapshotFromFile(projectSnapshot);
-
-  const addPatchFromDirectory =
-    useAddPatchToProjectSnapshotFromDirectory(projectSnapshot);
-
   const form = useForm(
     isSingleFile
       ? {
           fields: [nameField, singleFilePathField],
           onSubmit: () =>
-            addPatchFromFile({
+            onAddFromFile({
               name: nameField.value.trim(),
               author: authorField.value.trim(),
               version: versionField.value.trim(),
@@ -105,7 +108,7 @@ export default function PatchAdditionDrawer({
       : {
           fields: [nameField, mainFileRelativePathField, sourceDirPathField],
           onSubmit: () =>
-            addPatchFromDirectory({
+            onAddFromDirectory({
               name: nameField.value.trim(),
               author: authorField.value.trim(),
               version: versionField.value.trim(),

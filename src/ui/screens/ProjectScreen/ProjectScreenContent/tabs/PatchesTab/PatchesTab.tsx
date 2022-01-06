@@ -1,15 +1,16 @@
 import { ReactElement, useCallback, useMemo } from 'react';
 import { useToolchain } from '../../../../../../core-hooks/Core';
 import {
+  useAddPatchToProjectSnapshotFromDirectory,
+  useAddPatchToProjectSnapshotFromFile,
   useProjectSnapshotPatches,
   useRemovePatchFromProjectSnapshot,
 } from '../../../../../../core-hooks/ProjectSnapshot';
 import { useGetEmbeddedTool } from '../../../../../../core-hooks/Toolchain';
 import Patch from '../../../../../../core/Patch';
 import ProjectSnapshot from '../../../../../../core/ProjectSnapshot';
-import { useGet, useList } from '../../../../../../hooks/useAccessors';
+import { useList } from '../../../../../../hooks/useAccessors';
 import { TableColumn, TableRow } from '../../../../../../ui-atoms/Table';
-import { getter } from '../../../../../../utils/Accessors';
 import { $EitherErrorOr } from '../../../../../../utils/EitherErrorOr';
 import { $ErrorReport } from '../../../../../../utils/ErrorReport';
 import PatchAdditionDrawer from '../../../../../drawers/PatchAdditionDrawer';
@@ -27,6 +28,10 @@ export default function PatchesTab({
   const asar = useGetEmbeddedTool(toolchain, 'asar');
 
   const patches = useProjectSnapshotPatches(projectSnapshot);
+  const addPatchFromFile =
+    useAddPatchToProjectSnapshotFromFile(projectSnapshot);
+  const addPatchFromDirectory =
+    useAddPatchToProjectSnapshotFromDirectory(projectSnapshot);
 
   const handleApplyPatch = useCallback(
     async (patch: Patch) => {
@@ -69,7 +74,8 @@ export default function PatchesTab({
       renderResourceAdditionDrawer={({ onClose }) => (
         <PatchAdditionDrawer
           onClose={onClose}
-          projectSnapshot={projectSnapshot}
+          onAddFromDirectory={addPatchFromDirectory}
+          onAddFromFile={addPatchFromFile}
         />
       )}
       columns={columns}

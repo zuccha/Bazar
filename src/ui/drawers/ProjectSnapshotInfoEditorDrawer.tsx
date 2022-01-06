@@ -1,29 +1,27 @@
 import { Alert, AlertIcon, Box, VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 import { useProjectInfo, useSetProjectInfo } from '../../core-hooks/Project';
-import Project from '../../core/Project';
-import useAsyncCallback from '../../hooks/useAsyncCallback';
+import Project, { ProjectInfo } from '../../core/Project';
 import useForm from '../../hooks/useForm';
 import useFormField from '../../hooks/useFormField';
 import Button from '../../ui-atoms/Button';
 import Drawer from '../../ui-atoms/Drawer';
 import FormControl from '../../ui-atoms/FormControl';
 import TextEditor from '../../ui-atoms/TextEditor';
+import { ErrorReport } from '../../utils/ErrorReport';
 import { $FileSystem } from '../../utils/FileSystem';
 
 interface ProjectSnapshotInfoEditorDrawerProps {
+  info: ProjectInfo;
   onClose: () => void;
-  project: Project;
+  onEdit: (info: ProjectInfo) => Promise<ErrorReport | undefined>;
 }
 
 export default function ProjectSnapshotInfoEditorDrawer({
+  info,
   onClose,
-  project,
+  onEdit,
 }: ProjectSnapshotInfoEditorDrawerProps): ReactElement {
-  const info = useProjectInfo(project);
-  const setInfo = useSetProjectInfo(project);
-  const handleEditInfo = useAsyncCallback(setInfo, [setInfo]);
-
   const nameField = useFormField({
     infoMessage: 'This is the name of the project',
     initialValue: info.name,
@@ -42,21 +40,27 @@ export default function ProjectSnapshotInfoEditorDrawer({
   const form = useForm({
     fields: [nameField],
     onSubmit: () =>
-      handleEditInfo.call({ name: nameField.value, author: authorField.value }),
+      onEdit({ name: nameField.value, author: authorField.value }),
   });
 
   return (
     <Drawer
       buttons={
         <>
-          <Button label='Cancel' onClick={onClose} variant='outline' mr={3} />
           <Button
+            isDisabled={form.isSubmitting}
+            label='Cancel'
+            onClick={onClose}
+            variant='outline'
+            mr={3}
+          />
+          <Button
+            isDisabled={!form.isValid || form.isSubmitting}
             label='Save'
             onClick={async () => {
               await form.handleSubmit();
               onClose();
             }}
-            isDisabled={!form.isValid}
           />
         </>
       }

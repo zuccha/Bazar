@@ -28,6 +28,16 @@ export default function HomeScreenActions(): ReactElement {
 
   const navigateRoot = useNavigateRoot();
 
+  const handleCreateProject = useAsyncCallback(
+    async (project: Project) => {
+      const maybeError = setProject(project);
+      if (maybeError) return maybeError;
+      navigateRoot(RootRouteName.Project);
+      prioritizeRecentProject(project.getPath());
+    },
+    [prioritizeRecentProject, setProject],
+  );
+
   const handleOpenProject = useAsyncCallback(async () => {
     const pathOrError = await $Dialog.open({ type: 'directory' });
     if (pathOrError.isError) return pathOrError.error;
@@ -40,16 +50,21 @@ export default function HomeScreenActions(): ReactElement {
     prioritizeRecentProject(pathOrError.value);
   }, [navigateRoot, prioritizeRecentProject, setProject]);
 
+  const isDisabled =
+    handleOpenProject.isLoading || handleCreateProject.isLoading;
+
   return (
     <>
       <VStack spacing={2} w='100%'>
         <Button
+          isDisabled={isDisabled}
           label='New project'
           onClick={handleCreateProjectFromSource}
           isFullWidth
           maxW='200px'
         />
         <Button
+          isDisabled={isDisabled}
           label='Open project'
           onClick={handleOpenProject.call}
           isFullWidth
@@ -65,6 +80,7 @@ export default function HomeScreenActions(): ReactElement {
       {isProjectCreationFromSourceOpen && (
         <ProjectCreationFromSourceDrawer
           onClose={() => setIsProjectCreationFromSourceOpen(false)}
+          onCreate={handleCreateProject.call}
         />
       )}
     </>
