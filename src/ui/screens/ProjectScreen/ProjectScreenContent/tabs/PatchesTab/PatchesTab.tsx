@@ -14,7 +14,7 @@ import { useList } from '../../../../../../hooks/useAccessors';
 import { TableColumn, TableRow } from '../../../../../../ui-atoms/Table';
 import { $EitherErrorOr } from '../../../../../../utils/EitherErrorOr';
 import { $ErrorReport } from '../../../../../../utils/ErrorReport';
-import PatchAdditionDrawer from '../../../../../drawers/PatchAdditionDrawer';
+import PatchAdditionFromFilesDrawer from '../../../../../drawers/PatchAdditionFromFilesDrawer';
 import PatchTemplateAdditionDrawer from '../../../../../drawers/PatchTemplateAdditionDrawer';
 import ResourcesTab from '../../ResourcesTab';
 import PatchesTabInfo from './PatchesTabInfo';
@@ -78,7 +78,7 @@ export default function PatchesTab({
       onRemove={handleRemovePatch}
       renderInfo={(patch) => <PatchesTabInfo patch={patch} />}
       renderResourceAdditionDrawer={({ onClose }) => (
-        <PatchAdditionDrawer
+        <PatchAdditionFromFilesDrawer
           onClose={onClose}
           onAddFromDirectory={addPatchFromDirectory}
           onAddFromFile={addPatchFromFile}

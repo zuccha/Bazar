@@ -16,7 +16,7 @@ import { $FileSystem } from '../../utils/FileSystem';
 
 type Source = 'file' | 'directory';
 
-interface PatchAdditionDrawerProps {
+interface PatchAdditionFromFilesDrawerProps {
   onClose: () => void;
   onAddFromDirectory: (args: {
     name: string;
@@ -33,11 +33,11 @@ interface PatchAdditionDrawerProps {
   }) => Promise<ErrorReport | undefined>;
 }
 
-export default function PatchAdditionDrawer({
+export default function PatchAdditionFromFilesDrawer({
   onClose,
   onAddFromDirectory,
   onAddFromFile,
-}: PatchAdditionDrawerProps): ReactElement {
+}: PatchAdditionFromFilesDrawerProps): ReactElement {
   const [source, setSource] = useState<Source>('file');
 
   const nameField = useFormField({
