@@ -9,7 +9,7 @@ import {
 } from '@chakra-ui/react';
 import { ReactElement, ReactNode, useRef } from 'react';
 
-interface AlertDeleteProps {
+interface DialogProps {
   children: ReactNode;
   footer: ReactNode;
   leastDestructiveRef: AlertDialogProps['leastDestructiveRef'];
@@ -17,13 +17,13 @@ interface AlertDeleteProps {
   title: string;
 }
 
-export default function DialogWithDeletion({
+export default function Dialog({
   children,
   footer,
   leastDestructiveRef,
   onClose,
   title,
-}: AlertDeleteProps): ReactElement {
+}: DialogProps): ReactElement {
   const cancelRef = useRef(null);
 
   return (
