@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { Getter, Setter } from '../utils/Accessors';
 import { ErrorReport } from '../utils/ErrorReport';
 import PairMap from '../utils/PairMap';
+import useListUpdatesCount from './useListUpdatesCount';
 
 type Item = unknown;
 type Callback = () => void;
@@ -81,6 +82,7 @@ export const useObject = <T extends Item>(item: T): T => {
 
 export const useList = <T extends Item>(list: T[]): T[] => {
   const [, setRenderCount] = useState(0);
+  const listUpdatesCount = useListUpdatesCount(list);
 
   useLayoutEffect(() => {
     const render = () => setRenderCount((renderCount) => renderCount + 1);
@@ -92,7 +94,7 @@ export const useList = <T extends Item>(list: T[]): T[] => {
         unsubscribe();
       }
     };
-  }, list);
+  }, [listUpdatesCount]);
 
   return list;
 };
