@@ -36,7 +36,7 @@ export default class Collection {
         Collection.PROJECT_SNAPSHOTS_DIR_NAME,
       );
       if (await $FileSystem.exists(projectSnapshotsDirectory)) {
-        const projectNames = await $FileSystem.getFileNames(
+        const projectNames = await $FileSystem.getDirNames(
           projectSnapshotsDirectory,
         );
         this._projectSnapshotNames = projectNames;
@@ -85,7 +85,7 @@ export default class Collection {
         return error.extend(errorMessage);
       }
 
-      this._projectSnapshotNames.push(projectSnapshot.getName());
+      this._projectSnapshotNames.push(name);
     },
   );
 }
