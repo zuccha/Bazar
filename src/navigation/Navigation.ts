@@ -52,7 +52,7 @@ export default class Navigation {
   private _toolchain: Router<ToolchainRouteName>;
 
   private constructor() {
-    this._root = Router.create<RootRouteName>(RootRouteName.Collection);
+    this._root = Router.create<RootRouteName>(RootRouteName.Home);
     this._collection = Router.create<CollectionRouteName>(
       CollectionRouteName.Projects,
     );
