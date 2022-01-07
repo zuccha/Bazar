@@ -120,7 +120,6 @@ export default function Table<T>({
             </Text>
           </Flex>
         ))}
-        {actions.length > 0 && <Flex width='120px' {...styles.row} />}
       </Flex>
 
       <Flex flex={1} pb={2} flexDir='column' overflow='auto'>
@@ -145,6 +144,7 @@ export default function Table<T>({
                 cursor: onSelectRowIndex ? 'pointer' : undefined,
               }}
               onClick={() => onSelectRowIndex?.(rowIndex)}
+              position='relative'
             >
               {columns.map((column, columnIndex) => (
                 <Flex
@@ -157,7 +157,7 @@ export default function Table<T>({
                 </Flex>
               ))}
               {actions.length > 0 && (
-                <Center {...styles.row} width='120px'>
+                <Center position='absolute' h='100%' right={4}>
                   <HStack
                     spacing={1}
                     visibility='hidden'
