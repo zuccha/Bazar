@@ -44,6 +44,8 @@ export default function PatchesTab({
 
   const handleRemovePatch = useRemovePatchFromProjectSnapshot(projectSnapshot);
 
+  const handleSavePatchAsTemplate = async () => undefined;
+
   const columns: TableColumn<Patch>[] = useMemo(() => {
     return [
       {
@@ -66,10 +68,12 @@ export default function PatchesTab({
       resources={patches}
       canApply={asar.status === 'installed'}
       canOpenInEditor={false}
-      canRemove={true}
+      canRemove
+      canSaveAsTemplate={false}
       onApply={handleApplyPatch}
       onOpenInEditor={() => Promise.resolve(undefined)}
       onRemove={handleRemovePatch}
+      onSaveAsTemplate={handleSavePatchAsTemplate}
       renderInfo={(patch) => <PatchesTabInfo patch={patch} />}
       renderResourceAdditionDrawer={({ onClose }) => (
         <PatchAdditionDrawer

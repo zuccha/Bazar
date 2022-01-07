@@ -2,6 +2,7 @@ import {
   ArrowForwardIcon,
   CopyIcon,
   DeleteIcon,
+  DownloadIcon,
   EditIcon,
 } from '@chakra-ui/icons';
 import { Flex, HStack, VStack } from '@chakra-ui/react';
@@ -39,10 +40,12 @@ interface ResourcesTabProps<R extends Resource> {
   canApply: boolean;
   canRemove: boolean;
   canOpenInEditor: boolean;
+  canSaveAsTemplate: boolean;
 
   onApply: (resource: R) => Promise<EitherErrorOr<Process>>;
   onRemove: (resource: R) => Promise<ErrorReport | undefined>;
   onOpenInEditor: (resource: R) => Promise<ErrorReport | undefined>;
+  onSaveAsTemplate: (resource: R) => Promise<ErrorReport | undefined>;
 
   renderInfo: (resource: R | undefined) => ReactElement;
   renderResourceAdditionDrawer: (params: {
@@ -60,10 +63,12 @@ export default function ResourcesTab<R extends Resource>({
   canApply,
   canOpenInEditor,
   canRemove,
+  canSaveAsTemplate,
 
   onApply,
   onOpenInEditor,
   onRemove,
+  onSaveAsTemplate,
 
   renderInfo,
   renderResourceAdditionDrawer,
@@ -200,6 +205,22 @@ export default function ResourcesTab<R extends Resource>({
     [onRemove, canRemove, handleError],
   );
 
+  const handleSaveAsTemplate = useAsyncCallback(
+    async (resource: R): Promise<ErrorReport | undefined> => {
+      if (!canSaveAsTemplate) {
+        const errorMessage = `Cannot save ${name} as template`;
+        const error = $ErrorReport.make(errorMessage);
+        handleError(error, `Failed to save ${name} as template`);
+        return error;
+      }
+
+      const maybeError = await onSaveAsTemplate(resource);
+      handleError(maybeError, `Failed to save ${name} as template`);
+      return maybeError;
+    },
+    [onSaveAsTemplate, canSaveAsTemplate, handleError],
+  );
+
   const isApplying = handleApply.isLoading || handleApplyAll.isLoading;
 
   const actions: TableAction<R>[] = useMemo(() => {
@@ -212,7 +233,7 @@ export default function ResourcesTab<R extends Resource>({
       },
       {
         icon: <EditIcon />,
-        isDisabled: !canOpenInEditor || isApplying,
+        isDisabled: !canOpenInEditor || handleOpenInEditor.isLoading,
         label: `Open ${name} in editor`,
         onClick: (row) => handleOpenInEditor.call(row.data),
       },
@@ -222,6 +243,12 @@ export default function ResourcesTab<R extends Resource>({
         label: `Remove ${name}`,
         onClick: (row) => setResourceToRemove(row.data),
       },
+      {
+        icon: <DownloadIcon />,
+        isDisabled: !canSaveAsTemplate || handleSaveAsTemplate.isLoading,
+        label: `Save ${name} as template`,
+        onClick: (row) => handleSaveAsTemplate.call(row.data),
+      },
     ];
   }, [
     name,
@@ -230,6 +257,9 @@ export default function ResourcesTab<R extends Resource>({
     canRemove,
     handleApply.call,
     handleOpenInEditor.call,
+    handleSaveAsTemplate.call,
+    handleOpenInEditor.isLoading,
+    handleSaveAsTemplate.isLoading,
     isApplying,
     resourceToRemove,
   ]);
