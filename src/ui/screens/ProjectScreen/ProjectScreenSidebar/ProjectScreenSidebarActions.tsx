@@ -15,11 +15,11 @@ import {
   useGetEmbeddedTool,
 } from '../../../../core-hooks/Toolchain';
 import Project from '../../../../core/Project';
+import ProjectTemplateAdditionDrawer from '../../../drawers/ProjectTemplateAdditionDrawer';
 import useAsyncCallback from '../../../../hooks/useAsyncCallback';
 import useHandleError from '../../../../hooks/useHandleError';
 import useSafeState from '../../../../hooks/usSafeState';
 import Button from '../../../../ui-atoms/Button';
-import ProjectAdditionToCollectionDrawer from '../../../drawers/ProjectAdditionToCollectionDrawer';
 
 interface ProjectScreenSidebarActionsProps {
   project: Project;
@@ -32,8 +32,8 @@ export default function ProjectScreenSidebarActions({
   const toast = useToast();
 
   const [
-    isProjectAdditionToCollectionDrawerVisible,
-    setIsProjectAdditionToCollectionDrawerVisible,
+    isProjectTemplateAdditionDrawerVisible,
+    setIsProjectTemplateAdditionDrawerVisible,
   ] = useSafeState(false);
 
   const collection = useCollection();
@@ -104,14 +104,14 @@ export default function ProjectScreenSidebarActions({
         <Button
           isDisabled={handleAddProjectSnapshotToCollection.isLoading}
           label='Save as template'
-          onClick={() => setIsProjectAdditionToCollectionDrawerVisible(true)}
+          onClick={() => setIsProjectTemplateAdditionDrawerVisible(true)}
           w='100%'
         />
       </VStack>
 
-      {isProjectAdditionToCollectionDrawerVisible && (
-        <ProjectAdditionToCollectionDrawer
-          onClose={() => setIsProjectAdditionToCollectionDrawerVisible(false)}
+      {isProjectTemplateAdditionDrawerVisible && (
+        <ProjectTemplateAdditionDrawer
+          onClose={() => setIsProjectTemplateAdditionDrawerVisible(false)}
           onAdd={handleAddProjectSnapshotToCollection.call}
         />
       )}

@@ -9,15 +9,15 @@ import TextEditor from '../../ui-atoms/TextEditor';
 import { ErrorReport } from '../../utils/ErrorReport';
 import { $FileSystem } from '../../utils/FileSystem';
 
-interface ProjectAdditionToCollectionDrawerProps {
+interface ProjectTemplateAdditionDrawerProps {
   onClose: () => void;
   onAdd: (name: string) => Promise<ErrorReport | undefined>;
 }
 
-export default function ProjectAdditionToCollectionDrawer({
+export default function ProjectTemplateAdditionDrawer({
   onClose,
   onAdd,
-}: ProjectAdditionToCollectionDrawerProps): ReactElement {
+}: ProjectTemplateAdditionDrawerProps): ReactElement {
   const nameField = useFormField({
     infoMessage: 'Name of the project template',
     initialValue: '',
