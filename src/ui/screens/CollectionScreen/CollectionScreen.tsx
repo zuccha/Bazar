@@ -8,6 +8,7 @@ import { CollectionRouteName } from '../../../navigation/Navigation';
 import ComingSoon from '../../../ui-atoms/ComingSoon';
 import Header from '../../../ui-atoms/Header';
 import NavigatorWithList from '../../../ui-atoms/NavigatorWithList';
+import ProjectsCollectionPage from './pages/ProjectsCollectionPage';
 
 export default function CollectionScreen(): ReactElement {
   const projectRoute = useTemplatesRoute();
@@ -18,7 +19,7 @@ export default function CollectionScreen(): ReactElement {
       {
         id: CollectionRouteName.Projects,
         label: 'Projects',
-        content: <ComingSoon title='Projects' />,
+        content: <ProjectsCollectionPage />,
       },
       {
         id: CollectionRouteName.Blocks,
