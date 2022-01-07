@@ -14,6 +14,7 @@ import { TableColumn, TableRow } from '../../../../../../ui-atoms/Table';
 import { $EitherErrorOr } from '../../../../../../utils/EitherErrorOr';
 import { $ErrorReport } from '../../../../../../utils/ErrorReport';
 import PatchAdditionDrawer from '../../../../../drawers/PatchAdditionDrawer';
+import PatchTemplateAdditionDrawer from '../../../../../drawers/PatchTemplateAdditionDrawer';
 import ResourcesTab from '../../ResourcesTab';
 import PatchesTabInfo from './PatchesTabInfo';
 
@@ -69,17 +70,23 @@ export default function PatchesTab({
       canApply={asar.status === 'installed'}
       canOpenInEditor={false}
       canRemove
-      canSaveAsTemplate={false}
+      canSaveAsTemplate
       onApply={handleApplyPatch}
       onOpenInEditor={() => Promise.resolve(undefined)}
       onRemove={handleRemovePatch}
-      onSaveAsTemplate={handleSavePatchAsTemplate}
       renderInfo={(patch) => <PatchesTabInfo patch={patch} />}
       renderResourceAdditionDrawer={({ onClose }) => (
         <PatchAdditionDrawer
           onClose={onClose}
           onAddFromDirectory={addPatchFromDirectory}
           onAddFromFile={addPatchFromFile}
+        />
+      )}
+      renderResourceSaveAsTemplateDrawer={({ onClose, resource }) => (
+        <PatchTemplateAdditionDrawer
+          patch={resource}
+          onClose={onClose}
+          onAdd={async () => undefined}
         />
       )}
       columns={columns}

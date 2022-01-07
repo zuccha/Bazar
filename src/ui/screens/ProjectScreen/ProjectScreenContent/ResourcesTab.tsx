@@ -45,10 +45,13 @@ interface ResourcesTabProps<R extends Resource> {
   onApply: (resource: R) => Promise<EitherErrorOr<Process>>;
   onRemove: (resource: R) => Promise<ErrorReport | undefined>;
   onOpenInEditor: (resource: R) => Promise<ErrorReport | undefined>;
-  onSaveAsTemplate: (resource: R) => Promise<ErrorReport | undefined>;
 
   renderInfo: (resource: R | undefined) => ReactElement;
   renderResourceAdditionDrawer: (params: {
+    onClose: () => void;
+  }) => ReactElement;
+  renderResourceSaveAsTemplateDrawer: (params: {
+    resource: R;
     onClose: () => void;
   }) => ReactElement;
 
@@ -68,10 +71,10 @@ export default function ResourcesTab<R extends Resource>({
   onApply,
   onOpenInEditor,
   onRemove,
-  onSaveAsTemplate,
 
   renderInfo,
   renderResourceAdditionDrawer,
+  renderResourceSaveAsTemplateDrawer,
 
   columns,
   rows,
@@ -84,6 +87,10 @@ export default function ResourcesTab<R extends Resource>({
   const [resourceToRemove, setResourceToRemove] = useSafeState<R | undefined>(
     undefined,
   );
+
+  const [resourceToSaveAsTemplate, setResourceToSaveAsTemplate] = useSafeState<
+    R | undefined
+  >(undefined);
 
   const [selectedRowIndex, setSelectedRowIndex] = useSafeState<
     number | undefined
@@ -205,22 +212,6 @@ export default function ResourcesTab<R extends Resource>({
     [onRemove, canRemove, handleError],
   );
 
-  const handleSaveAsTemplate = useAsyncCallback(
-    async (resource: R): Promise<ErrorReport | undefined> => {
-      if (!canSaveAsTemplate) {
-        const errorMessage = `Cannot save ${name} as template`;
-        const error = $ErrorReport.make(errorMessage);
-        handleError(error, `Failed to save ${name} as template`);
-        return error;
-      }
-
-      const maybeError = await onSaveAsTemplate(resource);
-      handleError(maybeError, `Failed to save ${name} as template`);
-      return maybeError;
-    },
-    [onSaveAsTemplate, canSaveAsTemplate, handleError],
-  );
-
   const isApplying = handleApply.isLoading || handleApplyAll.isLoading;
 
   const actions: TableAction<R>[] = useMemo(() => {
@@ -245,9 +236,9 @@ export default function ResourcesTab<R extends Resource>({
       },
       {
         icon: <DownloadIcon />,
-        isDisabled: !canSaveAsTemplate || handleSaveAsTemplate.isLoading,
+        isDisabled: !canSaveAsTemplate || !!resourceToSaveAsTemplate,
         label: `Save ${name} as template`,
-        onClick: (row) => handleSaveAsTemplate.call(row.data),
+        onClick: (row) => setResourceToSaveAsTemplate(row.data),
       },
     ];
   }, [
@@ -255,13 +246,13 @@ export default function ResourcesTab<R extends Resource>({
     canApply,
     canOpenInEditor,
     canRemove,
+    canSaveAsTemplate,
     handleApply.call,
     handleOpenInEditor.call,
-    handleSaveAsTemplate.call,
     handleOpenInEditor.isLoading,
-    handleSaveAsTemplate.isLoading,
     isApplying,
     resourceToRemove,
+    resourceToSaveAsTemplate,
   ]);
 
   const copyToClipboard = useCopyToClipboard();
@@ -352,6 +343,12 @@ export default function ResourcesTab<R extends Resource>({
           title={`Remove ${name} "${resourceToRemove.getInfo().name}"`}
         />
       )}
+
+      {!!resourceToSaveAsTemplate &&
+        renderResourceSaveAsTemplateDrawer({
+          resource: resourceToSaveAsTemplate,
+          onClose: () => setResourceToSaveAsTemplate(undefined),
+        })}
     </>
   );
 }
