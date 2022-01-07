@@ -1,10 +1,11 @@
-import { VStack } from '@chakra-ui/react';
+import { Flex, VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 import useForm from '../../hooks/useForm';
 import useFormField from '../../hooks/useFormField';
 import Button from '../../ui-atoms/Button';
 import Drawer from '../../ui-atoms/Drawer';
 import FormControl from '../../ui-atoms/FormControl';
+import FormError from '../../ui-atoms/FormError';
 import TextEditor from '../../ui-atoms/TextEditor';
 import { ErrorReport } from '../../utils/ErrorReport';
 import { $FileSystem } from '../../utils/FileSystem';
@@ -46,8 +47,8 @@ export default function ProjectTemplateAdditionDrawer({
             isDisabled={!form.isValid || form.isSubmitting}
             label='Save'
             onClick={async () => {
-              await form.handleSubmit();
-              onClose();
+              const error = await form.handleSubmit();
+              if (!error) onClose();
             }}
           />
         </>
@@ -55,7 +56,7 @@ export default function ProjectTemplateAdditionDrawer({
       onClose={onClose}
       title='Save project as template'
     >
-      <VStack flex={1}>
+      <VStack flex={1} h='100%'>
         <FormControl {...nameField.control}>
           <TextEditor
             onBlur={nameField.handleBlur}
@@ -64,6 +65,8 @@ export default function ProjectTemplateAdditionDrawer({
             value={nameField.value}
           />
         </FormControl>
+        <Flex flex={1} />
+        {form.error && <FormError errorReport={form.error} />}
       </VStack>
     </Drawer>
   );
