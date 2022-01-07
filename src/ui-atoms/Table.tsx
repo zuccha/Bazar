@@ -1,4 +1,4 @@
-import { Center, Flex, HStack, Text } from '@chakra-ui/react';
+import { Center, Flex, Heading, HStack, Text } from '@chakra-ui/react';
 import { ReactElement, useMemo } from 'react';
 import useColorScheme from '../theme/useColorScheme';
 import IconButton from './IconButton';
@@ -13,9 +13,6 @@ export interface TableColumn<T> {
   label: string;
 
   getValue: (row: TableRow<T>) => string | number | boolean;
-
-  isSortable?: boolean;
-  isEditable?: boolean;
 
   width: 'fill' | `${number}px`;
 }
@@ -35,6 +32,8 @@ interface TableProps<T> {
   selectedRowIndex?: number | undefined;
   onSelectRowIndex?: (index: number) => void;
 
+  variant?: 'solid' | 'minimal';
+
   flex?: number;
   height?: number | string;
   width?: number | string;
@@ -46,16 +45,35 @@ function computeColumnStyle<T>(
   return column.width === 'fill' ? { flexGrow: 1 } : { width: column.width };
 }
 
-const borderStyle = {
-  borderColor: 'gray.300',
-  borderWidth: '1px',
-};
-
-const rowStyle = {
-  borderColor: 'gray.300',
-  borderBottomWidth: '1px',
-  px: 5,
-  py: 2,
+const stylesByVariant = {
+  solid: {
+    border: {
+      borderColor: 'gray.300',
+      borderWidth: '1px',
+    },
+    header: {
+      bg: 'app.bg2',
+      h: 50,
+    },
+    row: {
+      borderColor: 'gray.300',
+      borderBottomWidth: '1px',
+      px: 5,
+      py: 2,
+    },
+  },
+  minimal: {
+    border: {},
+    header: {
+      h: 50,
+    },
+    row: {
+      borderColor: 'gray.300',
+      borderBottomWidth: '1px',
+      px: 5,
+      py: 2,
+    },
+  },
 };
 
 export default function Table<T>({
@@ -65,6 +83,8 @@ export default function Table<T>({
 
   selectedRowIndex,
   onSelectRowIndex,
+
+  variant = 'solid',
 
   flex,
   height,
@@ -76,32 +96,41 @@ export default function Table<T>({
     return columns.map(computeColumnStyle);
   }, [columns]);
 
+  const styles = stylesByVariant[variant];
+
   return (
     <Flex
       flexDir='column'
       height={height}
       width={width}
       flex={flex}
-      {...borderStyle}
+      {...styles.border}
       overflow='hidden'
     >
-      <Flex h={50} bg='gray.200'>
+      <Flex {...styles.header}>
         {columns.map((column, columnIndex) => (
           <Flex
             key={column.key}
             alignItems='center'
             {...columnStyles[columnIndex]}
-            {...rowStyle}
+            {...styles.row}
           >
             <Text textTransform='uppercase' fontWeight='bold' fontSize='xs'>
               {column.label}
             </Text>
           </Flex>
         ))}
-        {actions.length > 0 && <Flex width='120px' {...rowStyle} />}
+        {actions.length > 0 && <Flex width='120px' {...styles.row} />}
       </Flex>
 
       <Flex flex={1} pb={2} flexDir='column' overflow='auto'>
+        {rows.length === 0 && (
+          <Center flex={1}>
+            <Text size='sm' fontStyle='italic'>
+              No items
+            </Text>
+          </Center>
+        )}
         {rows.map((row, rowIndex) => {
           return (
             <Flex
@@ -122,13 +151,13 @@ export default function Table<T>({
                   key={`${row.key}-${column.key}`}
                   alignItems='center'
                   {...columnStyles[columnIndex]}
-                  {...rowStyle}
+                  {...styles.row}
                 >
                   <Text fontSize='md'>{column.getValue(row)}</Text>
                 </Flex>
               ))}
               {actions.length > 0 && (
-                <Center {...rowStyle} width='120px'>
+                <Center {...styles.row} width='120px'>
                   <HStack
                     spacing={1}
                     visibility='hidden'
