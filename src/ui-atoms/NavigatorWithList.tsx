@@ -68,7 +68,7 @@ export default function NavigatorWithList<T extends string>({
           <Flex />
         </VStack>
         <Flex bg='app.bg1' w='1px' />
-        <Flex flex={1} p={4} flexDir='column' overflow='auto'>
+        <Flex flex={1} flexDir='column' overflow='auto'>
           {content}
         </Flex>
       </Flex>

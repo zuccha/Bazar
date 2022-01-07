@@ -26,7 +26,7 @@ export default function NewProjectSettingsPage(): ReactElement {
   });
 
   return (
-    <VStack spacing={4} alignItems='flex-start'>
+    <VStack spacing={4} alignItems='flex-start' p={4}>
       <FormControl {...author.field.control}>
         <TextEditor
           isDisabled={author.isSaving}

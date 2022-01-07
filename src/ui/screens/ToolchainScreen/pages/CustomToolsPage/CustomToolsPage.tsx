@@ -44,6 +44,7 @@ export default function ToolchainScreen(): ReactElement {
       spacing={4}
       divider={<StackDivider borderColor='app.bg1' />}
       alignItems='flex-start'
+      p={4}
     >
       <Text pb={2}>These are tools of your personal choice.</Text>
       <CustomToolItem

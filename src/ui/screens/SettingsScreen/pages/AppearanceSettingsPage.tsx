@@ -23,7 +23,7 @@ export default function AppearanceSettingsPage(): ReactElement {
   });
 
   return (
-    <VStack spacing={4} alignItems='flex-start'>
+    <VStack spacing={4} alignItems='flex-start' p={4}>
       <FormControl {...colorScheme.field.control}>
         <Selector
           isDisabled={colorScheme.isSaving}

@@ -40,6 +40,7 @@ export default function ToolchainScreen(): ReactElement {
       spacing={4}
       divider={<StackDivider borderColor='app.bg1' />}
       alignItems='flex-start'
+      p={4}
     >
       <Text pb={2}>
         Bazar needs specific versions of the following tools to work properly,
