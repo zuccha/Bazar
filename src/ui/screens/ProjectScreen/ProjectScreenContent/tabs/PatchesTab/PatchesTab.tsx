@@ -1,5 +1,6 @@
 import { ReactElement, useCallback, useMemo } from 'react';
-import { useToolchain } from '../../../../../../core-hooks/Core';
+import { useAddPatchToCollection } from '../../../../../../core-hooks/Collection';
+import { useCollection, useToolchain } from '../../../../../../core-hooks/Core';
 import {
   useAddPatchToProjectSnapshotFromDirectory,
   useAddPatchToProjectSnapshotFromFile,
@@ -25,6 +26,7 @@ interface PatchesTabProps {
 export default function PatchesTab({
   projectSnapshot,
 }: PatchesTabProps): ReactElement {
+  const collection = useCollection();
   const toolchain = useToolchain();
   const asar = useGetEmbeddedTool(toolchain, 'asar');
 
@@ -45,7 +47,7 @@ export default function PatchesTab({
 
   const handleRemovePatch = useRemovePatchFromProjectSnapshot(projectSnapshot);
 
-  const handleSavePatchAsTemplate = async () => undefined;
+  const savePatchAsTemplate = useAddPatchToCollection(collection);
 
   const columns: TableColumn<Patch>[] = useMemo(() => {
     return [
@@ -86,7 +88,7 @@ export default function PatchesTab({
         <PatchTemplateAdditionDrawer
           patch={resource}
           onClose={onClose}
-          onAdd={async () => undefined}
+          onAdd={(name) => savePatchAsTemplate(name, resource)}
         />
       )}
       columns={columns}

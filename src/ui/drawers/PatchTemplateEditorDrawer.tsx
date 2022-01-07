@@ -1,8 +1,8 @@
 import { Flex, VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
-import Patch from '../../core/Patch';
 import useForm from '../../hooks/useForm';
 import useFormField from '../../hooks/useFormField';
+import Alert from '../../ui-atoms/Alert';
 import Button from '../../ui-atoms/Button';
 import Drawer from '../../ui-atoms/Drawer';
 import FormControl from '../../ui-atoms/FormControl';
@@ -11,20 +11,20 @@ import TextEditor from '../../ui-atoms/TextEditor';
 import { ErrorReport } from '../../utils/ErrorReport';
 import { $FileSystem } from '../../utils/FileSystem';
 
-interface PatchTemplateAdditionDrawerProps {
-  patch: Patch;
+interface PatchTemplateEditorDrawerProps {
+  name: string;
   onClose: () => void;
-  onAdd: (name: string) => Promise<ErrorReport | undefined>;
+  onEdit: (name: string) => Promise<ErrorReport | undefined>;
 }
 
-export default function PatchTemplateAdditionDrawer({
-  patch,
+export default function PatchTemplateEditorDrawer({
+  name,
   onClose,
-  onAdd,
-}: PatchTemplateAdditionDrawerProps): ReactElement {
+  onEdit,
+}: PatchTemplateEditorDrawerProps): ReactElement {
   const nameField = useFormField({
     infoMessage: 'Name of the patch template',
-    initialValue: patch.getInfo().name,
+    initialValue: name,
     isRequired: true,
     label: 'Patch name',
     onValidate: $FileSystem.validateIsValidName,
@@ -32,7 +32,7 @@ export default function PatchTemplateAdditionDrawer({
 
   const form = useForm({
     fields: [nameField],
-    onSubmit: () => onAdd(nameField.value),
+    onSubmit: () => onEdit(nameField.value),
   });
 
   return (
@@ -47,7 +47,9 @@ export default function PatchTemplateAdditionDrawer({
             mr={3}
           />
           <Button
-            isDisabled={!form.isValid || form.isSubmitting}
+            isDisabled={
+              name === nameField.value || !form.isValid || form.isSubmitting
+            }
             label='Save'
             onClick={async () => {
               const error = await form.handleSubmit();
@@ -57,18 +59,25 @@ export default function PatchTemplateAdditionDrawer({
         </>
       }
       onClose={onClose}
-      title='Save patch as template'
+      title='Edit patch template'
     >
-      <VStack flex={1} h='100%'>
+      <VStack h='100%'>
         <FormControl {...nameField.control}>
           <TextEditor
+            isDisabled={form.isSubmitting}
             onBlur={nameField.handleBlur}
             onChange={nameField.handleChange}
             placeholder={nameField.control.label}
             value={nameField.value}
           />
         </FormControl>
+        <Alert status='info'>
+          Renaming the template will also rename the directory that contains it.
+          Make sure you are not editing the template's files during the process.
+        </Alert>
+
         <Flex flex={1} />
+
         {form.error && <FormError errorReport={form.error} />}
       </VStack>
     </Drawer>

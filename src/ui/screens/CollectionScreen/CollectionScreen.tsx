@@ -8,6 +8,7 @@ import { CollectionRouteName } from '../../../navigation/Navigation';
 import ComingSoon from '../../../ui-atoms/ComingSoon';
 import Header from '../../../ui-atoms/Header';
 import NavigatorWithList from '../../../ui-atoms/NavigatorWithList';
+import PatchesCollectionPage from './pages/PatchesCollectionPage';
 import ProjectsCollectionPage from './pages/ProjectsCollectionPage';
 
 export default function CollectionScreen(): ReactElement {
@@ -36,8 +37,7 @@ export default function CollectionScreen(): ReactElement {
       {
         id: CollectionRouteName.Patches,
         label: 'Patches',
-        content: <ComingSoon title='Patches' />,
-        isDisabled: true,
+        content: <PatchesCollectionPage />,
       },
       {
         id: CollectionRouteName.Sprites,

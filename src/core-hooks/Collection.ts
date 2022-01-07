@@ -1,4 +1,5 @@
 import Collection from '../core/Collection';
+import Patch from '../core/Patch';
 import ProjectSnapshot from '../core/ProjectSnapshot';
 import { useGet, useSetAsync } from '../hooks/useAccessors';
 import { ErrorReport } from '../utils/ErrorReport';
@@ -37,4 +38,32 @@ export const useEditProjectSnapshotInCollection = (
   nextName: string,
 ) => Promise<ErrorReport | undefined>) => {
   return useSetAsync(collection, collection.editProjectSnapshot);
+};
+
+export const useCollectionPatchNames = (collection: Collection): string[] => {
+  return useGet(collection, collection.getPatchNames);
+};
+
+export const useAddPatchToCollection = (
+  collection: Collection,
+): ((
+  name: string,
+  projectSnapshot: Patch,
+) => Promise<ErrorReport | undefined>) => {
+  return useSetAsync(collection, collection.addPatch);
+};
+
+export const useDeletePatchFromCollection = (
+  collection: Collection,
+): ((name: string) => Promise<ErrorReport | undefined>) => {
+  return useSetAsync(collection, collection.deletePatch);
+};
+
+export const useEditPatchInCollection = (
+  collection: Collection,
+): ((
+  prevName: string,
+  nextName: string,
+) => Promise<ErrorReport | undefined>) => {
+  return useSetAsync(collection, collection.editPatch);
 };
