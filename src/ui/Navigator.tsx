@@ -48,14 +48,14 @@ export default function Navigator(): ReactElement {
           onClick={() => navigateRoot(RootRouteName.Home)}
         />
         <SidebarButton
-          icon={<StarIcon />}
+          icon={<CopyIcon />}
           isActive={rootRoute === RootRouteName.Project}
           isDisabled={!project}
           label='Project'
           onClick={() => navigateRoot(RootRouteName.Project)}
         />
         <SidebarButton
-          icon={<CopyIcon />}
+          icon={<StarIcon />}
           isActive={rootRoute === RootRouteName.Collection}
           label='Templates'
           onClick={() => navigateRoot(RootRouteName.Collection)}
