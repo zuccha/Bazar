@@ -1,27 +1,20 @@
-import {
-  Flex,
-  HStack,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  VStack,
-} from '@chakra-ui/react';
+import { Flex, HStack, VStack } from '@chakra-ui/react';
 import { ReactElement, useState } from 'react';
 import useForm from '../../hooks/useForm';
 import useFormField from '../../hooks/useFormField';
-import useColorScheme from '../../theme/useColorScheme';
 import Alert from '../../ui-atoms/Alert';
 import Button from '../../ui-atoms/Button';
 import Drawer from '../../ui-atoms/Drawer';
 import FormControl from '../../ui-atoms/FormControl';
 import FormError from '../../ui-atoms/FormError';
+import NavigatorWithTabs from '../../ui-atoms/NavigatorWithTabs';
 import SelectorOfFiles from '../../ui-atoms/SelectorOfFiles';
 import TextEditor from '../../ui-atoms/TextEditor';
 import TextEditorOfPath from '../../ui-atoms/TextEditorOfPath';
 import { ErrorReport } from '../../utils/ErrorReport';
 import { $FileSystem } from '../../utils/FileSystem';
+
+type Source = 'file' | 'directory';
 
 interface PatchAdditionDrawerProps {
   onClose: () => void;
@@ -45,8 +38,7 @@ export default function PatchAdditionDrawer({
   onAddFromDirectory,
   onAddFromFile,
 }: PatchAdditionDrawerProps): ReactElement {
-  const colorScheme = useColorScheme();
-  const [isSingleFile, setIsSingleFile] = useState(true);
+  const [source, setSource] = useState<Source>('file');
 
   const nameField = useFormField({
     infoMessage: 'Name of the patch',
@@ -94,28 +86,29 @@ export default function PatchAdditionDrawer({
   });
 
   const form = useForm(
-    isSingleFile
-      ? {
-          fields: [nameField, singleFilePathField],
-          onSubmit: () =>
-            onAddFromFile({
-              name: nameField.value.trim(),
-              author: authorField.value.trim(),
-              version: versionField.value.trim(),
-              filePath: singleFilePathField.value.trim(),
-            }),
-        }
-      : {
-          fields: [nameField, mainFileRelativePathField, sourceDirPathField],
-          onSubmit: () =>
-            onAddFromDirectory({
-              name: nameField.value.trim(),
-              author: authorField.value.trim(),
-              version: versionField.value.trim(),
-              sourceDirPath: sourceDirPathField.value.trim(),
-              mainFileRelativePath: mainFileRelativePathField.value.trim(),
-            }),
-        },
+    {
+      file: {
+        fields: [nameField, singleFilePathField],
+        onSubmit: () =>
+          onAddFromFile({
+            name: nameField.value.trim(),
+            author: authorField.value.trim(),
+            version: versionField.value.trim(),
+            filePath: singleFilePathField.value.trim(),
+          }),
+      },
+      directory: {
+        fields: [nameField, mainFileRelativePathField, sourceDirPathField],
+        onSubmit: () =>
+          onAddFromDirectory({
+            name: nameField.value.trim(),
+            author: authorField.value.trim(),
+            version: versionField.value.trim(),
+            sourceDirPath: sourceDirPathField.value.trim(),
+            mainFileRelativePath: mainFileRelativePathField.value.trim(),
+          }),
+      },
+    }[source],
   );
 
   return (
@@ -175,58 +168,65 @@ export default function PatchAdditionDrawer({
             />
           </FormControl>
 
-          <Tabs
+          <NavigatorWithTabs
+            width='100%'
+            flex={1}
+            contentStyle={{ mt: 4 }}
+            isBorderLess
             isFitted
-            w='100%'
-            index={isSingleFile ? 0 : 1}
-            onChange={(index) => setIsSingleFile(index === 0)}
-            colorScheme={colorScheme}
-          >
-            <TabList>
-              <Tab>File</Tab>
-              <Tab>Directory</Tab>
-            </TabList>
-            <TabPanels>
-              <TabPanel paddingBottom={0} paddingX={0}>
-                <FormControl {...singleFilePathField.control}>
-                  <TextEditorOfPath
-                    filters={[{ name: 'File', extensions: ['asm'] }]}
-                    isDisabled={form.isSubmitting}
-                    mode='file'
-                    onBlur={singleFilePathField.handleBlur}
-                    onChange={singleFilePathField.handleChange}
-                    placeholder={singleFilePathField.control.label}
-                    value={singleFilePathField.value}
-                  />
-                </FormControl>
-              </TabPanel>
-              <TabPanel paddingBottom={0} paddingX={0}>
-                <VStack width='100%' spacing={4} flex={1}>
-                  <FormControl {...sourceDirPathField.control}>
+            selectedPage={source}
+            onSelectPage={setSource}
+            pages={[
+              {
+                id: 'file',
+                label: 'File',
+                content: (
+                  <FormControl {...singleFilePathField.control}>
                     <TextEditorOfPath
+                      filters={[{ name: 'File', extensions: ['asm'] }]}
                       isDisabled={form.isSubmitting}
-                      mode='directory'
-                      onBlur={sourceDirPathField.handleBlur}
-                      onChange={sourceDirPathField.handleChange}
-                      placeholder={sourceDirPathField.control.label}
-                      value={sourceDirPathField.value}
+                      mode='file'
+                      onBlur={singleFilePathField.handleBlur}
+                      onChange={singleFilePathField.handleChange}
+                      placeholder={singleFilePathField.control.label}
+                      value={singleFilePathField.value}
                     />
                   </FormControl>
+                ),
+                isDisabled: form.isSubmitting,
+              },
+              {
+                id: 'directory',
+                label: 'Directory',
+                content: (
+                  <VStack width='100%' spacing={4} flex={1}>
+                    <FormControl {...sourceDirPathField.control}>
+                      <TextEditorOfPath
+                        isDisabled={form.isSubmitting}
+                        mode='directory'
+                        onBlur={sourceDirPathField.handleBlur}
+                        onChange={sourceDirPathField.handleChange}
+                        placeholder={sourceDirPathField.control.label}
+                        value={sourceDirPathField.value}
+                      />
+                    </FormControl>
 
-                  <FormControl {...mainFileRelativePathField.control}>
-                    <SelectorOfFiles
-                      directoryPath={sourceDirPathField.value}
-                      extensions={['.asm']}
-                      isDisabled={form.isSubmitting}
-                      onChange={mainFileRelativePathField.handleChange}
-                      placeholder='Main file'
-                      value={mainFileRelativePathField.value}
-                    />
-                  </FormControl>
-                </VStack>
-              </TabPanel>
-            </TabPanels>
-          </Tabs>
+                    <FormControl {...mainFileRelativePathField.control}>
+                      <SelectorOfFiles
+                        directoryPath={sourceDirPathField.value}
+                        extensions={['.asm']}
+                        isDisabled={form.isSubmitting}
+                        onChange={mainFileRelativePathField.handleChange}
+                        placeholder='Main file'
+                        value={mainFileRelativePathField.value}
+                      />
+                    </FormControl>
+                  </VStack>
+                ),
+                isDisabled: form.isSubmitting,
+              },
+            ]}
+          />
 
           <Alert status='info'>
             The patch will be added to the project, copying the original files.

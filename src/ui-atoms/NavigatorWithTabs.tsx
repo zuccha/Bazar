@@ -1,4 +1,12 @@
-import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
+import {
+  LayoutProps,
+  SpaceProps,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+} from '@chakra-ui/react';
 import { ReactElement, ReactNode, useCallback, useMemo } from 'react';
 import useColorScheme from '../theme/useColorScheme';
 
@@ -12,9 +20,14 @@ interface NavigatorWithTabsProps<T extends string> {
   }[];
   onSelectPage: (page: T) => void;
 
+  isBorderLess?: boolean;
+  isFitted?: boolean;
+
   flex?: number;
   height?: number | string;
   width?: number | string;
+
+  contentStyle?: Partial<LayoutProps & SpaceProps>;
 }
 
 export default function NavigatorWithTabs<T extends string>({
@@ -22,9 +35,14 @@ export default function NavigatorWithTabs<T extends string>({
   pages,
   onSelectPage,
 
+  isBorderLess,
+  isFitted,
+
   flex,
   height,
   width,
+
+  contentStyle,
 }: NavigatorWithTabsProps<T>): ReactElement {
   const colorScheme = useColorScheme();
 
@@ -47,9 +65,10 @@ export default function NavigatorWithTabs<T extends string>({
       width={width}
       display='flex'
       flexDir='column'
+      isFitted={isFitted}
       index={tabIndex}
       onChange={handleTabChange}
-      borderWidth={1}
+      borderWidth={isBorderLess ? 0 : 1}
       colorScheme={colorScheme}
     >
       <TabList>
@@ -67,6 +86,8 @@ export default function NavigatorWithTabs<T extends string>({
             display='flex'
             flexDir='column'
             h='100%'
+            p={0}
+            {...contentStyle}
           >
             {page.content}
           </TabPanel>

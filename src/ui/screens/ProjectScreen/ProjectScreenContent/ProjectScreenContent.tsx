@@ -87,6 +87,7 @@ export default function ProjectScreenContent({
       pages={pages}
       onSelectPage={navigateProject}
       flex={1}
+      contentStyle={{ m: 3 }}
     />
   );
 }
