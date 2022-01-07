@@ -23,3 +23,18 @@ export const useAddProjectSnapshotToCollection = (
 ) => Promise<ErrorReport | undefined>) => {
   return useSetAsync(collection, collection.addProjectSnapshot);
 };
+
+export const useDeleteProjectSnapshotFromCollection = (
+  collection: Collection,
+): ((name: string) => Promise<ErrorReport | undefined>) => {
+  return useSetAsync(collection, collection.deleteProjectSnapshot);
+};
+
+export const useEditProjectSnapshotInCollection = (
+  collection: Collection,
+): ((
+  prevName: string,
+  nextName: string,
+) => Promise<ErrorReport | undefined>) => {
+  return useSetAsync(collection, collection.editProjectSnapshot);
+};

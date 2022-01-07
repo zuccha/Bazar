@@ -1,9 +1,14 @@
 import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import { ReactElement, useMemo, useState } from 'react';
-import { useCollectionProjectSnapshotNames } from '../../../../../core-hooks/Collection';
+import {
+  useCollectionProjectSnapshotNames,
+  useDeleteProjectSnapshotFromCollection,
+  useEditProjectSnapshotInCollection,
+} from '../../../../../core-hooks/Collection';
 import { useCollection } from '../../../../../core-hooks/Core';
 import { useList } from '../../../../../hooks/useAccessors';
 import useAsyncCallback from '../../../../../hooks/useAsyncCallback';
+import useHandleError from '../../../../../hooks/useHandleError';
 import DialogWithIrreversibleAction from '../../../../../ui-atoms/DialogWithIrreversibleAction';
 import Table, {
   TableAction,
@@ -13,18 +18,34 @@ import Table, {
 import ProjectTemplateEditorDrawer from '../../../../drawers/ProjectTemplateEditorDrawer';
 
 export default function ProjectsCollectionPage(): ReactElement {
+  const handleError = useHandleError();
+
   const collection = useCollection();
   const projectSnapshotNames = useCollectionProjectSnapshotNames(collection);
 
   const [nameToDelete, setNameToDelete] = useState<string | undefined>();
+  const deleteProjectSnapshot =
+    useDeleteProjectSnapshotFromCollection(collection);
   const handleDelete = useAsyncCallback(async () => {
-    return undefined;
-  }, []);
+    if (nameToDelete) {
+      const error = await deleteProjectSnapshot(nameToDelete);
+      handleError(error, 'Failed to delete project');
+      return error;
+    }
+  }, [handleError, nameToDelete, deleteProjectSnapshot]);
 
   const [nameToEdit, setNameToEdit] = useState<string | undefined>();
-  const handleEdit = useAsyncCallback(async (name: string) => {
-    return undefined;
-  }, []);
+  const editProjectSnapshot = useEditProjectSnapshotInCollection(collection);
+  const handleEdit = useAsyncCallback(
+    async (name: string) => {
+      if (nameToEdit) {
+        const error = await editProjectSnapshot(nameToEdit, name);
+        handleError(error, 'Failed to edit project');
+        return error;
+      }
+    },
+    [handleError, nameToEdit, editProjectSnapshot],
+  );
 
   const isDisabled =
     !!nameToEdit ||

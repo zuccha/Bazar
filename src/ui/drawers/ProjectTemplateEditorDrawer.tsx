@@ -1,4 +1,4 @@
-import { VStack } from '@chakra-ui/react';
+import { Flex, VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 import useForm from '../../hooks/useForm';
 import useFormField from '../../hooks/useFormField';
@@ -6,6 +6,7 @@ import Alert from '../../ui-atoms/Alert';
 import Button from '../../ui-atoms/Button';
 import Drawer from '../../ui-atoms/Drawer';
 import FormControl from '../../ui-atoms/FormControl';
+import FormError from '../../ui-atoms/FormError';
 import TextEditor from '../../ui-atoms/TextEditor';
 import { ErrorReport } from '../../utils/ErrorReport';
 import { $FileSystem } from '../../utils/FileSystem';
@@ -46,11 +47,13 @@ export default function ProjectTemplateEditorDrawer({
             mr={3}
           />
           <Button
-            isDisabled={!form.isValid || form.isSubmitting}
+            isDisabled={
+              name === nameField.value || !form.isValid || form.isSubmitting
+            }
             label='Save'
             onClick={async () => {
-              await form.handleSubmit();
-              onClose();
+              const error = await form.handleSubmit();
+              if (!error) onClose();
             }}
           />
         </>
@@ -58,9 +61,10 @@ export default function ProjectTemplateEditorDrawer({
       onClose={onClose}
       title='Edit project template'
     >
-      <VStack flex={1}>
+      <VStack h='100%'>
         <FormControl {...nameField.control}>
           <TextEditor
+            isDisabled={form.isSubmitting}
             onBlur={nameField.handleBlur}
             onChange={nameField.handleChange}
             placeholder={nameField.control.label}
@@ -71,6 +75,10 @@ export default function ProjectTemplateEditorDrawer({
           Renaming the template will also rename the directory that contains it.
           Make sure you are not editing the template's files during the process.
         </Alert>
+
+        <Flex flex={1} />
+
+        {form.error && <FormError errorReport={form.error} />}
       </VStack>
     </Drawer>
   );
