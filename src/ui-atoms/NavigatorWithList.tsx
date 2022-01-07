@@ -1,4 +1,4 @@
-import { Button, Flex, Text, VStack } from '@chakra-ui/react';
+import { Button, Flex, VStack } from '@chakra-ui/react';
 import { ReactElement, ReactNode, useMemo } from 'react';
 import useColorScheme from '../theme/useColorScheme';
 
@@ -36,28 +36,36 @@ export default function NavigatorWithList<T extends string>({
     <Flex flex={flex} h={height} w={width} justifyContent='center'>
       <Flex flex={1} borderColor='app.bg1' borderWidth={1}>
         <VStack
-          spacing={2}
           w={200}
-          p={4}
           alignItems='flex-start'
           overflow='auto'
+          spacing={0}
+          divider={
+            <Flex w='100%' borderColor='app.bg1' borderBottomWidth={1} />
+          }
+          borderColor='app.bg1'
         >
           {pages.map((page) => {
             const isSelected = page.id === selectedPage;
             return (
               <Button
                 key={page.id}
-                colorScheme={isSelected ? colorScheme : 'black'}
+                borderRadius={0}
+                color={isSelected ? `${colorScheme}.500` : 'app.fg1'}
+                colorScheme={colorScheme}
                 fontWeight={isSelected ? 'bold' : 'normal'}
                 isDisabled={page.isDisabled}
+                justifyContent='flex-start'
                 onClick={() => onSelectPage(page.id)}
-                minW={0}
-                variant='link'
+                p={4}
+                variant='ghost'
+                w='100%'
               >
                 {page.label}
               </Button>
             );
           })}
+          <Flex />
         </VStack>
         <Flex bg='app.bg1' w='1px' />
         <Flex flex={1} p={4} flexDir='column' overflow='auto'>
