@@ -20,6 +20,7 @@ export default function Header({
     <Flex
       px={4}
       py={4}
+      bg='app.bg2'
       borderBottomWidth={hideBorderBottom ? 0 : 1}
       borderLeftWidth={hideBorderLeft ? 0 : 1}
       borderRightWidth={hideBorderRight ? 0 : 1}
