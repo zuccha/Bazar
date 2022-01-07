@@ -2,14 +2,15 @@ import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import { ReactElement, useMemo, useState } from 'react';
 import { useCollectionProjectSnapshotNames } from '../../../../../core-hooks/Collection';
 import { useCollection } from '../../../../../core-hooks/Core';
-import ProjectSnapshot from '../../../../../core/ProjectSnapshot';
 import { useList } from '../../../../../hooks/useAccessors';
 import useAsyncCallback from '../../../../../hooks/useAsyncCallback';
+import DialogWithIrreversibleAction from '../../../../../ui-atoms/DialogWithIrreversibleAction';
 import Table, {
   TableAction,
   TableColumn,
   TableRow,
 } from '../../../../../ui-atoms/Table';
+import ProjectTemplateEditorDrawer from '../../../../drawers/ProjectTemplateEditorDrawer';
 
 export default function ProjectsCollectionPage(): ReactElement {
   const collection = useCollection();
@@ -21,7 +22,7 @@ export default function ProjectsCollectionPage(): ReactElement {
   }, []);
 
   const [nameToEdit, setNameToEdit] = useState<string | undefined>();
-  const handleEdit = useAsyncCallback(async () => {
+  const handleEdit = useAsyncCallback(async (name: string) => {
     return undefined;
   }, []);
 
@@ -67,12 +68,32 @@ export default function ProjectsCollectionPage(): ReactElement {
   );
 
   return (
-    <Table
-      actions={actions}
-      columns={columns}
-      rows={rows}
-      variant='minimal'
-      flex={1}
-    />
+    <>
+      <Table
+        actions={actions}
+        columns={columns}
+        rows={rows}
+        variant='minimal'
+        flex={1}
+      />
+
+      {!!nameToDelete && (
+        <DialogWithIrreversibleAction
+          action='Delete'
+          isDisabled={handleDelete.isLoading}
+          onClose={() => setNameToDelete(undefined)}
+          onDelete={handleDelete.call}
+          title={`Delete ${nameToDelete}?`}
+        />
+      )}
+
+      {!!nameToEdit && (
+        <ProjectTemplateEditorDrawer
+          name={nameToEdit}
+          onClose={() => setNameToEdit(undefined)}
+          onEdit={handleEdit.call}
+        />
+      )}
+    </>
   );
 }
