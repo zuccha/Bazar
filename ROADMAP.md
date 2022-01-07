@@ -17,7 +17,7 @@ There is not necessarily an order of completion. Features will be implemented at
 - [x] Create project from ROM
 - [ ] Create project from template
 - [x] Open project
-- [ ] Save project as template
+- [x] Save project as template
 - [x] Complete project info
   - [x] Name
   - [x] Author
@@ -190,23 +190,82 @@ There is not necessarily an order of completion. Features will be implemented at
   - [x] Default author
   - [x] Default destination directory
   - [x] Default ROM file
+- [ ] Add "blocks" settings
+  - [ ] Ask for confirmation when applying all
+  - [ ] Ask for confirmation when renaming
+- [ ] Add "music" settings
+  - [ ] Ask for confirmation when applying all
+  - [ ] Ask for confirmation when renaming
+- [ ] Add "patches" settings
+  - [ ] Ask for confirmation when applying all
+  - [ ] Ask for confirmation when renaming
+- [ ] Add "sprites" settings
+  - [ ] Ask for confirmation when applying all
+  - [ ] Ask for confirmation when renaming
+- [ ] Add "uberASM" settings
+  - [ ] Ask for confirmation when applying all
+  - [ ] Ask for confirmation when renaming
+- [ ] Add "graphics" settings
+  - [ ] Ask for confirmation when applying all
+  - [ ] Ask for confirmation when renaming
+- [ ] Add "ex-graphics" settings
+  - [ ] Ask for confirmation when applying all
+  - [ ] Ask for confirmation when renaming
+- [ ] Add "templates" settings
+  - [ ] Custom templates directory
 - [x] Divide settings in sections
 - [ ] Export settings
 - [ ] Import settings
 
 ## Templates
 
-- [ ] List templates
-  - [ ] Project
-  - [ ] Block
-  - [ ] Music
-  - [ ] Patch
-  - [ ] Sprite
-  - [ ] UberASM
-  - [ ] Graphics
-  - [ ] ExGraphics
-- [ ] Add template
-- [ ] Remove template
+- [ ] Projects
+  - [x] List project templates
+  - [x] Save project as template
+  - [ ] Delete project template
+  - [ ] Edit project template
+- [ ] Blocks
+  - [ ] List block templates
+  - [ ] Add block as template
+  - [ ] Save block as template
+  - [ ] Delete block template
+  - [ ] Edit block template
+- [ ] Music
+  - [ ] List music templates
+  - [ ] Add music as template
+  - [ ] Save music as template
+  - [ ] Delete music template
+  - [ ] Edit music template
+- [ ] Patch
+  - [ ] List patch templates
+  - [ ] Add patch as template
+  - [ ] Save patch as template
+  - [ ] Delete patch template
+  - [ ] Edit patch template
+- [ ] Sprite
+  - [ ] List sprites templates
+  - [ ] Add sprites as template
+  - [ ] Save sprites as template
+  - [ ] Delete sprites template
+  - [ ] Edit sprites template
+- [ ] UberASM
+  - [ ] List uberASM templates
+  - [ ] Add uberASM as template
+  - [ ] Save uberASM as template
+  - [ ] Delete uberASM template
+  - [ ] Edit uberASM template
+- [ ] Graphics
+  - [ ] List graphics templates
+  - [ ] Add graphics as template
+  - [ ] Save graphics as template
+  - [ ] Delete graphics template
+  - [ ] Edit graphics template
+- [ ] ExGraphics
+  - [ ] List ExGraphics templates
+  - [ ] Add ExGraphics as template
+  - [ ] Save ExGraphics as template
+  - [ ] Delete ExGraphics template
+  - [ ] Edit ExGraphics template
 
 ## About
 
