@@ -3,12 +3,23 @@ import Router from './Router';
 
 export enum RootRouteName {
   About = 'About',
+  Collection = 'Collection',
   Help = 'Help',
   Home = 'Home',
   Project = 'Project',
   Settings = 'Settings',
-  Templates = 'Templates',
   Toolchain = 'Toolchain',
+}
+
+export enum CollectionRouteName {
+  Projects = 'Projects',
+  Blocks = 'Blocks',
+  Music = 'Music',
+  Patches = 'Patches',
+  Sprites = 'Sprites',
+  UberAsm = 'UberAsm',
+  GFX = 'GFX',
+  ExGFX = 'ExGFX',
 }
 
 export enum ProjectRouteName {
@@ -28,39 +39,28 @@ export enum SettingsRouteName {
   NewProject = 'NewProject',
 }
 
-export enum TemplatesRouteName {
-  Projects = 'Projects',
-  Blocks = 'Blocks',
-  Music = 'Music',
-  Patches = 'Patches',
-  Sprites = 'Sprites',
-  UberAsm = 'UberAsm',
-  GFX = 'GFX',
-  ExGFX = 'ExGFX',
-}
-
 export enum ToolchainRouteName {
   Custom = 'Custom',
   Embedded = 'Embedded',
 }
 
 export default class Navigation {
-  private root: Router<RootRouteName>;
-  private project: Router<ProjectRouteName>;
-  private settings: Router<SettingsRouteName>;
-  private templates: Router<TemplatesRouteName>;
-  private toolchain: Router<ToolchainRouteName>;
+  private _root: Router<RootRouteName>;
+  private _collection: Router<CollectionRouteName>;
+  private _project: Router<ProjectRouteName>;
+  private _settings: Router<SettingsRouteName>;
+  private _toolchain: Router<ToolchainRouteName>;
 
   private constructor() {
-    this.root = Router.create<RootRouteName>(RootRouteName.Home);
-    this.project = Router.create<ProjectRouteName>(ProjectRouteName.Patches);
-    this.settings = Router.create<SettingsRouteName>(
+    this._root = Router.create<RootRouteName>(RootRouteName.Collection);
+    this._collection = Router.create<CollectionRouteName>(
+      CollectionRouteName.Projects,
+    );
+    this._project = Router.create<ProjectRouteName>(ProjectRouteName.Patches);
+    this._settings = Router.create<SettingsRouteName>(
       SettingsRouteName.Appearance,
     );
-    this.templates = Router.create<TemplatesRouteName>(
-      TemplatesRouteName.Projects,
-    );
-    this.toolchain = Router.create<ToolchainRouteName>(
+    this._toolchain = Router.create<ToolchainRouteName>(
       ToolchainRouteName.Embedded,
     );
   }
@@ -69,25 +69,25 @@ export default class Navigation {
     return new Navigation();
   }
 
-  getRoot = getter(['Navigation.root'], (): Router<RootRouteName> => this.root);
+  getRoot = getter(['root'], (): Router<RootRouteName> => this._root);
+
+  getCollection = getter(
+    ['collection'],
+    (): Router<CollectionRouteName> => this._collection,
+  );
 
   getProject = getter(
-    ['Navigation.project'],
-    (): Router<ProjectRouteName> => this.project,
+    ['project'],
+    (): Router<ProjectRouteName> => this._project,
   );
 
   getSettings = getter(
-    ['Navigation.settings'],
-    (): Router<SettingsRouteName> => this.settings,
-  );
-
-  getTemplates = getter(
-    ['Navigation.templates'],
-    (): Router<TemplatesRouteName> => this.templates,
+    ['settings'],
+    (): Router<SettingsRouteName> => this._settings,
   );
 
   getToolchain = getter(
-    ['Navigation.toolchain'],
-    (): Router<ToolchainRouteName> => this.toolchain,
+    ['toolchain'],
+    (): Router<ToolchainRouteName> => this._toolchain,
   );
 }

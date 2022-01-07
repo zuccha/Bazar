@@ -4,60 +4,60 @@ import {
   useNavigateTemplates,
   useTemplatesRoute,
 } from '../../../navigation/hooks';
-import { TemplatesRouteName } from '../../../navigation/Navigation';
+import { CollectionRouteName } from '../../../navigation/Navigation';
 import ComingSoon from '../../../ui-atoms/ComingSoon';
 import Header from '../../../ui-atoms/Header';
 import NavigatorWithList from '../../../ui-atoms/NavigatorWithList';
 
-export default function TemplatesScreen(): ReactElement {
+export default function CollectionScreen(): ReactElement {
   const projectRoute = useTemplatesRoute();
   const navigateTemplates = useNavigateTemplates();
 
   const pages = useMemo(
     () => [
       {
-        id: TemplatesRouteName.Projects,
+        id: CollectionRouteName.Projects,
         label: 'Projects',
         content: <ComingSoon title='Projects' />,
       },
       {
-        id: TemplatesRouteName.Blocks,
+        id: CollectionRouteName.Blocks,
         label: 'Blocks',
         content: <ComingSoon title='Blocks' />,
         isDisabled: true,
       },
       {
-        id: TemplatesRouteName.Music,
+        id: CollectionRouteName.Music,
         label: 'Music',
         content: <ComingSoon title='Music' />,
         isDisabled: true,
       },
       {
-        id: TemplatesRouteName.Patches,
+        id: CollectionRouteName.Patches,
         label: 'Patches',
         content: <ComingSoon title='Patches' />,
         isDisabled: true,
       },
       {
-        id: TemplatesRouteName.Sprites,
+        id: CollectionRouteName.Sprites,
         label: 'Sprites',
         content: <ComingSoon title='Sprites' />,
         isDisabled: true,
       },
       {
-        id: TemplatesRouteName.UberAsm,
+        id: CollectionRouteName.UberAsm,
         label: 'UberAsm',
         content: <ComingSoon title='UberAsm' />,
         isDisabled: true,
       },
       {
-        id: TemplatesRouteName.GFX,
+        id: CollectionRouteName.GFX,
         label: 'GFX',
         content: <ComingSoon title='GFX' />,
         isDisabled: true,
       },
       {
-        id: TemplatesRouteName.ExGFX,
+        id: CollectionRouteName.ExGFX,
         label: 'ExGFX',
         content: <ComingSoon title='ExGFX' />,
         isDisabled: true,

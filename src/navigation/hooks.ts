@@ -4,7 +4,7 @@ import Navigation, {
   ProjectRouteName,
   RootRouteName,
   SettingsRouteName,
-  TemplatesRouteName,
+  CollectionRouteName,
   ToolchainRouteName,
 } from './Navigation';
 import Router from './Router';
@@ -68,18 +68,18 @@ export const useNavigateSettings = (): ((route: SettingsRouteName) => void) => {
 
 // #region Templates
 
-const useTemplates = (): Router<TemplatesRouteName> => {
+const useTemplates = (): Router<CollectionRouteName> => {
   const navigation = useNavigation();
-  return useGet(navigation, navigation.getTemplates);
+  return useGet(navigation, navigation.getCollection);
 };
 
-export const useTemplatesRoute = (): TemplatesRouteName => {
+export const useTemplatesRoute = (): CollectionRouteName => {
   const templates = useTemplates();
   return useGet(templates, templates.getRoute);
 };
 
 export const useNavigateTemplates = (): ((
-  route: TemplatesRouteName,
+  route: CollectionRouteName,
 ) => void) => {
   const templates = useTemplates();
   return useSet(templates, templates.navigate);

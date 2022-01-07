@@ -15,7 +15,7 @@ import HelpScreen from './screens/HelpScreen';
 import HomeScreen from './screens/HomeScreen';
 import ProjectScreen from './screens/ProjectScreen';
 import SettingsScreen from './screens/SettingsScreen';
-import TemplatesScreen from './screens/TemplatesScreen';
+import CollectionScreen from './screens/CollectionScreen';
 import ToolchainScreen from './screens/ToolchainScreen';
 import { useProject } from '../core-hooks/Core';
 import { useNavigateRoot, useRootRoute } from '../navigation/hooks';
@@ -23,11 +23,11 @@ import { RootRouteName } from '../navigation/Navigation';
 
 const ScreenByAppRouteName: Record<RootRouteName, () => ReactElement> = {
   [RootRouteName.About]: AboutScreen,
+  [RootRouteName.Collection]: CollectionScreen,
   [RootRouteName.Help]: HelpScreen,
   [RootRouteName.Home]: HomeScreen,
   [RootRouteName.Project]: ProjectScreen,
   [RootRouteName.Settings]: SettingsScreen,
-  [RootRouteName.Templates]: TemplatesScreen,
   [RootRouteName.Toolchain]: ToolchainScreen,
 } as const;
 
@@ -56,9 +56,9 @@ export default function Navigator(): ReactElement {
         />
         <SidebarButton
           icon={<CopyIcon />}
-          isActive={rootRoute === RootRouteName.Templates}
+          isActive={rootRoute === RootRouteName.Collection}
           label='Templates'
-          onClick={() => navigateRoot(RootRouteName.Templates)}
+          onClick={() => navigateRoot(RootRouteName.Collection)}
         />
         <SidebarButton
           icon={<LinkIcon />}
