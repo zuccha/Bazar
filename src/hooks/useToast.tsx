@@ -1,5 +1,6 @@
-import { useToast as useChakraToast } from '@chakra-ui/react';
+import { Button, Flex, useToast as useChakraToast } from '@chakra-ui/react';
 import { useCallback, useMemo } from 'react';
+import { $Clipboard } from '../utils/Clipboard';
 import ErrorReport from '../utils/ErrorReport';
 
 export default function useToast(): ((
@@ -14,10 +15,24 @@ export default function useToast(): ((
 
   const failure = useCallback(
     (message: string, error: ErrorReport) => {
-      // TODO: Copy error trace when pressing toast.
       chakraToast({
+        containerStyle: { maxWidth: '350px' },
         title: message,
+        description: (
+          <Button
+            size='sm'
+            onClick={() => $Clipboard.write(error.trace().join('\n'))}
+            isFullWidth
+            bg='red.600'
+            _hover={{ bg: 'red.700' }}
+            _active={{ bg: 'red.800' }}
+            mt={2}
+          >
+            Copy
+          </Button>
+        ),
         status: 'error',
+        isClosable: true,
       });
     },
     [chakraToast],
@@ -26,8 +41,10 @@ export default function useToast(): ((
   const success = useCallback(
     (message: string) => {
       chakraToast({
+        containerStyle: { maxWidth: '350px' },
         title: message,
         status: 'success',
+        isClosable: true,
       });
     },
     [chakraToast],
