@@ -142,7 +142,6 @@ export default class Project extends Resource<ProjectInfo> {
         (error = await $FileSystem.copyDirectory(
           this.latest.getPath(),
           backupDirectoryPath,
-          true,
         ))
       ) {
         const errorMessage = `${errorPrefix}: failed to create backup directory`;

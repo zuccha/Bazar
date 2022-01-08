@@ -29,7 +29,6 @@ export const $FileSystem = {
   copyDirectory: async (
     sourceDirPath: string,
     targetDirPath: string,
-    isRecursive: boolean = false,
   ): Promise<ErrorReport | undefined> => {
     try {
       // Create directory if it doesn't exist.
@@ -50,25 +49,22 @@ export const $FileSystem = {
         if (maybeError) return maybeError;
       }
 
-      if (isRecursive) {
-        const subDirNames = await $FileSystem.getDirNames(sourceDirPath);
-        for (const subDirName of subDirNames) {
-          const sourceSubDirPath = await $FileSystem.join(
-            sourceDirPath,
-            subDirName,
-          );
-          const targetSubDirPath = await $FileSystem.join(
-            targetDirPath,
-            subDirName,
-          );
-          const maybeError = await $FileSystem.copyDirectory(
-            sourceSubDirPath,
-            targetSubDirPath,
-            true,
-          );
-          if (maybeError) {
-            return maybeError;
-          }
+      const subDirNames = await $FileSystem.getDirNames(sourceDirPath);
+      for (const subDirName of subDirNames) {
+        const sourceSubDirPath = await $FileSystem.join(
+          sourceDirPath,
+          subDirName,
+        );
+        const targetSubDirPath = await $FileSystem.join(
+          targetDirPath,
+          subDirName,
+        );
+        const maybeError = await $FileSystem.copyDirectory(
+          sourceSubDirPath,
+          targetSubDirPath,
+        );
+        if (maybeError) {
+          return maybeError;
         }
       }
     } catch (error) {
@@ -244,7 +240,7 @@ export const $FileSystem = {
 
     try {
       if (await $FileSystem.isDirectory(oldPath)) {
-        error = await $FileSystem.copyDirectory(oldPath, newPath, true);
+        error = await $FileSystem.copyDirectory(oldPath, newPath);
         if (error)
           return error.extend(`${errorPrefix}: failed to copy directory`);
         error = await $FileSystem.removeDir(oldPath);

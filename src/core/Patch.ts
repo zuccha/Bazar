@@ -77,11 +77,7 @@ export default class Patch extends Resource<PatchInfo> {
 
     // Copy files
     if (
-      (error = await $FileSystem.copyDirectory(
-        sourceDirPath,
-        patch.getPath(),
-        true,
-      ))
+      (error = await $FileSystem.copyDirectory(sourceDirPath, patch.getPath()))
     ) {
       patch.delete();
       const errorMessage = `${errorPrefix}: failed to copy patch files`;
