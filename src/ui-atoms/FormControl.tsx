@@ -12,6 +12,8 @@ interface FormControlProps {
   isDisabled?: boolean;
   isInvalid?: boolean;
   isRequired?: boolean;
+  isSuccinct?: boolean;
+  isTurnedOff?: boolean;
   label: string;
   width?: number | string;
 }
@@ -23,6 +25,8 @@ export default function FormControl({
   isDisabled,
   isInvalid,
   isRequired = false,
+  isSuccinct = false,
+  isTurnedOff = false,
   label,
   width,
 }: FormControlProps): ReactElement {
@@ -30,13 +34,13 @@ export default function FormControl({
     <Chakra.FormControl
       isRequired={isRequired}
       label={label}
-      isDisabled={isDisabled}
-      isInvalid={isInvalid}
+      isDisabled={isDisabled || isTurnedOff}
+      isInvalid={isInvalid && !isTurnedOff}
       width={width}
     >
-      <FormLabel label={label} infoMessage={infoMessage} />
+      {!isSuccinct && <FormLabel label={label} infoMessage={infoMessage} />}
       {children}
-      {errorReport && (
+      {errorReport && !isTurnedOff && (
         <>
           <Flex h={2} />
           <FormError errorReport={errorReport} />
