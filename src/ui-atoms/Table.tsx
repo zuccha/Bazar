@@ -1,4 +1,4 @@
-import { Center, Flex, Heading, HStack, Text } from '@chakra-ui/react';
+import { Center, Flex, HStack, Text } from '@chakra-ui/react';
 import { ReactElement, useMemo } from 'react';
 import useColorScheme from '../theme/useColorScheme';
 import IconButton from './IconButton';
@@ -24,8 +24,16 @@ export interface TableAction<T> {
   onClick: (row: TableRow<T>) => unknown;
 }
 
+export interface TableHeaderAction {
+  icon: ReactElement;
+  isDisabled?: boolean;
+  label: string;
+  onClick: () => unknown;
+}
+
 interface TableProps<T> {
-  actions: TableAction<T>[];
+  actions?: TableAction<T>[];
+  headerActions?: TableHeaderAction[];
   columns: TableColumn<T>[];
   rows: TableRow<T>[];
 
@@ -53,7 +61,6 @@ const stylesByVariant = {
     },
     header: {
       bg: 'app.bg2',
-      h: 50,
     },
     row: {
       borderColor: 'gray.300',
@@ -64,9 +71,7 @@ const stylesByVariant = {
   },
   minimal: {
     border: {},
-    header: {
-      h: 50,
-    },
+    header: {},
     row: {
       borderColor: 'gray.300',
       borderBottomWidth: '1px',
@@ -77,7 +82,8 @@ const stylesByVariant = {
 };
 
 export default function Table<T>({
-  actions,
+  actions = [],
+  headerActions = [],
   columns,
   rows,
 
@@ -107,7 +113,7 @@ export default function Table<T>({
       {...styles.border}
       overflow='hidden'
     >
-      <Flex {...styles.header}>
+      <Flex {...styles.header} h={50} position='relative'>
         {columns.map((column, columnIndex) => (
           <Flex
             key={column.key}
@@ -120,6 +126,21 @@ export default function Table<T>({
             </Text>
           </Flex>
         ))}
+        {headerActions.length > 0 && (
+          <HStack spacing={1} position='absolute' h='100%' right={4}>
+            {headerActions.map((action) => (
+              <IconButton
+                icon={action.icon}
+                isDisabled={action.isDisabled}
+                key={action.label}
+                label={action.label}
+                onClick={action.onClick}
+                size='sm'
+                variant='ghost'
+              />
+            ))}
+          </HStack>
+        )}
       </Flex>
 
       <Flex flex={1} pb={2} flexDir='column' overflow='auto'>
@@ -157,7 +178,7 @@ export default function Table<T>({
                 </Flex>
               ))}
               {actions.length > 0 && (
-                <Center position='absolute' h='100%' right={4}>
+                <Flex position='absolute' h='100%' right={4}>
                   <HStack
                     spacing={1}
                     visibility='hidden'
@@ -175,7 +196,7 @@ export default function Table<T>({
                       />
                     ))}
                   </HStack>
-                </Center>
+                </Flex>
               )}
             </Flex>
           );
