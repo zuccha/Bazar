@@ -23,7 +23,7 @@ export default function Drawer({
           {title}
         </Chakra.DrawerHeader>
 
-        <Chakra.DrawerBody>{children}</Chakra.DrawerBody>
+        <Chakra.DrawerBody p={4}>{children}</Chakra.DrawerBody>
 
         <Chakra.DrawerFooter borderTopWidth='1px'>
           {buttons}
