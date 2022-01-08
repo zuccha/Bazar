@@ -12,6 +12,7 @@ import { useGetEmbeddedTool } from '../../../../../../core-hooks/Toolchain';
 import Patch from '../../../../../../core/Patch';
 import ProjectSnapshot from '../../../../../../core/ProjectSnapshot';
 import { useList } from '../../../../../../hooks/useAccessors';
+import useToast from '../../../../../../hooks/useToast';
 import { TableColumn, TableRow } from '../../../../../../ui-atoms/Table';
 import { $EitherErrorOr } from '../../../../../../utils/EitherErrorOr';
 import ErrorReport from '../../../../../../utils/ErrorReport';
@@ -28,6 +29,8 @@ interface PatchesTabProps {
 export default function PatchesTab({
   projectSnapshot,
 }: PatchesTabProps): ReactElement {
+  const toast = useToast();
+
   const collection = useCollection();
   const toolchain = useToolchain();
   const asar = useGetEmbeddedTool(toolchain, 'asar');
@@ -103,7 +106,15 @@ export default function PatchesTab({
         <PatchTemplateAdditionDrawer
           patch={resource}
           onClose={onClose}
-          onAdd={(info) => saveAsTemplate(resource, info)}
+          onAdd={async (info) => {
+            const error = await saveAsTemplate(resource, info);
+            toast(
+              'Patch successfully saved as template',
+              'Failed to save patch as template',
+              error,
+            );
+            return error;
+          }}
         />
       )}
       columns={columns}
