@@ -33,17 +33,10 @@ export default class Project extends Resource<ProjectInfo> {
 
   // #region Constructors
 
-  static async createFromSource(
+  static async createFromRom(
     directoryPath: string,
-    {
-      name,
-      author,
-      romFilePath,
-    }: {
-      name: string;
-      author: string;
-      romFilePath: string;
-    },
+    { name, author }: ProjectInfo,
+    romFilePath: string,
   ): Promise<EitherErrorOr<Project>> {
     const errorPrefix = 'Project.createFromSource';
     let error: ErrorReport | undefined;

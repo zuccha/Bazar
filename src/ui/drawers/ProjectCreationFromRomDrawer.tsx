@@ -20,7 +20,7 @@ interface ProjectCreationFromSourceProps {
   onCreate: (project: Project) => Promise<ErrorReport | undefined>;
 }
 
-export default function ProjectCreationFromSourceDrawer({
+export default function ProjectCreationFromRomDrawer({
   onClose,
   onCreate,
 }: ProjectCreationFromSourceProps): ReactElement {
@@ -71,13 +71,13 @@ export default function ProjectCreationFromSourceDrawer({
   const form = useForm({
     fields: [nameField, romFilePathField, locationDirPathField],
     onSubmit: async () => {
-      const errorOrProject = await Project.createFromSource(
+      const errorOrProject = await Project.createFromRom(
         locationDirPathField.value.trim(),
         {
           name: nameField.value.trim(),
           author: authorField.value.trim(),
-          romFilePath: romFilePathField.value.trim(),
         },
+        romFilePathField.value.trim(),
       );
       if (errorOrProject.isError) return errorOrProject.error;
       return onCreate(errorOrProject.value);

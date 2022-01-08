@@ -10,7 +10,7 @@ import { RootRouteName } from '../../../navigation/Navigation';
 import Button from '../../../ui-atoms/Button';
 import FormError from '../../../ui-atoms/FormError';
 import { $Dialog } from '../../../utils/Dialog';
-import ProjectCreationFromSourceDrawer from '../../drawers/ProjectCreationFromSourceDrawer';
+import ProjectCreationFromRomDrawer from '../../drawers/ProjectCreationFromRomDrawer';
 
 export default function HomeScreenActions(): ReactElement {
   const settings = useSettings();
@@ -78,7 +78,7 @@ export default function HomeScreenActions(): ReactElement {
       </VStack>
 
       {isProjectCreationFromSourceOpen && (
-        <ProjectCreationFromSourceDrawer
+        <ProjectCreationFromRomDrawer
           onClose={() => setIsProjectCreationFromSourceOpen(false)}
           onCreate={handleCreateProject.call}
         />
