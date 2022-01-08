@@ -126,10 +126,6 @@ export const useGetAsync = <T extends Item, Return>(
     value: undefined,
   });
 
-  // const [value, setValue] = useState<Return | undefined>(undefined);
-  // const [error, setError] = useState<ErrorReport | undefined>(undefined);
-  // const [isLoading, setIsLoading] = useState(false);
-
   useLayoutEffect(() => {
     const render = () => setRenderCount((renderCount) => renderCount + 1);
     const unsubscribe = subscribeToProperty(item, getter.deps, render);
