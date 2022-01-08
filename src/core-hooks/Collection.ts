@@ -1,7 +1,9 @@
+import { useCallback, useMemo } from 'react';
 import Collection from '../core/Collection';
 import Patch from '../core/Patch';
 import ProjectSnapshot from '../core/ProjectSnapshot';
-import { useGet, useSetAsync } from '../hooks/useAccessors';
+import { useGet, useGetAsync, useSetAsync } from '../hooks/useAccessors';
+import { AsyncResponse } from '../utils/Accessors';
 import ErrorReport from '../utils/ErrorReport';
 
 export const useLoadCollection = (
@@ -42,6 +44,20 @@ export const useEditProjectSnapshotInCollection = (
 
 export const useCollectionPatchNames = (collection: Collection): string[] => {
   return useGet(collection, collection.getPatchNames);
+};
+
+export const useCollectionPatch = (
+  collection: Collection,
+  name: string,
+): AsyncResponse<Patch> => {
+  return useGetAsync(
+    collection,
+    useMemo(() => {
+      const getPatch = () => collection.getPatch(name);
+      getPatch.deps = collection.getPatch.deps;
+      return getPatch;
+    }, [collection, name]),
+  );
 };
 
 export const useAddPatchToCollectionFromDirectory = (

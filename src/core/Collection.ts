@@ -1,4 +1,5 @@
 import { getter, setter } from '../utils/Accessors';
+import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
 import ErrorReport from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
 import Patch from './Patch';
@@ -209,6 +210,24 @@ export default class Collection {
         Collection.PATCHES_DIR_NAME,
         name,
       );
+    },
+  );
+
+  getPatch = getter(
+    ['patchNames'],
+    async (name: string): Promise<EitherErrorOr<Patch>> => {
+      const path = await this.getPatchPath(name);
+      if (!path) {
+        const errorMessage = `Collection.getPatch: failed to find patch "${name}"`;
+        return $EitherErrorOr.error(ErrorReport.from(errorMessage));
+      }
+
+      const errorOrPatch = await Patch.open(path);
+      if (errorOrPatch.isError) {
+        const errorMessage = `Collection.getPatch: failed to open patch "${name}"`;
+        return $EitherErrorOr.error(errorOrPatch.error.extend(errorMessage));
+      }
+      return $EitherErrorOr.value(errorOrPatch.value);
     },
   );
 
