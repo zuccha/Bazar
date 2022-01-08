@@ -2,11 +2,9 @@ import { Flex, HStack, VStack } from '@chakra-ui/react';
 import { ReactElement, useState } from 'react';
 import useForm from '../../hooks/useForm';
 import useFormField from '../../hooks/useFormField';
-import Alert from '../../ui-atoms/Alert';
 import Button from '../../ui-atoms/Button';
 import Drawer from '../../ui-atoms/Drawer';
 import FormControl from '../../ui-atoms/FormControl';
-import FormError from '../../ui-atoms/FormError';
 import NavigatorWithTabs from '../../ui-atoms/NavigatorWithTabs';
 import SelectorOfFiles from '../../ui-atoms/SelectorOfFiles';
 import TextEditor from '../../ui-atoms/TextEditor';
@@ -132,10 +130,12 @@ export default function PatchAdditionFromFilesDrawer({
           />
         </>
       }
+      info='The patch will be added to the project, copying the original files.'
+      error={form.error}
       onClose={onClose}
       title='Add patch'
     >
-      <Flex direction='column' h='100%'>
+      <Flex direction='column' flex={1}>
         <VStack w='100%' spacing={4} flex={1}>
           <HStack w='100%'>
             <FormControl {...nameField.control}>
@@ -227,13 +227,7 @@ export default function PatchAdditionFromFilesDrawer({
               },
             ]}
           />
-
-          <Alert status='info'>
-            The patch will be added to the project, copying the original files.
-          </Alert>
         </VStack>
-
-        {form.error && <FormError errorReport={form.error} />}
       </Flex>
     </Drawer>
   );

@@ -1,15 +1,13 @@
-import { Flex, VStack } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 import { useCollectionPatchNames } from '../../core-hooks/Collection';
 import { useCollection } from '../../core-hooks/Core';
 import { useList } from '../../hooks/useAccessors';
 import useForm from '../../hooks/useForm';
 import useFormField from '../../hooks/useFormField';
-import Alert from '../../ui-atoms/Alert';
 import Button from '../../ui-atoms/Button';
 import Drawer from '../../ui-atoms/Drawer';
 import FormControl from '../../ui-atoms/FormControl';
-import FormError from '../../ui-atoms/FormError';
 import Selector from '../../ui-atoms/Selector';
 import { ErrorReport } from '../../utils/ErrorReport';
 
@@ -63,30 +61,21 @@ export default function PatchAdditionFromTemplateDrawer({
           />
         </>
       }
+      error={form.error}
+      info='Changes that will be made to the patch in the project will not be applied to the template.'
       onClose={onClose}
       title='Add patch from template'
     >
-      <Flex direction='column' h='100%'>
-        <VStack w='100%' spacing={4} flex={1}>
-          <FormControl {...templateNameField.control}>
-            <Selector
-              isDisabled={form.isSubmitting}
-              onChange={templateNameField.handleChange}
-              options={templateNameOptions}
-              placeholder={templateNameField.control.label}
-              value={templateNameField.value}
-            />
-          </FormControl>
-
-          <Flex flex={1} />
-
-          <Alert status='info'>
-            Changes that will be made to the patch in the project will not be
-            applied to the template.
-          </Alert>
-        </VStack>
-
-        {form.error && <FormError errorReport={form.error} />}
+      <Flex direction='column' flex={1}>
+        <FormControl {...templateNameField.control}>
+          <Selector
+            isDisabled={form.isSubmitting}
+            onChange={templateNameField.handleChange}
+            options={templateNameOptions}
+            placeholder={templateNameField.control.label}
+            value={templateNameField.value}
+          />
+        </FormControl>
       </Flex>
     </Drawer>
   );

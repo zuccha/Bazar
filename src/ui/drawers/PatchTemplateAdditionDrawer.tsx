@@ -1,4 +1,3 @@
-import { Flex, VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 import Patch from '../../core/Patch';
 import useForm from '../../hooks/useForm';
@@ -6,7 +5,6 @@ import useFormField from '../../hooks/useFormField';
 import Button from '../../ui-atoms/Button';
 import Drawer from '../../ui-atoms/Drawer';
 import FormControl from '../../ui-atoms/FormControl';
-import FormError from '../../ui-atoms/FormError';
 import TextEditor from '../../ui-atoms/TextEditor';
 import { ErrorReport } from '../../utils/ErrorReport';
 import { $FileSystem } from '../../utils/FileSystem';
@@ -56,22 +54,20 @@ export default function PatchTemplateAdditionDrawer({
           />
         </>
       }
+      error={form.error}
+      info='Future changes to the patch will not propagate to the template.'
       onClose={onClose}
       title='Save patch as template'
     >
-      <VStack flex={1} h='100%'>
-        <FormControl {...nameField.control}>
-          <TextEditor
-            isDisabled
-            onBlur={nameField.handleBlur}
-            onChange={nameField.handleChange}
-            placeholder={nameField.control.label}
-            value={nameField.value}
-          />
-        </FormControl>
-        <Flex flex={1} />
-        {form.error && <FormError errorReport={form.error} />}
-      </VStack>
+      <FormControl {...nameField.control}>
+        <TextEditor
+          isDisabled
+          onBlur={nameField.handleBlur}
+          onChange={nameField.handleChange}
+          placeholder={nameField.control.label}
+          value={nameField.value}
+        />
+      </FormControl>
     </Drawer>
   );
 }

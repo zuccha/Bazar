@@ -1,4 +1,5 @@
 import * as Chakra from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 import { ReactElement, ReactNode } from 'react';
 import { ErrorReport } from '../utils/ErrorReport';
 import FormError from './FormError';
@@ -35,7 +36,12 @@ export default function FormControl({
     >
       <FormLabel label={label} infoMessage={infoMessage} />
       {children}
-      {errorReport && <FormError errorReport={errorReport} />}
+      {errorReport && (
+        <>
+          <Flex h={2} />
+          <FormError errorReport={errorReport} />
+        </>
+      )}
     </Chakra.FormControl>
   );
 }

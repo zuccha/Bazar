@@ -4,11 +4,9 @@ import Project from '../../core/Project';
 import { useSettings } from '../../core-hooks/Core';
 import { useSetting } from '../../core-hooks/Settings';
 import TextEditorOfPath from '../../ui-atoms/TextEditorOfPath';
-import Alert from '../../ui-atoms/Alert';
 import Button from '../../ui-atoms/Button';
 import Drawer from '../../ui-atoms/Drawer';
 import FormControl from '../../ui-atoms/FormControl';
-import FormError from '../../ui-atoms/FormError';
 import TextEditor from '../../ui-atoms/TextEditor';
 import { $FileSystem } from '../../utils/FileSystem';
 import useForm from '../../hooks/useForm';
@@ -105,10 +103,12 @@ export default function ProjectCreationFromRomDrawer({
           />
         </>
       }
+      error={form.error}
+      info='A new directory named after the chosen project name will be created in the selected location, containing a copy of the base ROM and generated files.'
       onClose={onClose}
       title='New project'
     >
-      <Flex direction='column' h='100%'>
+      <Flex direction='column' flex={1}>
         <VStack width='100%' spacing={4} flex={1}>
           <FormControl {...nameField.control}>
             <TextEditor
@@ -153,16 +153,6 @@ export default function ProjectCreationFromRomDrawer({
             />
           </FormControl>
         </VStack>
-
-        <Flex flex={1} />
-
-        <Alert status='info'>
-          A new directory named after the chosen project name will be created in
-          the selected location, containing a copy of the base ROM and generated
-          files.
-        </Alert>
-
-        {form.error && <FormError errorReport={form.error} />}
       </Flex>
     </Drawer>
   );

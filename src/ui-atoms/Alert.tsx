@@ -13,7 +13,7 @@ export default function Alert({
   title,
 }: AlertProps): ReactElement {
   return (
-    <Chakra.Alert status={status}>
+    <Chakra.Alert status={status} fontSize='sm'>
       <Chakra.AlertIcon />
       {title && <Chakra.AlertTitle>{title}</Chakra.AlertTitle>}
       <Chakra.AlertDescription>{children}</Chakra.AlertDescription>

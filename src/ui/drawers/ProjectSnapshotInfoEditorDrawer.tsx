@@ -1,7 +1,6 @@
-import { Alert, AlertIcon, Box, VStack } from '@chakra-ui/react';
+import { VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
-import { useProjectInfo, useSetProjectInfo } from '../../core-hooks/Project';
-import Project, { ProjectInfo } from '../../core/Project';
+import { ProjectInfo } from '../../core/Project';
 import useForm from '../../hooks/useForm';
 import useFormField from '../../hooks/useFormField';
 import Button from '../../ui-atoms/Button';
@@ -64,6 +63,8 @@ export default function ProjectSnapshotInfoEditorDrawer({
           />
         </>
       }
+      error={form.error}
+      info='Changing the project name will not change the directory name.'
       onClose={onClose}
       title='Edit config'
     >
@@ -85,13 +86,6 @@ export default function ProjectSnapshotInfoEditorDrawer({
             value={authorField.value}
           />
         </FormControl>
-
-        <Box flex={1} />
-
-        <Alert status='info'>
-          <AlertIcon />
-          Changing the project name will not change the directory name.
-        </Alert>
       </VStack>
     </Drawer>
   );
