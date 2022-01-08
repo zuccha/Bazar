@@ -1,4 +1,9 @@
-import { AddIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
+import {
+  AddIcon,
+  DeleteIcon,
+  EditIcon,
+  ExternalLinkIcon,
+} from '@chakra-ui/icons';
 import { ReactElement, useMemo, useState } from 'react';
 import {
   useAddPatchToCollectionFromDirectory,
@@ -82,6 +87,12 @@ export default function PatchesCollectionPage(): ReactElement {
         isDisabled: isDisabled,
         label: `Edit patch`,
         onClick: (row) => setNameToEdit(row.data),
+      },
+      {
+        icon: <ExternalLinkIcon />,
+        isDisabled: true,
+        label: `Open patch in editor`,
+        onClick: (row) => {},
       },
       {
         icon: <DeleteIcon />,

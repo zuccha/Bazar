@@ -3,7 +3,7 @@ import {
   CopyIcon,
   DeleteIcon,
   DownloadIcon,
-  EditIcon,
+  ExternalLinkIcon,
 } from '@chakra-ui/icons';
 import { Flex, HStack, VStack } from '@chakra-ui/react';
 import { ReactElement, useCallback, useMemo } from 'react';
@@ -234,7 +234,7 @@ export default function ResourcesTab<R extends Resource>({
         onClick: (row) => handleApply.call(row.data),
       },
       {
-        icon: <EditIcon />,
+        icon: <ExternalLinkIcon />,
         isDisabled: !canOpenInEditor || handleOpenInEditor.isLoading,
         label: `Open ${name} in editor`,
         onClick: (row) => handleOpenInEditor.call(row.data),
