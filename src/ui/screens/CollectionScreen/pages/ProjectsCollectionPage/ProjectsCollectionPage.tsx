@@ -64,7 +64,7 @@ export default function ProjectsCollectionPage(): ReactElement {
       {
         icon: <DeleteIcon />,
         isDisabled: isDisabled,
-        label: `Remove ${name}`,
+        label: `Remove project`,
         onClick: (row) => setNameToDelete(row.data),
       },
     ];
