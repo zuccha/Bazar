@@ -35,12 +35,7 @@ const PatchesTabInfoWithoutPatch = (): ReactElement => {
       isSuccinct
       isTurnedOff
       onSubmit={async () => undefined}
-      info={{
-        name: '',
-        version: '',
-        author: '',
-        mainFileRelativePath: '',
-      }}
+      info={Patch.InfoEmpty}
     />
   );
 };

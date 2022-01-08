@@ -17,6 +17,13 @@ export type PatchInfo = Required<z.infer<typeof infoSchema>>;
 export default class Patch extends Resource<PatchInfo> {
   public readonly TypeName = 'Patch';
 
+  static readonly InfoEmpty: PatchInfo = {
+    name: '',
+    author: '',
+    version: '',
+    mainFileRelativePath: '',
+  };
+
   private constructor(props: ResourceFields<PatchInfo>) {
     super(props);
   }
