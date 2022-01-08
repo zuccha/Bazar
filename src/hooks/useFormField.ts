@@ -7,6 +7,7 @@ export interface FormFieldParams<T> {
   initialValue: T;
   isRequired?: boolean;
   label: string;
+  onChange?: (value: T) => void;
   onValidate?: (value: T) => Promise<ErrorReport | undefined>;
 }
 
@@ -29,7 +30,8 @@ export default function useFormField<T>({
   initialValue,
   isRequired = false,
   label,
-  onValidate = async () => undefined,
+  onChange,
+  onValidate,
 }: FormFieldParams<T>): FormField<T> {
   const [value, setValue] = useSafeState(initialValue);
   const [isDirty, setIsDirty] = useSafeState(!!initialValue);
@@ -38,12 +40,13 @@ export default function useFormField<T>({
   );
 
   useLayoutEffect(() => {
-    if (isDirty) onValidate(value).then(setErrorReport);
+    if (isDirty) onValidate?.(value).then(setErrorReport);
   }, []);
 
   const handleChange = useCallback(
     async (newValue: T) => {
-      const newErrorReport = await onValidate(newValue);
+      const newErrorReport = await onValidate?.(newValue);
+      onChange?.(newValue);
       setErrorReport(newErrorReport);
       setIsDirty(true);
       setValue(newValue);
@@ -52,13 +55,13 @@ export default function useFormField<T>({
   );
 
   const handleBlur = useCallback(async () => {
-    const newErrorReport = await onValidate(value);
+    const newErrorReport = await onValidate?.(value);
     setErrorReport(newErrorReport);
     setIsDirty(true);
   }, [onValidate, value]);
 
   const isValid = useMemo(() => {
-    return isDirty ? !errorReport : !onValidate(initialValue);
+    return isDirty ? !errorReport : !onValidate?.(initialValue);
   }, [isDirty, errorReport, initialValue, onValidate]);
 
   return {
