@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { getter, setter } from '../utils/Accessors';
 import { $DateTime } from '../utils/DateTime';
 import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
-import { $ErrorReport, ErrorReport } from '../utils/ErrorReport';
+import ErrorReport from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
 import { $Shell, Process } from '../utils/Shell';
 import Collection from './Collection';
@@ -139,7 +139,7 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
 
       if (lunarMagic.status !== 'installed') {
         const errorMessage = `${errorPrefix}: Lunar Magic is not installed`;
-        return $ErrorReport.make(errorMessage);
+        return ErrorReport.from(errorMessage);
       }
 
       if ((error = await $FileSystem.validateExistsFile(lunarMagic.exePath))) {
@@ -152,7 +152,7 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
       ]);
       if (process.code !== 0) {
         const errorMessage = `${errorPrefix}: Could not open project snapshot in Lunar Magic`;
-        return $ErrorReport.make(errorMessage);
+        return ErrorReport.from(errorMessage);
       }
     },
   );
@@ -174,7 +174,7 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
       ]);
       if (process.code !== 0) {
         const errorMessage = `${errorPrefix}: Could not launch project snapshot in emulator`;
-        return $ErrorReport.make(errorMessage);
+        return ErrorReport.from(errorMessage);
       }
     },
   );
@@ -206,7 +206,7 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
 
       if (this.patches.some((patch) => patch.getInfo().name === name)) {
         const errorMessage = `${errorPrefix}: patch with name "${name}" already exists`;
-        return $ErrorReport.make(errorMessage);
+        return ErrorReport.from(errorMessage);
       }
 
       const patchOrError = await Patch.createFromDirectory(
@@ -239,7 +239,7 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
 
       if (this.patches.some((patch) => patch.getInfo().name === name)) {
         const errorMessage = `${errorPrefix}: patch with name "${name}" already exists`;
-        return $ErrorReport.make(errorMessage);
+        return ErrorReport.from(errorMessage);
       }
 
       const patchOrError = await Patch.createFromFile(
@@ -272,7 +272,7 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
 
       if (patchPath === '') {
         const errorMessage = `${errorPrefix}: patch with name "${name}" was not found`;
-        return $ErrorReport.make(errorMessage);
+        return ErrorReport.from(errorMessage);
       }
 
       if ((error = await $FileSystem.validateNotExists(patchPath))) {
@@ -307,7 +307,7 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
 
       if (patchIndex === -1) {
         const errorMessage = `${errorPrefix}: patch "${name}" does not exist`;
-        return $ErrorReport.make(errorMessage);
+        return ErrorReport.from(errorMessage);
       }
 
       const error = await patch.delete();

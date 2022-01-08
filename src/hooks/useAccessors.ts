@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { Getter, Setter } from '../utils/Accessors';
-import { ErrorReport } from '../utils/ErrorReport';
+import ErrorReport from '../utils/ErrorReport';
 import PairMap from '../utils/PairMap';
 import useListUpdatesCount from './useListUpdatesCount';
 

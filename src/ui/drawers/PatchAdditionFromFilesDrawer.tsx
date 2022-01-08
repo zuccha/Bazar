@@ -9,7 +9,7 @@ import NavigatorWithTabs from '../../ui-atoms/NavigatorWithTabs';
 import SelectorOfFiles from '../../ui-atoms/SelectorOfFiles';
 import TextEditor from '../../ui-atoms/TextEditor';
 import TextEditorOfPath from '../../ui-atoms/TextEditorOfPath';
-import { ErrorReport } from '../../utils/ErrorReport';
+import ErrorReport from '../../utils/ErrorReport';
 import { $FileSystem } from '../../utils/FileSystem';
 
 type Source = 'file' | 'directory';
@@ -137,7 +137,7 @@ export default function PatchAdditionFromFilesDrawer({
     >
       <Flex direction='column' flex={1}>
         <VStack w='100%' spacing={4} flex={1}>
-          <HStack w='100%'>
+          <HStack w='100%' alignItems='flex-start'>
             <FormControl {...nameField.control}>
               <TextEditor
                 isDisabled={form.isSubmitting}

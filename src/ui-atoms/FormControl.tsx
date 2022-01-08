@@ -1,7 +1,7 @@
 import * as Chakra from '@chakra-ui/react';
 import { Flex } from '@chakra-ui/react';
 import { ReactElement, ReactNode } from 'react';
-import { ErrorReport } from '../utils/ErrorReport';
+import ErrorReport from '../utils/ErrorReport';
 import FormError from './FormError';
 import FormLabel from './FormLabel';
 

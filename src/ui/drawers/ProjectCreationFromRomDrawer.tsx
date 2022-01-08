@@ -11,7 +11,7 @@ import TextEditor from '../../ui-atoms/TextEditor';
 import { $FileSystem } from '../../utils/FileSystem';
 import useForm from '../../hooks/useForm';
 import useFormField from '../../hooks/useFormField';
-import { ErrorReport } from '../../utils/ErrorReport';
+import ErrorReport from '../../utils/ErrorReport';
 
 interface ProjectCreationFromSourceProps {
   onClose: () => void;

@@ -45,7 +45,7 @@ export default function TextEditorOfPath({
     } else {
       toast({
         title: 'Failed to open dialog',
-        description: pathOrError.error.main,
+        description: pathOrError.error.message,
       });
     }
   }, [onChange]);

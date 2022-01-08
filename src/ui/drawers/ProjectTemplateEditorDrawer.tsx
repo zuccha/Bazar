@@ -5,7 +5,7 @@ import Button from '../../ui-atoms/Button';
 import Drawer from '../../ui-atoms/Drawer';
 import FormControl from '../../ui-atoms/FormControl';
 import TextEditor from '../../ui-atoms/TextEditor';
-import { ErrorReport } from '../../utils/ErrorReport';
+import ErrorReport from '../../utils/ErrorReport';
 import { $FileSystem } from '../../utils/FileSystem';
 
 interface ProjectTemplateEditorDrawerProps {

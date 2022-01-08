@@ -1,7 +1,7 @@
 import Project, { ProjectInfo } from '../core/Project';
 import ProjectSnapshot from '../core/ProjectSnapshot';
 import { useGet, useSetAsync } from '../hooks/useAccessors';
-import { ErrorReport } from '../utils/ErrorReport';
+import ErrorReport from '../utils/ErrorReport';
 
 export const useProjectLatestSnapshot = (project: Project): ProjectSnapshot => {
   return useGet(project, project.getLatest);

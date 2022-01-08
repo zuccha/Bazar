@@ -25,7 +25,7 @@ import Table, {
   TableRow,
 } from '../../../../ui-atoms/Table';
 import { EitherErrorOr } from '../../../../utils/EitherErrorOr';
-import { $ErrorReport, ErrorReport } from '../../../../utils/ErrorReport';
+import ErrorReport from '../../../../utils/ErrorReport';
 import { Process } from '../../../../utils/Shell';
 import { $String } from '../../../../utils/String';
 
@@ -163,7 +163,7 @@ export default function ResourcesTab<R extends Resource>({
     async (resource: R): Promise<ErrorReport | undefined> => {
       if (!canApply) {
         const errorMessage = `Cannot apply ${name}`;
-        const error = $ErrorReport.make(errorMessage);
+        const error = ErrorReport.from(errorMessage);
         handleError(error, `Failed to apply ${name}`);
         return error;
       }
@@ -179,7 +179,7 @@ export default function ResourcesTab<R extends Resource>({
   > => {
     if (!canApply) {
       const errorMessage = `Cannot apply ${name}`;
-      const error = $ErrorReport.make(errorMessage);
+      const error = ErrorReport.from(errorMessage);
       handleError(error, `Failed to apply ${name}`);
       return error;
     }
@@ -195,7 +195,7 @@ export default function ResourcesTab<R extends Resource>({
     async (resource: R): Promise<ErrorReport | undefined> => {
       if (!canOpenInEditor) {
         const errorMessage = `Cannot open ${name} in editor`;
-        const error = $ErrorReport.make(errorMessage);
+        const error = ErrorReport.from(errorMessage);
         handleError(error, `Failed to open ${name} in editor`);
         return error;
       }
@@ -211,7 +211,7 @@ export default function ResourcesTab<R extends Resource>({
     async (resource: R): Promise<ErrorReport | undefined> => {
       if (!canRemove) {
         const errorMessage = `Cannot remove ${name}`;
-        const error = $ErrorReport.make(errorMessage);
+        const error = ErrorReport.from(errorMessage);
         handleError(error, `Failed to remove ${name}`);
         return error;
       }

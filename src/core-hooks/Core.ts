@@ -4,7 +4,7 @@ import Project from '../core/Project';
 import Settings from '../core/Settings';
 import Toolchain from '../core/Toolchain';
 import { useGet, useSet } from '../hooks/useAccessors';
-import { ErrorReport } from '../utils/ErrorReport';
+import ErrorReport from '../utils/ErrorReport';
 
 export const useCollection = (): Collection => {
   const core = useCore();

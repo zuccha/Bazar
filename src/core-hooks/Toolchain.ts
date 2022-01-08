@@ -7,7 +7,7 @@ import Toolchain, {
 } from '../core/Toolchain';
 import { useGet, useSetAsync } from '../hooks/useAccessors';
 import { getter, setter } from '../utils/Accessors';
-import { ErrorReport } from '../utils/ErrorReport';
+import ErrorReport from '../utils/ErrorReport';
 
 export const useLoadToolchain = (
   toolchain: Toolchain,

@@ -1,6 +1,6 @@
 import * as Tauri from '@tauri-apps/api';
 import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
-import { $ErrorReport, ErrorReport } from '../utils/ErrorReport';
+import ErrorReport from '../utils/ErrorReport';
 import { invoke } from '@tauri-apps/api';
 
 const HTTP = Tauri.http;
@@ -69,7 +69,7 @@ export const $FileSystem = {
       }
     } catch (error) {
       const errorMessage = `FileSystem.copyDirectory: failed to copy directory "${sourceDirPath}" to "${targetDirPath}"`;
-      return $ErrorReport.make(errorMessage);
+      return ErrorReport.from(errorMessage);
     }
   },
 
@@ -81,7 +81,7 @@ export const $FileSystem = {
       await FS.copyFile(sourcePath, targetPath);
     } catch (error) {
       const errorMessage = `FileSystem.copyFile: failed to copy file from "${sourcePath}" to "${targetPath}"`;
-      return $ErrorReport.make(errorMessage);
+      return ErrorReport.from(errorMessage);
     }
   },
 
@@ -90,7 +90,7 @@ export const $FileSystem = {
       await FS.createDir(path, { recursive: true });
     } catch {
       const errorMessage = `FileSystem.createDirectory: failed to create directory "${path}"`;
-      return $ErrorReport.make(errorMessage);
+      return ErrorReport.from(errorMessage);
     }
   },
 
@@ -108,7 +108,7 @@ export const $FileSystem = {
       responseType: HTTP.ResponseType.Binary,
     });
     if (response.status !== 200) {
-      return $ErrorReport.make(`Failed to download file "${url}"`);
+      return ErrorReport.from(`Failed to download file "${url}"`);
     }
 
     try {
@@ -119,7 +119,7 @@ export const $FileSystem = {
         contents: response.data,
       });
     } catch {
-      return $ErrorReport.make(`Failed to save file "${filePath}"`);
+      return ErrorReport.from(`Failed to save file "${filePath}"`);
     }
   },
 
@@ -209,7 +209,7 @@ export const $FileSystem = {
       return $EitherErrorOr.value(JSON.parse(content));
     } catch {
       const errorMessage = `FileSystem.loadJson: failed to load JSON file "${path}"`;
-      return $EitherErrorOr.error($ErrorReport.make(errorMessage));
+      return $EitherErrorOr.error(ErrorReport.from(errorMessage));
     }
   },
 
@@ -226,7 +226,7 @@ export const $FileSystem = {
       await FS.removeFile(filePath);
     } catch {
       const errorMessage = `FileSystem.removeFile: failed to delete file "${filePath}"`;
-      return $ErrorReport.make(errorMessage);
+      return ErrorReport.from(errorMessage);
     }
   },
 
@@ -235,7 +235,7 @@ export const $FileSystem = {
       await FS.removeDir(dirPath, { recursive: true });
     } catch {
       const errorMessage = `FileSystem.removeDir: failed to delete directory "${dirPath}"`;
-      return $ErrorReport.make(errorMessage);
+      return ErrorReport.from(errorMessage);
     }
   },
 
@@ -263,7 +263,7 @@ export const $FileSystem = {
           return error.extend(`${errorPrefix}: failed to remove old file`);
       }
     } catch {
-      return $ErrorReport.make(
+      return ErrorReport.from(
         `${errorPrefix}: failed to rename "${oldPath}" to "${newPath}"`,
       );
     }
@@ -280,7 +280,7 @@ export const $FileSystem = {
       });
     } catch (error) {
       const errorMessage = `FileSystem.saveJson: failed to save JSON file "${path}"`;
-      return $ErrorReport.make(errorMessage);
+      return ErrorReport.from(errorMessage);
     }
   },
 
@@ -297,18 +297,18 @@ export const $FileSystem = {
       return undefined;
     } catch {
       const errorMessage = `FileSystem.unzip: failed to unzip file "${zipPath}"`;
-      return $ErrorReport.make(errorMessage);
+      return ErrorReport.from(errorMessage);
     }
   },
 
   validateExistsDir: async (path: string): Promise<ErrorReport | undefined> => {
     const errorPrefix = 'FileSystem.validateExistsDir';
     return !path
-      ? $ErrorReport.make(`${errorPrefix}: path is empty`)
+      ? ErrorReport.from(`${errorPrefix}: path is empty`)
       : !(await $FileSystem.exists(path))
-      ? $ErrorReport.make(`${errorPrefix}: path "${path}" does not exist`)
+      ? ErrorReport.from(`${errorPrefix}: path "${path}" does not exist`)
       : !(await $FileSystem.isDirectory(path))
-      ? $ErrorReport.make(`${errorPrefix}: path "${path}" is not a directory`)
+      ? ErrorReport.from(`${errorPrefix}: path "${path}" is not a directory`)
       : undefined;
   },
 
@@ -317,11 +317,11 @@ export const $FileSystem = {
   ): Promise<ErrorReport | undefined> => {
     const errorPrefix = 'FileSystem.validateExistsFile';
     return !path
-      ? $ErrorReport.make(`${errorPrefix}: path is empty`)
+      ? ErrorReport.from(`${errorPrefix}: path is empty`)
       : !(await $FileSystem.exists(path))
-      ? $ErrorReport.make(`${errorPrefix}: path "${path}" does not exist`)
+      ? ErrorReport.from(`${errorPrefix}: path "${path}" does not exist`)
       : !(await $FileSystem.isFile(path))
-      ? $ErrorReport.make(`${errorPrefix}: path "${path}" is not a file`)
+      ? ErrorReport.from(`${errorPrefix}: path "${path}" is not a file`)
       : undefined;
   },
 
@@ -331,9 +331,9 @@ export const $FileSystem = {
   ): Promise<ErrorReport | undefined> => {
     const errorPrefix = 'FileSystem.validateHasExtension';
     return !path
-      ? $ErrorReport.make(`${errorPrefix}: path is empty`)
+      ? ErrorReport.from(`${errorPrefix}: path is empty`)
       : !path.endsWith(extension)
-      ? $ErrorReport.make(
+      ? ErrorReport.from(
           `${errorPrefix}: path "${path}" does not have extension "${extension}"`,
         )
       : undefined;
@@ -348,7 +348,7 @@ export const $FileSystem = {
     const errorMessage = `FileSystem.validateContainsFile: directory "${normalizedDirectoryPath}" does not contain file "${normalizedFilePath}"`;
     return normalizedFilePath.startsWith(normalizedDirectoryPath)
       ? undefined
-      : $ErrorReport.make(errorMessage);
+      : ErrorReport.from(errorMessage);
   },
 
   validateIsValidName: async (
@@ -356,9 +356,9 @@ export const $FileSystem = {
   ): Promise<ErrorReport | undefined> => {
     const errorPrefix = 'FileSystem.validateIsValidName';
     return !name
-      ? $ErrorReport.make(`${errorPrefix}: name is empty`)
+      ? ErrorReport.from(`${errorPrefix}: name is empty`)
       : !/^[a-zA-Z0-9_.-]+$/.test(name)
-      ? $ErrorReport.make(
+      ? ErrorReport.from(
           `${errorPrefix}: name "${name}" contains invalid characters`,
         )
       : undefined;
@@ -367,9 +367,9 @@ export const $FileSystem = {
   validateNotExists: async (path: string): Promise<ErrorReport | undefined> => {
     const errorPrefix = 'FileSystem.validateNotExists';
     return !path
-      ? $ErrorReport.make(`${errorPrefix}: path is empty`)
+      ? ErrorReport.from(`${errorPrefix}: path is empty`)
       : (await $FileSystem.exists(path))
-      ? $ErrorReport.make(`${errorPrefix}: path "${path}" already exist`)
+      ? ErrorReport.from(`${errorPrefix}: path "${path}" already exist`)
       : undefined;
   },
 
@@ -377,17 +377,17 @@ export const $FileSystem = {
     try {
       if (!(await $FileSystem.exists(dirPath))) {
         const errorMessage = `FileSystem.zip: directory "${dirPath}" does not exist`;
-        return $ErrorReport.make(errorMessage);
+        return ErrorReport.from(errorMessage);
       }
       if (await $FileSystem.exists(`${dirPath}.zip`)) {
         const errorMessage = `FileSystem.zip: zip "${dirPath}.zip" already exists`;
-        return $ErrorReport.make(errorMessage);
+        return ErrorReport.from(errorMessage);
       }
       await invoke('archive', { dirPath });
       return undefined;
     } catch {
       const errorMessage = `FileSystem.zip: failed to zip directory "${dirPath}"`;
-      return $ErrorReport.make(errorMessage);
+      return ErrorReport.from(errorMessage);
     }
   },
 };

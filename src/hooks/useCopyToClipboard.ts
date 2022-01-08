@@ -1,6 +1,6 @@
 import { useToast } from '@chakra-ui/react';
 import * as Tauri from '@tauri-apps/api';
-import { $ErrorReport, ErrorReport } from '../utils/ErrorReport';
+import ErrorReport from '../utils/ErrorReport';
 import useAsyncCallback from './useAsyncCallback';
 import useHandleError from './useHandleError';
 
@@ -18,7 +18,7 @@ export default function useCopyToClipboard() {
           status: 'success',
         });
       } catch {
-        const error = $ErrorReport.make('Failed to copy to clipboard');
+        const error = ErrorReport.from('Failed to copy to clipboard');
         handleError(error, 'Please, try again');
         return error;
       }

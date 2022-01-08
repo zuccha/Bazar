@@ -1,5 +1,5 @@
 import { useCallback, useLayoutEffect, useMemo } from 'react';
-import { ErrorReport } from '../utils/ErrorReport';
+import ErrorReport from '../utils/ErrorReport';
 import useSafeState from './usSafeState';
 
 export interface FormFieldParams<T> {

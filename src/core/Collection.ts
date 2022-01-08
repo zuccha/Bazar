@@ -1,5 +1,5 @@
 import { getter, setter } from '../utils/Accessors';
-import { $ErrorReport, ErrorReport } from '../utils/ErrorReport';
+import ErrorReport from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
 import Patch from './Patch';
 import ProjectSnapshot from './ProjectSnapshot';
@@ -133,7 +133,7 @@ export default class Collection {
 
       if (index === -1) {
         const errorMessage = `${errorPrefix}: a template project with this name was not found`;
-        return $ErrorReport.make(errorMessage);
+        return ErrorReport.from(errorMessage);
       }
 
       if ((error = await $FileSystem.validateExistsDir(path))) {
@@ -172,7 +172,7 @@ export default class Collection {
 
       if (index === -1) {
         const errorMessage = `${errorPrefix}: a template project with this name was not found`;
-        return $ErrorReport.make(errorMessage);
+        return ErrorReport.from(errorMessage);
       }
 
       if ((error = await $FileSystem.validateExistsDir(prevPath))) {
@@ -235,7 +235,7 @@ export default class Collection {
 
       if (this._patchNames.some((patchName) => patchName === name)) {
         const errorMessage = `${errorPrefix}: patch with name "${name}" already exists`;
-        return $ErrorReport.make(errorMessage);
+        return ErrorReport.from(errorMessage);
       }
 
       const patchOrError = await Patch.createFromDirectory(
@@ -268,7 +268,7 @@ export default class Collection {
 
       if (this._patchNames.some((patchName) => patchName === name)) {
         const errorMessage = `${errorPrefix}: patch with name "${name}" already exists`;
-        return $ErrorReport.make(errorMessage);
+        return ErrorReport.from(errorMessage);
       }
 
       const patchOrError = await Patch.createFromFile(
@@ -326,7 +326,7 @@ export default class Collection {
 
       if (index === -1) {
         const errorMessage = `${errorPrefix}: a template patch with this name was not found`;
-        return $ErrorReport.make(errorMessage);
+        return ErrorReport.from(errorMessage);
       }
 
       if ((error = await $FileSystem.validateExistsDir(path))) {
@@ -365,7 +365,7 @@ export default class Collection {
 
       if (index === -1) {
         const errorMessage = `${errorPrefix}: a template patch with this name was not found`;
-        return $ErrorReport.make(errorMessage);
+        return ErrorReport.from(errorMessage);
       }
 
       if ((error = await $FileSystem.validateExistsDir(prevPath))) {

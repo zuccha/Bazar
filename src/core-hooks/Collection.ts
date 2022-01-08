@@ -2,7 +2,7 @@ import Collection from '../core/Collection';
 import Patch from '../core/Patch';
 import ProjectSnapshot from '../core/ProjectSnapshot';
 import { useGet, useSetAsync } from '../hooks/useAccessors';
-import { ErrorReport } from '../utils/ErrorReport';
+import ErrorReport from '../utils/ErrorReport';
 
 export const useLoadCollection = (
   collection: Collection,

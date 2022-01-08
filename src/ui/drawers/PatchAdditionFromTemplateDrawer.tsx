@@ -9,7 +9,7 @@ import Button from '../../ui-atoms/Button';
 import Drawer from '../../ui-atoms/Drawer';
 import FormControl from '../../ui-atoms/FormControl';
 import Selector from '../../ui-atoms/Selector';
-import { ErrorReport } from '../../utils/ErrorReport';
+import ErrorReport from '../../utils/ErrorReport';
 
 interface PatchAdditionDrawerProps {
   onClose: () => void;

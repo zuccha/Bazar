@@ -14,7 +14,7 @@ import ProjectSnapshot from '../../../../../../core/ProjectSnapshot';
 import { useList } from '../../../../../../hooks/useAccessors';
 import { TableColumn, TableRow } from '../../../../../../ui-atoms/Table';
 import { $EitherErrorOr } from '../../../../../../utils/EitherErrorOr';
-import { $ErrorReport } from '../../../../../../utils/ErrorReport';
+import ErrorReport from '../../../../../../utils/ErrorReport';
 import PatchAdditionFromFilesDrawer from '../../../../../drawers/PatchAdditionFromFilesDrawer';
 import PatchAdditionFromTemplateDrawer from '../../../../../drawers/PatchAdditionFromTemplateDrawer';
 import PatchTemplateAdditionDrawer from '../../../../../drawers/PatchTemplateAdditionDrawer';
@@ -44,7 +44,7 @@ export default function PatchesTab({
     async (patch: Patch) => {
       return asar.status === 'installed'
         ? await projectSnapshot.applyPatch(patch, asar.exePath)
-        : $EitherErrorOr.error($ErrorReport.make('asar not installed'));
+        : $EitherErrorOr.error(ErrorReport.from('asar not installed'));
     },
     [projectSnapshot.applyPatch],
   );

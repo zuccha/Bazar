@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { ErrorReport } from '../utils/ErrorReport';
+import ErrorReport from '../utils/ErrorReport';
 import { FormField } from './useFormField';
 import useSafeState from './usSafeState';
 

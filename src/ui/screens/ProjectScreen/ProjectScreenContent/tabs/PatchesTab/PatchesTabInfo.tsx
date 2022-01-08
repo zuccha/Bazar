@@ -92,7 +92,7 @@ const PatchesTabInfoWithPatch = ({
 
   return (
     <VStack spacing={2} flex={1} alignItems='flex-start'>
-      <HStack w='100%'>
+      <HStack w='100%' alignItems='flex-start'>
         <TextEditor
           isDisabled={isDisabled}
           onChange={nameField.handleChange}

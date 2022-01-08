@@ -1,18 +1,27 @@
-export interface ErrorReport {
-  readonly main: string;
-  readonly others: string[];
-  all: () => string[];
-  extend: (message: string) => ErrorReport;
-}
+export default class ErrorReport {
+  readonly message: string;
+  readonly parent: ErrorReport | undefined;
 
-export const $ErrorReport = {
-  make: (main: string, others: string[] = []): ErrorReport => {
-    return {
-      main,
-      others,
-      all: () => [main, ...others],
-      extend: (message: string) =>
-        $ErrorReport.make(message, [main, ...others]),
-    };
-  },
-};
+  private constructor(message: string, parent: ErrorReport | undefined) {
+    this.message = message;
+    this.parent = parent;
+  }
+
+  static from(message: string): ErrorReport {
+    return new ErrorReport(message, undefined);
+  }
+
+  extend = (message: string): ErrorReport => {
+    return new ErrorReport(message, this);
+  };
+
+  trace = (): string[] => {
+    let error: ErrorReport | undefined = this;
+    let trace: string[] = [];
+    while (error) {
+      trace.push(error.message);
+      error = error.parent;
+    }
+    return trace;
+  };
+}

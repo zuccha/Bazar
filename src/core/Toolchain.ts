@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { setter } from '../utils/Accessors';
 import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
-import { ErrorReport } from '../utils/ErrorReport';
+import ErrorReport from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
 import { $SettingsStore } from '../utils/SettingsStore';
 

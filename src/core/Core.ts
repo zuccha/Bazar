@@ -1,5 +1,5 @@
 import { getter, setter } from '../utils/Accessors';
-import { ErrorReport } from '../utils/ErrorReport';
+import ErrorReport from '../utils/ErrorReport';
 import Collection from './Collection';
 import Project from './Project';
 import Settings from './Settings';

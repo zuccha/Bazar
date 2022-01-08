@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { getter, setter } from '../utils/Accessors';
 import { $DateTime } from '../utils/DateTime';
 import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
-import { $ErrorReport, ErrorReport } from '../utils/ErrorReport';
+import ErrorReport from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
 import ProjectSnapshot from './ProjectSnapshot';
 import Resource, { ResourceFields } from './Resource';
@@ -221,7 +221,7 @@ export default class Project extends Resource<ProjectInfo> {
       const backupIndex = this.backups.indexOf(backup);
       if (backupIndex === -1) {
         const errorMessage = `${errorPrefix}: backup not found`;
-        return $ErrorReport.make(errorMessage);
+        return ErrorReport.from(errorMessage);
       }
 
       this.backups.splice(backupIndex, 1);

@@ -1,6 +1,6 @@
 import * as Tauri from '@tauri-apps/api';
 import { $EitherErrorOr, EitherErrorOr } from './EitherErrorOr';
-import { $ErrorReport } from './ErrorReport';
+import ErrorReport from './ErrorReport';
 import { $FileSystem } from './FileSystem';
 
 interface OpenDialogOptions {
@@ -34,7 +34,7 @@ export const $Dialog = {
       return $EitherErrorOr.value(path);
     } catch (error) {
       const errorMessage = `Dialog.open: Could not open ${options.type} dialog`;
-      return $EitherErrorOr.error($ErrorReport.make(errorMessage));
+      return $EitherErrorOr.error(ErrorReport.from(errorMessage));
     }
   },
 };

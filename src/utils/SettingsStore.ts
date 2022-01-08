@@ -1,5 +1,5 @@
 import { ZodType } from 'zod';
-import { $ErrorReport, ErrorReport } from './ErrorReport';
+import ErrorReport from './ErrorReport';
 import { $EitherErrorOr, EitherErrorOr } from './EitherErrorOr';
 import { $FileSystem } from './FileSystem';
 
@@ -54,7 +54,7 @@ export const $SettingsStore = {
       const maybeSettings = maybeSettingsOrError.value;
       const settingsOrError = schema.safeParse(maybeSettings);
       if (!settingsOrError.success) {
-        const error = $ErrorReport.make(settingsOrError.error.message);
+        const error = ErrorReport.from(settingsOrError.error.message);
         const errorMessage = 'SettingsStore.get: failed to parse settings file';
         return $EitherErrorOr.error(error.extend(errorMessage));
       }
@@ -88,7 +88,7 @@ export const $SettingsStore = {
       const maybeSettings = maybeSettingsOrError.value;
       const settingsOrError = schema.safeParse(maybeSettings);
       if (!settingsOrError.success) {
-        const error = $ErrorReport.make(settingsOrError.error.message);
+        const error = ErrorReport.from(settingsOrError.error.message);
         const errorMessage = `SettingsStore.getAll: failed to parse settings file`;
         return $EitherErrorOr.error(error.extend(errorMessage));
       }

@@ -1,6 +1,6 @@
 import { ZodType } from 'zod';
 import { $EitherErrorOr, EitherErrorOr } from './EitherErrorOr';
-import { $ErrorReport, ErrorReport } from './ErrorReport';
+import ErrorReport from './ErrorReport';
 import { $FileSystem } from './FileSystem';
 
 export const $Serialization = {
@@ -19,7 +19,7 @@ export const $Serialization = {
     const data = schema.safeParse(dataOrError.value);
     if (!data.success) {
       const errorMessage = `${errorPrefix}: data is not valid`;
-      return $EitherErrorOr.error($ErrorReport.make(errorMessage));
+      return $EitherErrorOr.error(ErrorReport.from(errorMessage));
     }
 
     return $EitherErrorOr.value(data.data);

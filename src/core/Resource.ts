@@ -1,7 +1,7 @@
 import { ZodType } from 'zod';
 import { getter, setter } from '../utils/Accessors';
 import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
-import { ErrorReport } from '../utils/ErrorReport';
+import ErrorReport from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
 import { $Serialization } from '../utils/Serialization';
 

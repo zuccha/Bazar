@@ -1,6 +1,6 @@
 import { useToast } from '@chakra-ui/react';
 import { useCallback } from 'react';
-import { ErrorReport } from '../utils/ErrorReport';
+import ErrorReport from '../utils/ErrorReport';
 
 export default function useHandleError(): (
   error: ErrorReport | undefined,
@@ -12,7 +12,7 @@ export default function useHandleError(): (
       if (error) {
         toast({
           title,
-          description: error.main,
+          description: error.message,
           status: 'error',
         });
       }

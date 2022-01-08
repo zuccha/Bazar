@@ -5,7 +5,7 @@ import Settings, {
 } from '../core/Settings';
 import { useGet, useSet, useSetAsync } from '../hooks/useAccessors';
 import { getter, setter } from '../utils/Accessors';
-import { $ErrorReport, ErrorReport } from '../utils/ErrorReport';
+import ErrorReport from '../utils/ErrorReport';
 
 export const useLoadSettings = (
   settings: Settings,
@@ -53,7 +53,7 @@ export const useSetSetting = <Setting extends GenericSetting>(
       setter([setting], async (value: GenericSettingsStore[Setting]) => {
         if (settings.getIsSavingGeneric()) {
           const errorMessage = `Settings.set: failed to set ${setting}, already saving another one`;
-          return $ErrorReport.make(errorMessage, []);
+          return ErrorReport.from(errorMessage);
         }
         startSaving();
         const error = await settings.set(setting, value);

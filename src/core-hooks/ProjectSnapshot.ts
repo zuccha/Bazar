@@ -3,7 +3,7 @@ import Patch from '../core/Patch';
 import ProjectSnapshot, { ProjectSnapshotInfo } from '../core/ProjectSnapshot';
 import Toolchain from '../core/Toolchain';
 import { useGet, useSetAsync } from '../hooks/useAccessors';
-import { ErrorReport } from '../utils/ErrorReport';
+import ErrorReport from '../utils/ErrorReport';
 
 export const useOpenProjectSnapshotInLunarMagic = (
   snapshot: ProjectSnapshot,

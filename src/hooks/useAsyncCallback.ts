@@ -1,5 +1,5 @@
 import { DependencyList, useCallback } from 'react';
-import { ErrorReport } from '../utils/ErrorReport';
+import ErrorReport from '../utils/ErrorReport';
 import useSafeState from './usSafeState';
 
 export interface AsyncCallback<Args extends unknown[]> {

@@ -1,4 +1,4 @@
-import { ErrorReport } from './ErrorReport';
+import ErrorReport from './ErrorReport';
 
 export interface EitherError {
   readonly isError: true;

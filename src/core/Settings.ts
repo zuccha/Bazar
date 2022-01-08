@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { getter, setter } from '../utils/Accessors';
-import { ErrorReport } from '../utils/ErrorReport';
+import ErrorReport from '../utils/ErrorReport';
 import { $PriorityList } from '../utils/PriorityList';
 import { $SettingsStore } from '../utils/SettingsStore';
 

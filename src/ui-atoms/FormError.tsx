@@ -1,7 +1,7 @@
-import { Flex } from '@chakra-ui/react';
+import { Box, Flex } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 import useCopyToClipboard from '../hooks/useCopyToClipboard';
-import { ErrorReport } from '../utils/ErrorReport';
+import ErrorReport from '../utils/ErrorReport';
 import Alert from './Alert';
 
 interface FormErrorProps {
@@ -14,15 +14,16 @@ export default function FormError({
   const copyToClipboard = useCopyToClipboard();
 
   return (
-    <Flex
+    <Box
       _hover={{ cursor: 'pointer' }}
       onClick={() => {
-        copyToClipboard.call(errorReport.all().join('\n'));
+        copyToClipboard.call(errorReport.trace().join('\n'));
       }}
+      w='100%'
     >
       <Alert status='error'>
-        <Flex alignItems='center'>{errorReport.main}</Flex>
+        <Flex alignItems='center'>{errorReport.message}</Flex>
       </Alert>
-    </Flex>
+    </Box>
   );
 }
