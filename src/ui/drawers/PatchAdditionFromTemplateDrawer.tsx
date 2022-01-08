@@ -1,5 +1,5 @@
 import { VStack } from '@chakra-ui/react';
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useEffect, useLayoutEffect, useState } from 'react';
 import {
   useCollectionPatch,
   useCollectionPatchNames,
@@ -62,7 +62,7 @@ export default function PatchAdditionFromTemplateDrawer({
     value: patchName,
   }));
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     infoFields.nameField.handleChange(patch.value?.getInfo().name ?? '');
     infoFields.versionField.handleChange(patch.value?.getInfo().version ?? '');
     infoFields.authorField.handleChange(patch.value?.getInfo().author ?? '');
@@ -71,7 +71,7 @@ export default function PatchAdditionFromTemplateDrawer({
     );
   }, [patch.value]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (patch.error) {
       toast.failure(
         'Failed to find valid info for the selected template',
