@@ -15,7 +15,7 @@ There is not necessarily an order of completion. Features will be implemented at
 ## Project
 
 - [x] Create project from ROM
-- [ ] Create project from template
+- [x] Create project from template
 - [x] Open project
 - [x] Save project as template
 - [x] Complete project info
@@ -72,7 +72,7 @@ There is not necessarily an order of completion. Features will be implemented at
 
 - [x] Add patch from file
 - [x] Add patch from directory
-- [ ] Add patch from template
+- [x] Add patch from template
 - [ ] Add patch and apply
 - [x] List patches
 - [x] Complete patch info
@@ -86,7 +86,7 @@ There is not necessarily an order of completion. Features will be implemented at
 - [ ] Open patch in editor
 - [x] Show patch info
 - [x] Edit patch info
-- [ ] Save patch as template
+- [x] Save patch as template
 
 ## Sprites
 
@@ -213,7 +213,6 @@ There is not necessarily an order of completion. Features will be implemented at
   - [ ] Ask for confirmation when renaming
 - [ ] Add "templates" settings
   - [ ] Custom templates directory
-- [x] Divide settings in sections
 - [ ] Export settings
 - [ ] Import settings
 
@@ -222,49 +221,63 @@ There is not necessarily an order of completion. Features will be implemented at
 - [ ] Projects
   - [x] List project templates
   - [x] Save project as template
-  - [ ] Delete project template
-  - [ ] Edit project template
+  - [x] Delete project template
+  - [x] Rename project template
 - [ ] Blocks
   - [ ] List block templates
   - [ ] Add block as template
+  - [ ] Add block as template with custom info
   - [ ] Save block as template
   - [ ] Delete block template
+  - [ ] Rename block template
   - [ ] Edit block template
 - [ ] Music
   - [ ] List music templates
   - [ ] Add music as template
+  - [ ] Add music as template with custom info
   - [ ] Save music as template
   - [ ] Delete music template
+  - [ ] Rename music template
   - [ ] Edit music template
 - [ ] Patch
-  - [ ] List patch templates
-  - [ ] Add patch as template
-  - [ ] Save patch as template
-  - [ ] Delete patch template
+  - [x] List patch templates
+  - [x] Add patch as template
+  - [ ] Add patch as template with custom info
+  - [x] Save patch as template
+  - [x] Delete patch template
+  - [x] Rename patch template
   - [ ] Edit patch template
 - [ ] Sprite
-  - [ ] List sprites templates
-  - [ ] Add sprites as template
-  - [ ] Save sprites as template
-  - [ ] Delete sprites template
-  - [ ] Edit sprites template
+  - [ ] List sprite templates
+  - [ ] Add sprite as template
+  - [ ] Add sprite as template with custom info
+  - [ ] Save sprite as template
+  - [ ] Delete sprite template
+  - [ ] Rename sprite template
+  - [ ] Edit sprite template
 - [ ] UberASM
   - [ ] List uberASM templates
   - [ ] Add uberASM as template
+  - [ ] Add uberASM as template with custom info
   - [ ] Save uberASM as template
   - [ ] Delete uberASM template
+  - [ ] Rename uberASM template
   - [ ] Edit uberASM template
 - [ ] Graphics
   - [ ] List graphics templates
   - [ ] Add graphics as template
+  - [ ] Add graphics as template with custom info
   - [ ] Save graphics as template
   - [ ] Delete graphics template
+  - [ ] Rename graphics template
   - [ ] Edit graphics template
 - [ ] ExGraphics
   - [ ] List ExGraphics templates
   - [ ] Add ExGraphics as template
+  - [ ] Add ExGraphics as template with custom info
   - [ ] Save ExGraphics as template
   - [ ] Delete ExGraphics template
+  - [ ] Rename ex-graphics template
   - [ ] Edit ExGraphics template
 
 ## About
