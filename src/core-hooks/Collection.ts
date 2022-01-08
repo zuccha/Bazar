@@ -44,13 +44,10 @@ export const useCollectionPatchNames = (collection: Collection): string[] => {
   return useGet(collection, collection.getPatchNames);
 };
 
-export const useAddPatchToCollection = (
+export const useAddPatchToCollectionFromExisting = (
   collection: Collection,
-): ((
-  name: string,
-  projectSnapshot: Patch,
-) => Promise<ErrorReport | undefined>) => {
-  return useSetAsync(collection, collection.addPatch);
+): ((patch: Patch) => Promise<ErrorReport | undefined>) => {
+  return useSetAsync(collection, collection.addPatchFromExisting);
 };
 
 export const useDeletePatchFromCollection = (

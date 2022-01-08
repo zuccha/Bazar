@@ -202,16 +202,16 @@ export default class Collection {
     return this._patchNames;
   });
 
-  addPatch = setter(
+  addPatchFromExisting = setter(
     ['patchNames'],
-    async (name: string, patch: Patch): Promise<ErrorReport | undefined> => {
+    async (patch: Patch): Promise<ErrorReport | undefined> => {
       const errorPrefix = 'Collection.addPatch';
       let error: ErrorReport | undefined;
 
       const path = await $FileSystem.join(
         this._directoryPath,
         Collection.PATCHES_DIR_NAME,
-        name,
+        patch.getInfo().name,
       );
 
       if ((error = await $FileSystem.validateNotExists(path))) {
@@ -224,7 +224,7 @@ export default class Collection {
         return error.extend(errorMessage);
       }
 
-      this._patchNames.push(name);
+      this._patchNames.push(patch.getInfo().name);
     },
   );
 

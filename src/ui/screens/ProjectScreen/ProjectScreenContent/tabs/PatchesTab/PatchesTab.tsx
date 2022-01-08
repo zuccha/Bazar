@@ -1,5 +1,5 @@
 import { ReactElement, useCallback, useMemo } from 'react';
-import { useAddPatchToCollection } from '../../../../../../core-hooks/Collection';
+import { useAddPatchToCollectionFromExisting } from '../../../../../../core-hooks/Collection';
 import { useCollection, useToolchain } from '../../../../../../core-hooks/Core';
 import {
   useAddPatchToProjectSnapshotFromDirectory,
@@ -51,7 +51,7 @@ export default function PatchesTab({
 
   const handleRemovePatch = useRemovePatchFromProjectSnapshot(projectSnapshot);
 
-  const savePatchAsTemplate = useAddPatchToCollection(collection);
+  const addPatchFromExisting = useAddPatchToCollectionFromExisting(collection);
 
   const columns: TableColumn<Patch>[] = useMemo(() => {
     return [
@@ -98,7 +98,7 @@ export default function PatchesTab({
         <PatchTemplateAdditionDrawer
           patch={resource}
           onClose={onClose}
-          onAdd={(name) => savePatchAsTemplate(name, resource)}
+          onAdd={() => addPatchFromExisting(resource)}
         />
       )}
       columns={columns}
