@@ -202,10 +202,78 @@ export default class Collection {
     return this._patchNames;
   });
 
+  addPatchFromDirectory = setter(
+    ['patchNames'],
+    async ({
+      name,
+      author,
+      version,
+      sourceDirPath,
+      mainFileRelativePath,
+    }: {
+      name: string;
+      author: string;
+      version: string;
+      sourceDirPath: string;
+      mainFileRelativePath: string;
+    }): Promise<ErrorReport | undefined> => {
+      const errorPrefix = `Collection.addPatchFromDirectory`;
+
+      if (this._patchNames.some((patchName) => patchName === name)) {
+        const errorMessage = `${errorPrefix}: patch with name "${name}" already exists`;
+        return $ErrorReport.make(errorMessage);
+      }
+
+      const patchOrError = await Patch.createFromDirectory(
+        await this.getSubPath(Collection.PATCHES_DIR_NAME),
+        { name, author, version, sourceDirPath, mainFileRelativePath },
+      );
+      if (patchOrError.isError) {
+        const errorMessage = `${errorPrefix}: failed to create patch "${name}"`;
+        return patchOrError.error.extend(errorMessage);
+      }
+
+      this._patchNames.push(patchOrError.value.getInfo().name);
+    },
+  );
+
+  addPatchFromFile = setter(
+    ['patches'],
+    async ({
+      name,
+      author,
+      version,
+      filePath,
+    }: {
+      name: string;
+      author: string;
+      version: string;
+      filePath: string;
+    }): Promise<ErrorReport | undefined> => {
+      const errorPrefix = `Collection.addPatchFromFile`;
+
+      if (this._patchNames.some((patchName) => patchName === name)) {
+        const errorMessage = `${errorPrefix}: patch with name "${name}" already exists`;
+        return $ErrorReport.make(errorMessage);
+      }
+
+      const patchOrError = await Patch.createFromFile(
+        await this.getSubPath(Collection.PATCHES_DIR_NAME),
+        { name, author, version, filePath },
+      );
+      if (patchOrError.isError) {
+        const errorMessage = `${errorPrefix}: failed to create patch "${name}"`;
+        return patchOrError.error.extend(errorMessage);
+      }
+
+      this._patchNames.push(patchOrError.value.getInfo().name);
+    },
+  );
+
   addPatchFromExisting = setter(
     ['patchNames'],
     async (patch: Patch): Promise<ErrorReport | undefined> => {
-      const errorPrefix = 'Collection.addPatch';
+      const errorPrefix = 'Collection.addPatchFromExisting';
       let error: ErrorReport | undefined;
 
       const path = await $FileSystem.join(

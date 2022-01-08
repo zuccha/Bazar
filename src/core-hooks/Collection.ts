@@ -44,6 +44,16 @@ export const useCollectionPatchNames = (collection: Collection): string[] => {
   return useGet(collection, collection.getPatchNames);
 };
 
+export const useAddPatchToCollectionFromDirectory = (
+  collection: Collection,
+) => {
+  return useSetAsync(collection, collection.addPatchFromDirectory);
+};
+
+export const useAddPatchToCollectionFromFile = (collection: Collection) => {
+  return useSetAsync(collection, collection.addPatchFromFile);
+};
+
 export const useAddPatchToCollectionFromExisting = (
   collection: Collection,
 ): ((patch: Patch) => Promise<ErrorReport | undefined>) => {

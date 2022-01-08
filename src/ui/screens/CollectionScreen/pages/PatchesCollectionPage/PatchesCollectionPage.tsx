@@ -1,6 +1,8 @@
-import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
+import { AddIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import { ReactElement, useMemo, useState } from 'react';
 import {
+  useAddPatchToCollectionFromDirectory,
+  useAddPatchToCollectionFromFile,
   useCollectionPatchNames,
   useDeletePatchFromCollection,
   useEditPatchInCollection,
@@ -9,19 +11,29 @@ import { useCollection } from '../../../../../core-hooks/Core';
 import { useList } from '../../../../../hooks/useAccessors';
 import useAsyncCallback from '../../../../../hooks/useAsyncCallback';
 import useHandleError from '../../../../../hooks/useHandleError';
+import useSafeState from '../../../../../hooks/usSafeState';
 import DialogWithIrreversibleAction from '../../../../../ui-atoms/DialogWithIrreversibleAction';
 import Table, {
   TableAction,
   TableColumn,
+  TableHeaderAction,
   TableRow,
 } from '../../../../../ui-atoms/Table';
+import PatchAdditionFromFilesDrawer from '../../../../drawers/PatchAdditionFromFilesDrawer';
 import PatchTemplateEditorDrawer from '../../../../drawers/PatchTemplateEditorDrawer';
 
 export default function PatchesCollectionPage(): ReactElement {
   const handleError = useHandleError();
 
+  const [isPatchAdditionDrawerVisible, setIsPatchAdditionDrawerVisible] =
+    useSafeState(false);
+
   const collection = useCollection();
   const patchNames = useCollectionPatchNames(collection);
+
+  const addPatchFromDirectory =
+    useAddPatchToCollectionFromDirectory(collection);
+  const addPatchFromFile = useAddPatchToCollectionFromFile(collection);
 
   const [nameToDelete, setNameToDelete] = useState<string | undefined>();
   const deletePatch = useDeletePatchFromCollection(collection);
@@ -52,18 +64,29 @@ export default function PatchesCollectionPage(): ReactElement {
     handleEdit.isLoading ||
     handleDelete.isLoading;
 
+  const headerActions: TableHeaderAction[] = useMemo(() => {
+    return [
+      {
+        icon: <AddIcon />,
+        isDisabled: isDisabled,
+        label: `Add patch`,
+        onClick: () => setIsPatchAdditionDrawerVisible(true),
+      },
+    ];
+  }, [isDisabled]);
+
   const actions: TableAction<string>[] = useMemo(() => {
     return [
       {
         icon: <EditIcon />,
         isDisabled: isDisabled,
-        label: `Edit project`,
+        label: `Edit patch`,
         onClick: (row) => setNameToEdit(row.data),
       },
       {
         icon: <DeleteIcon />,
         isDisabled: isDisabled,
-        label: `Remove ${name}`,
+        label: `Remove patch`,
         onClick: (row) => setNameToDelete(row.data),
       },
     ];
@@ -89,11 +112,20 @@ export default function PatchesCollectionPage(): ReactElement {
     <>
       <Table
         actions={actions}
+        headerActions={headerActions}
         columns={columns}
         rows={rows}
         variant='minimal'
         flex={1}
       />
+
+      {isPatchAdditionDrawerVisible && (
+        <PatchAdditionFromFilesDrawer
+          onClose={() => setIsPatchAdditionDrawerVisible(false)}
+          onAddFromDirectory={addPatchFromDirectory}
+          onAddFromFile={addPatchFromFile}
+        />
+      )}
 
       {!!nameToDelete && (
         <DialogWithIrreversibleAction
