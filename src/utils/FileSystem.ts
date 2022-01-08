@@ -148,10 +148,14 @@ export const $FileSystem = {
   },
 
   getDirNames: async (directoryPath: string): Promise<string[]> => {
-    const filesAndDirs = await FS.readDir(directoryPath);
-    return filesAndDirs
-      .filter((fileOrDir) => !!fileOrDir.children)
-      .map((dir) => dir.name ?? '');
+    try {
+      const filesAndDirs = await FS.readDir(directoryPath);
+      return filesAndDirs
+        .filter((fileOrDir) => !!fileOrDir.children)
+        .map((dir) => dir.name ?? '');
+    } catch {
+      return [];
+    }
   },
 
   getDataPath: async (subPath: string): Promise<string> => {
@@ -164,23 +168,27 @@ export const $FileSystem = {
     dirPath: string,
     isRecursive: boolean = false,
   ): Promise<string[]> => {
-    const filesAndDirs = await FS.readDir(dirPath);
-    const fileNames = filesAndDirs
-      .filter((fileOrDir) => !fileOrDir.children)
-      .map((file) => file.name ?? '');
+    try {
+      const filesAndDirs = await FS.readDir(dirPath);
+      const fileNames = filesAndDirs
+        .filter((fileOrDir) => !fileOrDir.children)
+        .map((file) => file.name ?? '');
 
-    if (isRecursive) {
-      const subDirNames = await $FileSystem.getDirNames(dirPath);
-      for (const subDirName of subDirNames) {
-        const subDirPath = await $FileSystem.join(dirPath, subDirName);
-        const subFileNames = await $FileSystem.getFileNames(subDirPath, true);
-        for (const subFileName of subFileNames) {
-          fileNames.push(await $FileSystem.join(subDirName, subFileName));
+      if (isRecursive) {
+        const subDirNames = await $FileSystem.getDirNames(dirPath);
+        for (const subDirName of subDirNames) {
+          const subDirPath = await $FileSystem.join(dirPath, subDirName);
+          const subFileNames = await $FileSystem.getFileNames(subDirPath, true);
+          for (const subFileName of subFileNames) {
+            fileNames.push(await $FileSystem.join(subDirName, subFileName));
+          }
         }
       }
-    }
 
-    return fileNames;
+      return fileNames;
+    } catch {
+      return [];
+    }
   },
 
   join: async (...paths: string[]): Promise<string> => {
