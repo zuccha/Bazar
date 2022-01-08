@@ -152,13 +152,15 @@ export default function ProjectCreationFromSourceDrawer({
               value={romFilePathField.value}
             />
           </FormControl>
-
-          <Alert status='info'>
-            A new directory named after the chosen project name will be created
-            in the selected location, containing a copy of the base ROM and
-            generated files.
-          </Alert>
         </VStack>
+
+        <Flex flex={1} />
+
+        <Alert status='info'>
+          A new directory named after the chosen project name will be created in
+          the selected location, containing a copy of the base ROM and generated
+          files.
+        </Alert>
 
         {form.error && <FormError errorReport={form.error} />}
       </Flex>
