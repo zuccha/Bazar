@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
-import { Getter, Setter } from '../utils/Accessors';
+import { AsyncResponse, Getter, Setter } from '../utils/Accessors';
+import { EitherErrorOr } from '../utils/EitherErrorOr';
 import ErrorReport from '../utils/ErrorReport';
 import PairMap from '../utils/PairMap';
 import useListUpdatesCount from './useListUpdatesCount';
@@ -112,6 +113,41 @@ export const useGet = <T extends Item, Return>(
   }, [item, getter]);
 
   return getter();
+};
+
+export const useGetAsync = <T extends Item, Return>(
+  item: T,
+  getter: Getter<[], Promise<EitherErrorOr<Return>>>,
+): AsyncResponse<Return> => {
+  const [, setRenderCount] = useState(0);
+  const [response, setResponse] = useState<AsyncResponse<Return>>({
+    error: undefined,
+    isLoading: false,
+    value: undefined,
+  });
+
+  // const [value, setValue] = useState<Return | undefined>(undefined);
+  // const [error, setError] = useState<ErrorReport | undefined>(undefined);
+  // const [isLoading, setIsLoading] = useState(false);
+
+  useLayoutEffect(() => {
+    const render = () => setRenderCount((renderCount) => renderCount + 1);
+    const unsubscribe = subscribeToProperty(item, getter.deps, render);
+    return unsubscribe;
+  }, [item, getter]);
+
+  useLayoutEffect(() => {
+    setResponse((prevResponse) => ({ ...prevResponse, isLoading: true }));
+    getter().then((errorOrValue) => {
+      setResponse({
+        error: errorOrValue.isError ? errorOrValue.error : undefined,
+        value: errorOrValue.isValue ? errorOrValue.value : undefined,
+        isLoading: false,
+      });
+    });
+  }, [item, getter]);
+
+  return response;
 };
 
 export const useSet = <T extends Item, Args extends unknown[]>(

@@ -1,3 +1,5 @@
+import ErrorReport from './ErrorReport';
+
 export type Getter<Args extends unknown[], Return> = { deps: string[] } & ((
   ...args: Args
 ) => Return);
@@ -5,6 +7,12 @@ export type Getter<Args extends unknown[], Return> = { deps: string[] } & ((
 export type Setter<Args extends unknown[], Return> = { triggers: string[] } & ((
   ...args: Args
 ) => Return);
+
+export interface AsyncResponse<T> {
+  error: ErrorReport | undefined;
+  isLoading: boolean;
+  value: T | undefined;
+}
 
 export const getter = <Args extends unknown[], Return>(
   deps: string[],
