@@ -65,6 +65,20 @@ export default class Collection {
 
   // #region ProjectSnapshots
 
+  getProjectSnapshotPath = getter(
+    ['directoryPath', 'projectSnapshotNames'],
+    async (name: string): Promise<string> => {
+      if (!this._projectSnapshotNames.includes(name)) {
+        return '';
+      }
+      return await $FileSystem.join(
+        this._directoryPath,
+        Collection.PROJECT_SNAPSHOTS_DIR_NAME,
+        name,
+      );
+    },
+  );
+
   getProjectSnapshotNames = getter(['projectSnapshotNames'], (): string[] => {
     return this._projectSnapshotNames;
   });

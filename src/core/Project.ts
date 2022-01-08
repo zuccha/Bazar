@@ -75,6 +75,58 @@ export default class Project extends Resource<ProjectInfo> {
     return $EitherErrorOr.value(project);
   }
 
+  static async createFromTemplate(
+    directoryPath: string,
+    { name, author }: ProjectInfo,
+    templatePath: string,
+  ): Promise<EitherErrorOr<Project>> {
+    const errorPrefix = 'Project.createFromSource';
+    let error: ErrorReport | undefined;
+
+    const latestPath = await $FileSystem.join(
+      directoryPath,
+      name,
+      Project.LATEST_DIR_NAME,
+    );
+
+    // Resource
+    const info = { name, author };
+    const project = new Project({ directoryPath, name, info });
+    if ((error = await project.save())) {
+      const errorMessage = `${errorPrefix}: failed to create resource`;
+      return $EitherErrorOr.error(error.extend(errorMessage));
+    }
+
+    // Copy latest snapshot
+    if ((error = await $FileSystem.copyDirectory(templatePath, latestPath))) {
+      await project.delete();
+      const errorMessage = `${errorPrefix}: failed to create latest snapshot`;
+      return $EitherErrorOr.error(error.extend(errorMessage));
+    }
+
+    // Open latest snapshot
+    const errorOrLatest = await ProjectSnapshot.open(latestPath);
+    if (errorOrLatest.isError) {
+      await project.delete();
+      const errorMessage = `${errorPrefix}: failed to open latest snapshot`;
+      return $EitherErrorOr.error(errorOrLatest.error.extend(errorMessage));
+    }
+
+    // Create backups
+    const backupsDirectory = await project.getSubPath(Project.BACKUPS_DIR_NAME);
+    const backups: string[] = [];
+    if ((error = await $FileSystem.createDirectory(backupsDirectory))) {
+      await project.delete();
+      const errorMessage = `${errorPrefix}: failed to create backups directory`;
+      return $EitherErrorOr.error(error.extend(errorMessage));
+    }
+
+    // Create project
+    project.latest = errorOrLatest.value;
+    project.backups = backups;
+    return $EitherErrorOr.value(project);
+  }
+
   static async open(path: string): Promise<EitherErrorOr<Project>> {
     const errorPrefix = 'Project.open';
 

@@ -1,5 +1,5 @@
 import { Box, VStack } from '@chakra-ui/layout';
-import { ReactElement, useCallback } from 'react';
+import { ReactElement } from 'react';
 import { useSetProject, useSettings } from '../../../core-hooks/Core';
 import { usePrioritizeRecentProject } from '../../../core-hooks/Settings';
 import Project from '../../../core/Project';
@@ -11,16 +11,18 @@ import Button from '../../../ui-atoms/Button';
 import FormError from '../../../ui-atoms/FormError';
 import { $Dialog } from '../../../utils/Dialog';
 import ProjectCreationFromRomDrawer from '../../drawers/ProjectCreationFromRomDrawer';
+import ProjectCreationFromTemplateDrawer from '../../drawers/ProjectCreationFromTemplateDrawer';
 
 export default function HomeScreenActions(): ReactElement {
   const settings = useSettings();
 
-  const [isProjectCreationFromSourceOpen, setIsProjectCreationFromSourceOpen] =
+  const [isProjectCreationFromRomVisible, setIsProjectCreationFromRomVisible] =
     useSafeState(false);
 
-  const handleCreateProjectFromSource = useCallback(() => {
-    setIsProjectCreationFromSourceOpen(true);
-  }, []);
+  const [
+    isProjectCreationFromTemplateVisible,
+    setIsProjectCreationFromTemplateVisible,
+  ] = useSafeState(false);
 
   const setProject = useSetProject();
 
@@ -59,16 +61,23 @@ export default function HomeScreenActions(): ReactElement {
         <Button
           isDisabled={isDisabled}
           label='New project'
-          onClick={handleCreateProjectFromSource}
+          onClick={() => setIsProjectCreationFromRomVisible(true)}
           isFullWidth
-          maxW='200px'
+          maxW='250px'
+        />
+        <Button
+          isDisabled={isDisabled}
+          label='New project from template'
+          onClick={() => setIsProjectCreationFromTemplateVisible(true)}
+          isFullWidth
+          maxW='250px'
         />
         <Button
           isDisabled={isDisabled}
           label='Open project'
           onClick={handleOpenProject.call}
           isFullWidth
-          maxW='200px'
+          maxW='250px'
         />
         {handleOpenProject.error && (
           <Box alignSelf='center'>
@@ -77,9 +86,16 @@ export default function HomeScreenActions(): ReactElement {
         )}
       </VStack>
 
-      {isProjectCreationFromSourceOpen && (
+      {isProjectCreationFromRomVisible && (
         <ProjectCreationFromRomDrawer
-          onClose={() => setIsProjectCreationFromSourceOpen(false)}
+          onClose={() => setIsProjectCreationFromRomVisible(false)}
+          onCreate={handleCreateProject.call}
+        />
+      )}
+
+      {isProjectCreationFromTemplateVisible && (
+        <ProjectCreationFromTemplateDrawer
+          onClose={() => setIsProjectCreationFromTemplateVisible(false)}
           onCreate={handleCreateProject.call}
         />
       )}
