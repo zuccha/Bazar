@@ -1,23 +1,21 @@
-import {
-  AddIcon,
-  DeleteIcon,
-  EditIcon,
-  ExternalLinkIcon,
-} from '@chakra-ui/icons';
-import { ReactElement, useMemo, useState } from 'react';
+import { AddIcon, DeleteIcon, ExternalLinkIcon } from '@chakra-ui/icons';
+import { Flex } from '@chakra-ui/react';
+import { ReactElement, useLayoutEffect, useMemo, useState } from 'react';
 import {
   useAddPatchToCollectionFromDirectory,
   useAddPatchToCollectionFromFile,
   useCollectionPatchNames,
   useDeletePatchFromCollection,
-  useEditPatchInCollection,
 } from '../../../../../core-hooks/Collection';
 import { useCollection } from '../../../../../core-hooks/Core';
+import Patch from '../../../../../core/Patch';
 import { useList } from '../../../../../hooks/useAccessors';
 import useAsyncCallback from '../../../../../hooks/useAsyncCallback';
 import useToast from '../../../../../hooks/useToast';
 import useSafeState from '../../../../../hooks/usSafeState';
 import DialogWithIrreversibleAction from '../../../../../ui-atoms/DialogWithIrreversibleAction';
+import Frame from '../../../../../ui-atoms/Frame';
+import Header from '../../../../../ui-atoms/Header';
 import Table, {
   TableAction,
   TableColumn,
@@ -25,7 +23,7 @@ import Table, {
   TableRow,
 } from '../../../../../ui-atoms/Table';
 import PatchAdditionFromFilesDrawer from '../../../../drawers/PatchAdditionFromFilesDrawer';
-import PatchTemplateEditorDrawer from '../../../../drawers/PatchTemplateEditorDrawer';
+import PatchesCollectionPageInfo from './PatchesCollectionPageInfo';
 
 export default function PatchesCollectionPage(): ReactElement {
   const toast = useToast();
@@ -35,6 +33,31 @@ export default function PatchesCollectionPage(): ReactElement {
 
   const collection = useCollection();
   const patchNames = useCollectionPatchNames(collection);
+
+  const [selectedPatchIndex, setSelectedPatchIndex] = useSafeState<
+    number | undefined
+  >(undefined);
+
+  const [selectedPatch, setSelectedPatch] = useState<Patch | undefined>(
+    undefined,
+  );
+
+  useLayoutEffect(() => {
+    if (selectedPatchIndex !== undefined) {
+      const patchName = patchNames[selectedPatchIndex];
+      if (patchName) {
+        collection.getPatch(patchName).then((errorOrPatch) => {
+          if (errorOrPatch.isError)
+            toast.failure('Failed to select patch', errorOrPatch.error);
+          errorOrPatch.isError
+            ? setSelectedPatch(undefined)
+            : setSelectedPatch(errorOrPatch.value);
+        });
+      }
+    } else {
+      setSelectedPatch(undefined);
+    }
+  }, [collection, selectedPatchIndex]);
 
   const addPatchFromDirectory =
     useAddPatchToCollectionFromDirectory(collection);
@@ -46,28 +69,12 @@ export default function PatchesCollectionPage(): ReactElement {
     if (nameToDelete) {
       const error = await deletePatch(nameToDelete);
       if (error) toast.failure('Failed to delete patch', error);
+      else setSelectedPatchIndex(undefined);
       return error;
     }
   }, [toast, nameToDelete, deletePatch]);
 
-  const [nameToEdit, setNameToEdit] = useState<string | undefined>();
-  const editPatch = useEditPatchInCollection(collection);
-  const handleEdit = useAsyncCallback(
-    async (name: string) => {
-      if (nameToEdit) {
-        const error = await editPatch(nameToEdit, name);
-        if (error) toast.failure('Failed to edit patch', error);
-        return error;
-      }
-    },
-    [toast, nameToEdit, editPatch],
-  );
-
-  const isDisabled =
-    !!nameToEdit ||
-    !!nameToDelete ||
-    handleEdit.isLoading ||
-    handleDelete.isLoading;
+  const isDisabled = !!nameToDelete || handleDelete.isLoading;
 
   const headerActions: TableHeaderAction[] = useMemo(() => {
     return [
@@ -82,12 +89,6 @@ export default function PatchesCollectionPage(): ReactElement {
 
   const actions: TableAction<string>[] = useMemo(() => {
     return [
-      {
-        icon: <EditIcon />,
-        isDisabled: isDisabled,
-        label: `Edit patch`,
-        onClick: (row) => setNameToEdit(row.data),
-      },
       {
         icon: <ExternalLinkIcon />,
         isDisabled: true,
@@ -121,14 +122,32 @@ export default function PatchesCollectionPage(): ReactElement {
 
   return (
     <>
-      <Table
-        actions={actions}
-        headerActions={headerActions}
-        columns={columns}
-        rows={rows}
-        variant='minimal'
-        flex={1}
-      />
+      <Flex flexDir='column' flex={1} overflow='auto'>
+        <Table
+          actions={actions}
+          headerActions={headerActions}
+          columns={columns}
+          rows={rows}
+          selectedRowIndex={selectedPatchIndex}
+          onSelectRowIndex={setSelectedPatchIndex}
+          variant='minimal'
+          flex={1}
+          minHeight='200px'
+        />
+        {selectedPatch && (
+          <>
+            <Header
+              title='Info'
+              hideBorderLeft
+              hideBorderRight
+              variant='minimal'
+            />
+            <Flex p={4} width='100%' overflow='auto'>
+              <PatchesCollectionPageInfo patch={selectedPatch} />
+            </Flex>
+          </>
+        )}
+      </Flex>
 
       {isPatchAdditionDrawerVisible && (
         <PatchAdditionFromFilesDrawer
@@ -145,14 +164,6 @@ export default function PatchesCollectionPage(): ReactElement {
           onClose={() => setNameToDelete(undefined)}
           onDelete={handleDelete.call}
           title={`Delete ${nameToDelete}?`}
-        />
-      )}
-
-      {!!nameToEdit && (
-        <PatchTemplateEditorDrawer
-          name={nameToEdit}
-          onClose={() => setNameToEdit(undefined)}
-          onEdit={handleEdit.call}
         />
       )}
     </>

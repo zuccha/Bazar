@@ -1,4 +1,4 @@
-import { Flex, Heading } from '@chakra-ui/react';
+import { Flex, Text } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 
 interface HeaderProps {
@@ -7,7 +7,19 @@ interface HeaderProps {
   hideBorderLeft?: boolean;
   hideBorderRight?: boolean;
   hideBorderTop?: boolean;
+  variant?: 'solid' | 'minimal';
 }
+
+const stylesByVariant = {
+  solid: {
+    container: {
+      bg: 'app.bg2',
+    },
+  },
+  minimal: {
+    container: {},
+  },
+};
 
 export default function Header({
   title,
@@ -15,21 +27,24 @@ export default function Header({
   hideBorderLeft,
   hideBorderRight,
   hideBorderTop,
+  variant = 'solid',
 }: HeaderProps): ReactElement {
+  const styles = stylesByVariant[variant];
+
   return (
     <Flex
       px={4}
       py={4}
-      bg='app.bg2'
+      {...styles.container}
       borderBottomWidth={hideBorderBottom ? 0 : 1}
       borderLeftWidth={hideBorderLeft ? 0 : 1}
       borderRightWidth={hideBorderRight ? 0 : 1}
       borderTopWidth={hideBorderTop ? 0 : 1}
       borderColor='app.bg1'
     >
-      <Heading size='xs' textTransform='uppercase'>
+      <Text textTransform='uppercase' fontWeight='bold' fontSize='xs'>
         {title}
-      </Heading>
+      </Text>
     </Flex>
   );
 }

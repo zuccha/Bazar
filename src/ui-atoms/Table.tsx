@@ -45,6 +45,8 @@ interface TableProps<T> {
   flex?: number;
   height?: number | string;
   width?: number | string;
+  minHeight?: number | string;
+  minWidth?: number | string;
 }
 
 function computeColumnStyle<T>(
@@ -95,6 +97,8 @@ export default function Table<T>({
   flex,
   height,
   width,
+  minHeight,
+  minWidth,
 }: TableProps<T>): ReactElement {
   const colorScheme = useColorScheme();
 
@@ -109,6 +113,8 @@ export default function Table<T>({
       flexDir='column'
       height={height}
       width={width}
+      minHeight={minHeight}
+      minWidth={minWidth}
       flex={flex}
       {...styles.border}
       overflow='hidden'

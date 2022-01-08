@@ -84,9 +84,6 @@ export const useDeletePatchFromCollection = (
 
 export const useEditPatchInCollection = (
   collection: Collection,
-): ((
-  prevName: string,
-  nextName: string,
-) => Promise<ErrorReport | undefined>) => {
+): ((name: string, info: PatchInfo) => Promise<ErrorReport | undefined>) => {
   return useSetAsync(collection, collection.editPatch);
 };

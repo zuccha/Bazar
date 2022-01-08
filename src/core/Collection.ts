@@ -347,13 +347,15 @@ export default class Collection {
         return ErrorReport.from(errorMessage);
       }
 
-      if ((error = await $FileSystem.validateExistsDir(path))) {
-        const errorMessage = `${errorPrefix}: a template patch with this name does not exist`;
-        return error.extend(errorMessage);
+      const patchOrError = await Patch.open(path);
+      if (patchOrError.isError) {
+        await $FileSystem.removeDir(path);
+        const errorMessage = `${errorPrefix}: failed to open patch "${name}"`;
+        return patchOrError.error.extend(errorMessage);
       }
 
-      if ((error = await $FileSystem.removeDir(path))) {
-        const errorMessage = `${errorPrefix}: failed to delete template patch`;
+      if ((error = await patchOrError.value.delete())) {
+        const errorMessage = `${errorPrefix}: failed to remove patch "${name}"`;
         return error.extend(errorMessage);
       }
 
@@ -361,49 +363,37 @@ export default class Collection {
     },
   );
 
-  editPatch = setter(
-    ['patchNames'],
-    async (prevName: string, nextName: string) => {
-      const errorPrefix = 'Collection.editPatch';
-      let error: ErrorReport | undefined;
+  editPatch = setter(['patchNames'], async (name: string, info: PatchInfo) => {
+    const errorPrefix = 'Collection.editPatch';
+    let error: ErrorReport | undefined;
 
-      const prevPath = await $FileSystem.join(
-        this._directoryPath,
-        Collection.PATCHES_DIR_NAME,
-        prevName,
-      );
+    const path = await $FileSystem.join(
+      this._directoryPath,
+      Collection.PATCHES_DIR_NAME,
+      name,
+    );
 
-      const nextPath = await $FileSystem.join(
-        this._directoryPath,
-        Collection.PATCHES_DIR_NAME,
-        nextName,
-      );
+    const index = this._patchNames.indexOf(name);
 
-      const index = this._patchNames.indexOf(prevName);
+    if (index === -1) {
+      const errorMessage = `${errorPrefix}: a template patch with this name was not found`;
+      return ErrorReport.from(errorMessage);
+    }
 
-      if (index === -1) {
-        const errorMessage = `${errorPrefix}: a template patch with this name was not found`;
-        return ErrorReport.from(errorMessage);
-      }
+    const patchOrError = await Patch.open(path);
+    if (patchOrError.isError) {
+      await $FileSystem.removeDir(path);
+      const errorMessage = `${errorPrefix}: failed to open patch "${name}"`;
+      return patchOrError.error.extend(errorMessage);
+    }
 
-      if ((error = await $FileSystem.validateExistsDir(prevPath))) {
-        const errorMessage = `${errorPrefix}: a template patch with this name does not exist`;
-        return error.extend(errorMessage);
-      }
+    if ((error = await patchOrError.value.renameAndSetInfo(info))) {
+      const errorMessage = `${errorPrefix}: failed to remove patch "${name}"`;
+      return error.extend(errorMessage);
+    }
 
-      if ((error = await $FileSystem.validateNotExists(nextPath))) {
-        const errorMessage = `${errorPrefix}: a template patch with this name already exists`;
-        return error.extend(errorMessage);
-      }
-
-      if ((error = await $FileSystem.rename(prevPath, nextPath))) {
-        const errorMessage = `${errorPrefix}: failed to rename template patch`;
-        return error.extend(errorMessage);
-      }
-
-      this._patchNames[index] = nextName;
-    },
-  );
+    this._patchNames[index] = info.name;
+  });
 
   // #endregion Patch
 }
