@@ -4,6 +4,7 @@ import useForm from '../../hooks/useForm';
 import Button from '../../ui-atoms/Button';
 import Drawer from '../../ui-atoms/Drawer';
 import ErrorReport from '../../utils/ErrorReport';
+import { PatchInfoFields, usePatchInfoFields } from '../forms/PatchInfoForm';
 
 interface PatchTemplateAdditionDrawerProps {
   patch: Patch;
@@ -16,9 +17,17 @@ export default function PatchTemplateAdditionDrawer({
   onClose,
   onAdd,
 }: PatchTemplateAdditionDrawerProps): ReactElement {
+  const infoFields = usePatchInfoFields(patch.getInfo());
+
   const form = useForm({
-    fields: [],
-    onSubmit: () => onAdd(patch.getInfo()),
+    fields: [infoFields.nameField, infoFields.mainFileRelativePathField],
+    onSubmit: () =>
+      onAdd({
+        name: infoFields.nameField.value.trim(),
+        version: infoFields.versionField.value.trim(),
+        author: infoFields.authorField.value.trim(),
+        mainFileRelativePath: infoFields.mainFileRelativePathField.value.trim(),
+      }),
   });
 
   return (
@@ -47,7 +56,11 @@ export default function PatchTemplateAdditionDrawer({
       onClose={onClose}
       title='Save patch as template'
     >
-      <></>
+      <PatchInfoFields
+        directoryPath={patch.getPath()}
+        {...infoFields}
+        width='100%'
+      />
     </Drawer>
   );
 }
