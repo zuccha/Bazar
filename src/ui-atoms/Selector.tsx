@@ -47,7 +47,6 @@ function Selector(
       disabled={isDisabled || options.length <= 1}
       isFullWidth={isFullWidth}
       onChange={handleChange}
-      placeholder={placeholder}
       ref={ref}
       size='sm'
       value={value}

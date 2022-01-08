@@ -44,7 +44,6 @@ export default function TextEditor({
         onBlur={onBlur}
         onChange={handleChange}
         placeholder={placeholder}
-        _placeholder={{ color: 'gray.700' }}
         size='sm'
         value={value}
         variant='outline'
