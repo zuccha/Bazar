@@ -250,7 +250,7 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
 
       const patchPath = await this.getSubPath(
         ProjectSnapshot.PATCHES_DIR_NAME,
-        name,
+        info.name,
       );
 
       if (patchPath === '') {
@@ -272,11 +272,16 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
 
       const patchOrError = await Patch.open(patchPath);
       if (patchOrError.isError) {
+        await $FileSystem.removeDir(patchPath);
         const errorMessage = `${errorPrefix}: failed to open patch "${name}"`;
         return patchOrError.error.extend(errorMessage);
       }
 
-      // TODO: Update patch info.
+      if ((error = await patchOrError.value.renameAndSetInfo(info))) {
+        patchOrError.value.delete();
+        const errorMessage = `${errorPrefix}: failed to set new info for patch "${name}"`;
+        return error.extend(errorMessage);
+      }
 
       this.patches.push(patchOrError.value);
     },

@@ -298,7 +298,7 @@ export default class Collection {
       const path = await $FileSystem.join(
         this._directoryPath,
         Collection.PATCHES_DIR_NAME,
-        patch.getInfo().name,
+        info.name,
       );
 
       if ((error = await $FileSystem.validateNotExists(path))) {
@@ -311,9 +311,20 @@ export default class Collection {
         return error.extend(errorMessage);
       }
 
-      // TODO: Update patch info.
+      const patchOrError = await Patch.open(path);
+      if (patchOrError.isError) {
+        await $FileSystem.removeDir(path);
+        const errorMessage = `${errorPrefix}: failed to open patch "${info.name}"`;
+        return patchOrError.error.extend(errorMessage);
+      }
 
-      this._patchNames.push(patch.getInfo().name);
+      if ((error = await patchOrError.value.renameAndSetInfo(info))) {
+        patchOrError.value.delete();
+        const errorMessage = `${errorPrefix}: failed to set new info for patch "${name}"`;
+        return error.extend(errorMessage);
+      }
+
+      this._patchNames.push(info.name);
     },
   );
 
