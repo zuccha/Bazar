@@ -10,7 +10,7 @@ import useFormField, {
   FormField,
   FormFieldParams,
 } from '../../../hooks/useFormField';
-import useHandleError from '../../../hooks/useHandleError';
+import useToast from '../../../hooks/useToast';
 import { $Function } from '../../../utils/Function';
 
 interface Options {
@@ -26,7 +26,7 @@ export default function useSettingField<S extends GenericSetting>(
   set: (value: GenericSettingsStore[S]) => void;
   isSaving: boolean;
 } {
-  const handleError = useHandleError();
+  const toast = useToast();
 
   const settings = useSettings();
   const isSaving = useIsSavingSettings(settings);
@@ -47,14 +47,14 @@ export default function useSettingField<S extends GenericSetting>(
     (newValue: GenericSettingsStore[S]) => {
       const oldValue = field.value;
       field.handleChange(newValue);
-      setSettingDebounce(newValue).then((maybeError) => {
-        if (maybeError) {
+      setSettingDebounce(newValue).then((error) => {
+        if (error) {
           field.handleChange(oldValue);
-          handleError(maybeError, 'Failed to save setting');
+          toast.failure('Failed to save setting', error);
         }
       });
     },
-    [field.handleChange, field.value, setSettingDebounce, handleError],
+    [field.handleChange, field.value, setSettingDebounce, toast],
   );
 
   return { field, set, isSaving };

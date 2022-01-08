@@ -8,7 +8,7 @@ import {
 import { useCollection } from '../../../../../core-hooks/Core';
 import { useList } from '../../../../../hooks/useAccessors';
 import useAsyncCallback from '../../../../../hooks/useAsyncCallback';
-import useHandleError from '../../../../../hooks/useHandleError';
+import useToast from '../../../../../hooks/useToast';
 import DialogWithIrreversibleAction from '../../../../../ui-atoms/DialogWithIrreversibleAction';
 import Table, {
   TableAction,
@@ -18,7 +18,7 @@ import Table, {
 import ProjectTemplateEditorDrawer from '../../../../drawers/ProjectTemplateEditorDrawer';
 
 export default function ProjectsCollectionPage(): ReactElement {
-  const handleError = useHandleError();
+  const toast = useToast();
 
   const collection = useCollection();
   const projectSnapshotNames = useCollectionProjectSnapshotNames(collection);
@@ -29,10 +29,10 @@ export default function ProjectsCollectionPage(): ReactElement {
   const handleDelete = useAsyncCallback(async () => {
     if (nameToDelete) {
       const error = await deleteProjectSnapshot(nameToDelete);
-      handleError(error, 'Failed to delete project');
+      if (error) toast.failure('Failed to delete project', error);
       return error;
     }
-  }, [handleError, nameToDelete, deleteProjectSnapshot]);
+  }, [toast, nameToDelete, deleteProjectSnapshot]);
 
   const [nameToEdit, setNameToEdit] = useState<string | undefined>();
   const editProjectSnapshot = useEditProjectSnapshotInCollection(collection);
@@ -40,11 +40,11 @@ export default function ProjectsCollectionPage(): ReactElement {
     async (name: string) => {
       if (nameToEdit) {
         const error = await editProjectSnapshot(nameToEdit, name);
-        handleError(error, 'Failed to edit project');
+        if (error) toast.failure('Failed to edit project', error);
         return error;
       }
     },
-    [handleError, nameToEdit, editProjectSnapshot],
+    [toast, nameToEdit, editProjectSnapshot],
   );
 
   const isDisabled =

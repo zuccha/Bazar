@@ -1,14 +1,12 @@
 import { Flex } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
-import { useCore } from './contexts/CoreContext';
+import { useState } from 'react';
 import { useLoadCollection } from './core-hooks/Collection';
 import { useCollection, useSettings, useToolchain } from './core-hooks/Core';
 import { useLoadSettings } from './core-hooks/Settings';
 import { useLoadToolchain } from './core-hooks/Toolchain';
 import useEffectAsync from './hooks/useEffectAsync';
-import useHandleError from './hooks/useHandleError';
+import useToast from './hooks/useToast';
 import Navigator from './ui/Navigator';
-import { $FileSystem } from './utils/FileSystem';
 
 const errorTitles = ['Failed to load settings', 'Failed to load tools'];
 
@@ -24,30 +22,21 @@ export default function App() {
   const toolchain = useToolchain();
   const loadToolchain = useLoadToolchain(toolchain);
 
-  const handleError = useHandleError();
+  const toast = useToast();
 
   useEffectAsync(async () => {
-    const maybeErrors = await Promise.all([loadSettings(), loadToolchain()]);
-    maybeErrors.forEach((maybeError, index) =>
-      handleError(maybeError, errorTitles[index] || 'Failed to load'),
-    );
+    const errors = await Promise.all([loadSettings(), loadToolchain()]);
+    errors.forEach((error, index) => {
+      if (error) toast.failure(errorTitles[index] || 'Failed to load', error);
+    });
 
-    if (maybeErrors.every((maybeError) => !maybeError)) {
-      const maybeError = await loadCollection();
-      handleError(maybeError, 'Failed to load collection');
+    if (errors.every((error) => !error)) {
+      const error = await loadCollection();
+      if (error) toast.failure('Failed to load collection', error);
     }
 
     setIsLoading(false);
   }, []);
-
-  useEffect(() => {
-    Promise.all([loadSettings(), loadToolchain()]).then((maybeErrors) => {
-      maybeErrors.forEach((maybeError, index) =>
-        handleError(maybeError, errorTitles[index] || 'Failed to load'),
-      ),
-        setIsLoading(false);
-    });
-  }, [loadSettings, loadToolchain]);
 
   return isLoading ? (
     <Flex h='100%' w='100%' alignItems='center' justifyContent='center'>

@@ -15,7 +15,7 @@ import {
 import { useCollection } from '../../../../../core-hooks/Core';
 import { useList } from '../../../../../hooks/useAccessors';
 import useAsyncCallback from '../../../../../hooks/useAsyncCallback';
-import useHandleError from '../../../../../hooks/useHandleError';
+import useToast from '../../../../../hooks/useToast';
 import useSafeState from '../../../../../hooks/usSafeState';
 import DialogWithIrreversibleAction from '../../../../../ui-atoms/DialogWithIrreversibleAction';
 import Table, {
@@ -28,7 +28,7 @@ import PatchAdditionFromFilesDrawer from '../../../../drawers/PatchAdditionFromF
 import PatchTemplateEditorDrawer from '../../../../drawers/PatchTemplateEditorDrawer';
 
 export default function PatchesCollectionPage(): ReactElement {
-  const handleError = useHandleError();
+  const toast = useToast();
 
   const [isPatchAdditionDrawerVisible, setIsPatchAdditionDrawerVisible] =
     useSafeState(false);
@@ -45,10 +45,10 @@ export default function PatchesCollectionPage(): ReactElement {
   const handleDelete = useAsyncCallback(async () => {
     if (nameToDelete) {
       const error = await deletePatch(nameToDelete);
-      handleError(error, 'Failed to delete patch');
+      if (error) toast.failure('Failed to delete patch', error);
       return error;
     }
-  }, [handleError, nameToDelete, deletePatch]);
+  }, [toast, nameToDelete, deletePatch]);
 
   const [nameToEdit, setNameToEdit] = useState<string | undefined>();
   const editPatch = useEditPatchInCollection(collection);
@@ -56,11 +56,11 @@ export default function PatchesCollectionPage(): ReactElement {
     async (name: string) => {
       if (nameToEdit) {
         const error = await editPatch(nameToEdit, name);
-        handleError(error, 'Failed to edit patch');
+        if (error) toast.failure('Failed to edit patch', error);
         return error;
       }
     },
-    [handleError, nameToEdit, editPatch],
+    [toast, nameToEdit, editPatch],
   );
 
   const isDisabled =

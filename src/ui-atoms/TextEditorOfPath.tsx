@@ -1,6 +1,6 @@
-import * as Chakra from '@chakra-ui/react';
-import { useToast } from '@chakra-ui/react';
+import { Flex, HStack } from '@chakra-ui/react';
 import { ReactElement, useCallback } from 'react';
+import useToast from '../hooks/useToast';
 import { $Dialog } from '../utils/Dialog';
 import Button from './Button';
 import TextEditor from './TextEditor';
@@ -43,16 +43,13 @@ export default function TextEditorOfPath({
         onChange(pathOrError.value);
       }
     } else {
-      toast({
-        title: 'Failed to open dialog',
-        description: pathOrError.error.message,
-      });
+      toast.failure('Failed to browse path', pathOrError.error);
     }
   }, [onChange]);
 
   return (
-    <Chakra.HStack width='100%'>
-      <Chakra.Flex flex={1}>
+    <HStack width='100%'>
+      <Flex flex={1}>
         <TextEditor
           isDisabled={isDisabled}
           isInvalid={isInvalid}
@@ -63,13 +60,13 @@ export default function TextEditorOfPath({
           placeholder={placeholder}
           value={value}
         />
-      </Chakra.Flex>
+      </Flex>
       <Button
         label='...'
         isDisabled={isDisabled}
         onClick={handleBrowse}
         variant='outline'
       />
-    </Chakra.HStack>
+    </HStack>
   );
 }

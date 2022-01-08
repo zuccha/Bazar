@@ -6,7 +6,7 @@ import {
 } from '../../../../../core-hooks/Toolchain';
 import { ToolchainEmbedded } from '../../../../../core/Toolchain';
 import useAsyncCallback from '../../../../../hooks/useAsyncCallback';
-import useHandleError from '../../../../../hooks/useHandleError';
+import useToast from '../../../../../hooks/useToast';
 
 export default function useHandleEmbeddedTool({
   name,
@@ -19,7 +19,7 @@ export default function useHandleEmbeddedTool({
   uninstall: () => void;
   status: 'loading' | 'installed' | 'not-installed' | 'deprecated';
 } {
-  const handleError = useHandleError();
+  const toast = useToast();
 
   const toolchain = useToolchain();
   const tool = useGetEmbeddedTool(toolchain, key);
@@ -28,15 +28,15 @@ export default function useHandleEmbeddedTool({
 
   const handleInstall = useAsyncCallback(async () => {
     const error = await installTool();
-    handleError(error, `Failed to install ${name}`);
+    if (error) toast.failure(`Failed to install ${name}`, error);
     return error;
-  }, [handleError, name, installTool]);
+  }, [toast, name, installTool]);
 
   const handleUninstall = useAsyncCallback(async () => {
     const error = await uninstallTool();
-    handleError(error, `Failed to uninstall ${name}`);
+    if (error) toast.failure(`Failed to uninstall ${name}`, error);
     return error;
-  }, [handleError, name, uninstallTool]);
+  }, [toast, name, uninstallTool]);
 
   const status =
     handleInstall.isLoading || handleUninstall.isLoading

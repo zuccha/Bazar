@@ -1,22 +1,21 @@
 import { ArrowForwardIcon, DeleteIcon } from '@chakra-ui/icons';
 import { Flex } from '@chakra-ui/react';
-import { ReactElement, useCallback, useMemo, useState } from 'react';
+import { ReactElement, useMemo, useState } from 'react';
 import {
   useDeleteProjectBackup,
   useProjectBackups,
   useRestoreProjectBackup,
 } from '../../../../../../core-hooks/Project';
 import Project from '../../../../../../core/Project';
-import { useGet, useList } from '../../../../../../hooks/useAccessors';
+import { useList } from '../../../../../../hooks/useAccessors';
 import useAsyncCallback from '../../../../../../hooks/useAsyncCallback';
-import useHandleError from '../../../../../../hooks/useHandleError';
+import useToast from '../../../../../../hooks/useToast';
 import DialogWithIrreversibleAction from '../../../../../../ui-atoms/DialogWithIrreversibleAction';
 import Table, {
   TableAction,
   TableColumn,
   TableRow,
 } from '../../../../../../ui-atoms/Table';
-import { getter } from '../../../../../../utils/Accessors';
 import { $DateTime, DateTimeFormat } from '../../../../../../utils/DateTime';
 
 interface BackupsTabProps {
@@ -31,23 +30,23 @@ export default function BackupsTab({ project }: BackupsTabProps): ReactElement {
   const [backupToDelete, setBackupToDelete] = useState<string | undefined>();
   const [backupToRestore, setBackupToRestore] = useState<string | undefined>();
 
-  const handleError = useHandleError();
+  const toast = useToast();
 
   const handleDeleteBackup = useAsyncCallback(async () => {
     if (backupToDelete) {
       const error = await deleteBackup(backupToDelete);
-      handleError(error, 'Failed to delete backup');
+      if (error) toast.failure('Failed to delete backup', error);
       return error;
     }
-  }, [backupToDelete, handleError]);
+  }, [backupToDelete, toast]);
 
   const handleRestoreBackup = useAsyncCallback(async () => {
     if (backupToRestore) {
       const error = await restoreBackup(backupToRestore);
-      handleError(error, 'Failed to delete backup');
+      toast('Backup restored successfully', 'Failed to restore backup', error);
       return error;
     }
-  }, [backupToRestore]);
+  }, [backupToRestore, toast]);
 
   const isLoading =
     handleDeleteBackup.isLoading || handleRestoreBackup.isLoading;

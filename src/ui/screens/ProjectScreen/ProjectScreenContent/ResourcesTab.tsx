@@ -9,7 +9,7 @@ import { Flex, HStack, VStack } from '@chakra-ui/react';
 import { ReactElement, useCallback, useMemo } from 'react';
 import useAsyncCallback from '../../../../hooks/useAsyncCallback';
 import useCopyToClipboard from '../../../../hooks/useCopyToClipboard';
-import useHandleError from '../../../../hooks/useHandleError';
+import useToast from '../../../../hooks/useToast';
 import useSafeState from '../../../../hooks/usSafeState';
 import Button from '../../../../ui-atoms/Button';
 import DialogWithIrreversibleAction from '../../../../ui-atoms/DialogWithIrreversibleAction';
@@ -83,7 +83,7 @@ export default function ResourcesTab<R extends Resource>({
   columns,
   rows,
 }: ResourcesTabProps<R>): ReactElement {
-  const handleError = useHandleError();
+  const toast = useToast();
 
   const [outputChunks, setOutputChunks] = useSafeState<OutputChunk[]>([]);
   const handleClearOutput = useCallback(() => setOutputChunks([]), []);
@@ -164,14 +164,14 @@ export default function ResourcesTab<R extends Resource>({
       if (!canApply) {
         const errorMessage = `Cannot apply ${name}`;
         const error = ErrorReport.from(errorMessage);
-        handleError(error, `Failed to apply ${name}`);
+        if (error) toast.failure(`Failed to apply ${name}`, error);
         return error;
       }
 
       const newOutputChunks = await apply(resource);
       setOutputChunks(newOutputChunks);
     },
-    [apply, canApply, handleError],
+    [apply, canApply, toast],
   );
 
   const handleApplyAll = useAsyncCallback(async (): Promise<
@@ -180,7 +180,7 @@ export default function ResourcesTab<R extends Resource>({
     if (!canApply) {
       const errorMessage = `Cannot apply ${name}`;
       const error = ErrorReport.from(errorMessage);
-      handleError(error, `Failed to apply ${name}`);
+      if (error) toast.failure(`Failed to apply ${name}`, error);
       return error;
     }
 
@@ -189,22 +189,22 @@ export default function ResourcesTab<R extends Resource>({
       newOutputChunks.push(...(await apply(resource)));
     }
     setOutputChunks(newOutputChunks);
-  }, [apply, canApply, handleError, resources]);
+  }, [apply, canApply, toast, resources]);
 
   const handleOpenInEditor = useAsyncCallback(
     async (resource: R): Promise<ErrorReport | undefined> => {
       if (!canOpenInEditor) {
         const errorMessage = `Cannot open ${name} in editor`;
         const error = ErrorReport.from(errorMessage);
-        handleError(error, `Failed to open ${name} in editor`);
+        if (error) toast.failure(`Failed to open ${name} in editor`, error);
         return error;
       }
 
-      const maybeError = await onOpenInEditor(resource);
-      handleError(maybeError, `Failed to open ${name} in editor`);
-      return maybeError;
+      const error = await onOpenInEditor(resource);
+      if (error) toast.failure(`Failed to open ${name} in editor`, error);
+      return error;
     },
-    [onOpenInEditor, canOpenInEditor, handleError],
+    [onOpenInEditor, canOpenInEditor, toast],
   );
 
   const handleRemove = useAsyncCallback(
@@ -212,15 +212,15 @@ export default function ResourcesTab<R extends Resource>({
       if (!canRemove) {
         const errorMessage = `Cannot remove ${name}`;
         const error = ErrorReport.from(errorMessage);
-        handleError(error, `Failed to remove ${name}`);
+        if (error) toast.failure(`Failed to remove ${name}`, error);
         return error;
       }
 
-      const maybeError = await onRemove(resource);
-      handleError(maybeError, `Failed to remove ${name}`);
-      return maybeError;
+      const error = await onRemove(resource);
+      if (error) toast.failure(`Failed to remove ${name}`, error);
+      return error;
     },
-    [onRemove, canRemove, handleError],
+    [onRemove, canRemove, toast],
   );
 
   const isApplying = handleApply.isLoading || handleApplyAll.isLoading;

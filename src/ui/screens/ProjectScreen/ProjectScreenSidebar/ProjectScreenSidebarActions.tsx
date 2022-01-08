@@ -1,4 +1,4 @@
-import { useToast, VStack } from '@chakra-ui/react';
+import { VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 import { useAddProjectSnapshotToCollection } from '../../../../core-hooks/Collection';
 import { useCollection, useToolchain } from '../../../../core-hooks/Core';
@@ -17,9 +17,9 @@ import {
 import Project from '../../../../core/Project';
 import ProjectTemplateAdditionDrawer from '../../../drawers/ProjectTemplateAdditionDrawer';
 import useAsyncCallback from '../../../../hooks/useAsyncCallback';
-import useHandleError from '../../../../hooks/useHandleError';
 import useSafeState from '../../../../hooks/usSafeState';
 import Button from '../../../../ui-atoms/Button';
+import useToast from '../../../../hooks/useToast';
 
 interface ProjectScreenSidebarActionsProps {
   project: Project;
@@ -28,7 +28,6 @@ interface ProjectScreenSidebarActionsProps {
 export default function ProjectScreenSidebarActions({
   project,
 }: ProjectScreenSidebarActionsProps): ReactElement {
-  const handleError = useHandleError();
   const toast = useToast();
 
   const [
@@ -44,36 +43,38 @@ export default function ProjectScreenSidebarActions({
   const openInLunarMagic = useOpenProjectSnapshotInLunarMagic(snapshot);
   const handleOpenInLunarMagic = useAsyncCallback(async () => {
     const error = await openInLunarMagic(toolchain);
-    handleError(error, 'Failed to open in Lunar Magic');
+    if (error) toast.failure('Failed to open in Lunar Magic', error);
     return error;
-  }, [toolchain, openInLunarMagic, handleError]);
+  }, [toolchain, openInLunarMagic, toast]);
 
   const emulator = useGetCustomTool(toolchain, 'emulator');
   const launchInEmulator = useLaunchProjectSnapshotInEmulator(snapshot);
   const handleLaunchInEmulator = useAsyncCallback(async () => {
     const error = await launchInEmulator(toolchain);
-    handleError(error, 'Failed to run emulator');
+    if (error) toast.failure('Failed to launch in emulator', error);
     return error;
-  }, [toolchain, launchInEmulator, handleError]);
+  }, [toolchain, launchInEmulator, toast]);
 
   const createBackup = useCreateProjectBackup(project);
   const handleCreateBackup = useAsyncCallback(async () => {
     const error = await createBackup();
-    if (error) handleError(error, 'Failed to create backup');
-    else toast({ title: 'Backup created!', status: 'success' });
+    toast('Backup created!', 'Failed to create backup', error);
     return error;
-  }, [createBackup, handleError, toast]);
+  }, [createBackup, toast]);
 
   const addProjectSnapshotToCollection =
     useAddProjectSnapshotToCollection(collection);
   const handleAddProjectSnapshotToCollection = useAsyncCallback(
     async (name: string) => {
       const error = await addProjectSnapshotToCollection(name, snapshot);
-      if (error) handleError(error, 'Failed to add project to collection');
-      else toast({ title: 'Project saved as template', status: 'success' });
+      toast(
+        'Project saved as template',
+        'Failed to add project to collection',
+        error,
+      );
       return error;
     },
-    [snapshot, addProjectSnapshotToCollection, handleError, toast],
+    [snapshot, addProjectSnapshotToCollection, toast],
   );
 
   return (

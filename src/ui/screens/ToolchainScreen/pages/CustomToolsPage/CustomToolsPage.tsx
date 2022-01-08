@@ -6,7 +6,7 @@ import {
   useGetCustomTool,
 } from '../../../../../core-hooks/Toolchain';
 import useAsyncCallback from '../../../../../hooks/useAsyncCallback';
-import useHandleError from '../../../../../hooks/useHandleError';
+import useToast from '../../../../../hooks/useToast';
 import CustomToolItem from './CustomToolItem';
 
 export default function ToolchainScreen(): ReactElement {
@@ -18,24 +18,24 @@ export default function ToolchainScreen(): ReactElement {
   const editEditor = useEditCustomTool(toolchain, 'editor');
   const editEmulator = useEditCustomTool(toolchain, 'emulator');
 
-  const handleError = useHandleError();
+  const toast = useToast();
 
   const handleEditEditor = useAsyncCallback(
     async (exePath: string) => {
-      const maybeError = await editEditor(exePath);
-      handleError(maybeError, 'Failed to edit editor');
-      return maybeError;
+      const error = await editEditor(exePath);
+      if (error) toast.failure('Failed to edit editor', error);
+      return error;
     },
-    [editEditor, handleError],
+    [editEditor, toast],
   );
 
   const handleEditEmulator = useAsyncCallback(
     async (exePath: string) => {
-      const maybeError = await editEmulator(exePath);
-      handleError(maybeError, 'Failed to edit emulator');
-      return maybeError;
+      const error = await editEmulator(exePath);
+      if (error) toast.failure('Failed to edit emulator', error);
+      return error;
     },
-    [editEmulator, handleError],
+    [editEmulator, toast],
   );
 
   return (

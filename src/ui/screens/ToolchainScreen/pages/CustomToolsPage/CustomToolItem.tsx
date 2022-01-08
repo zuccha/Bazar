@@ -1,7 +1,6 @@
 import { Flex, Heading, Text } from '@chakra-ui/react';
 import { ReactElement, useCallback } from 'react';
 import useAsyncCallback from '../../../../../hooks/useAsyncCallback';
-import useHandleError from '../../../../../hooks/useHandleError';
 import FormControl from '../../../../../ui-atoms/FormControl';
 import TextEditorOfPath from '../../../../../ui-atoms/TextEditorOfPath';
 
@@ -20,14 +19,12 @@ export default function CustomToolItem({
   name,
   onChoose,
 }: CustomToolItemProps): ReactElement {
-  const handleError = useHandleError();
-
   const handleBrowse = useAsyncCallback(
     async (value: string) => {
       onChoose(value);
       return undefined;
     },
-    [onChoose, handleError],
+    [onChoose],
   );
 
   const handleClear = useCallback(() => {
