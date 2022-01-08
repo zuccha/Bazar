@@ -21,6 +21,7 @@ const PatchesTabInfoWithPatch = ({
   return (
     <PatchInfoForm
       directoryPath={directoryPath}
+      isSuccinct
       onSubmit={updatePatchInfo}
       info={patchInfo}
     />
