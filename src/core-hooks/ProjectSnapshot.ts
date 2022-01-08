@@ -1,3 +1,4 @@
+import Collection from '../core/Collection';
 import Patch from '../core/Patch';
 import ProjectSnapshot, { ProjectSnapshotInfo } from '../core/ProjectSnapshot';
 import Toolchain from '../core/Toolchain';
@@ -44,6 +45,12 @@ export const useAddPatchToProjectSnapshotFromFile = (
   snapshot: ProjectSnapshot,
 ) => {
   return useSetAsync(snapshot, snapshot.addPatchFromFile);
+};
+
+export const useAddPatchToProjectSnapshotFromTemplate = (
+  snapshot: ProjectSnapshot,
+) => {
+  return useSetAsync(snapshot, snapshot.addPatchFromTemplate);
 };
 
 export const useRemovePatchFromProjectSnapshot = (

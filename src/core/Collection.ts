@@ -184,6 +184,20 @@ export default class Collection {
 
   // #region Patches
 
+  getPatchPath = getter(
+    ['directoryPath', 'patchNames'],
+    async (name: string): Promise<string> => {
+      if (!this._patchNames.includes(name)) {
+        return '';
+      }
+      return await $FileSystem.join(
+        this._directoryPath,
+        Collection.PATCHES_DIR_NAME,
+        name,
+      );
+    },
+  );
+
   getPatchNames = getter(['patchNames'], (): string[] => {
     return this._patchNames;
   });

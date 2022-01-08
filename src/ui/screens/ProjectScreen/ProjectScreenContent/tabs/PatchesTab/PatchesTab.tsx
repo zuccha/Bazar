@@ -4,6 +4,7 @@ import { useCollection, useToolchain } from '../../../../../../core-hooks/Core';
 import {
   useAddPatchToProjectSnapshotFromDirectory,
   useAddPatchToProjectSnapshotFromFile,
+  useAddPatchToProjectSnapshotFromTemplate,
   useProjectSnapshotPatches,
   useRemovePatchFromProjectSnapshot,
 } from '../../../../../../core-hooks/ProjectSnapshot';
@@ -15,6 +16,7 @@ import { TableColumn, TableRow } from '../../../../../../ui-atoms/Table';
 import { $EitherErrorOr } from '../../../../../../utils/EitherErrorOr';
 import { $ErrorReport } from '../../../../../../utils/ErrorReport';
 import PatchAdditionFromFilesDrawer from '../../../../../drawers/PatchAdditionFromFilesDrawer';
+import PatchAdditionFromTemplateDrawer from '../../../../../drawers/PatchAdditionFromTemplateDrawer';
 import PatchTemplateAdditionDrawer from '../../../../../drawers/PatchTemplateAdditionDrawer';
 import ResourcesTab from '../../ResourcesTab';
 import PatchesTabInfo from './PatchesTabInfo';
@@ -35,6 +37,8 @@ export default function PatchesTab({
     useAddPatchToProjectSnapshotFromFile(projectSnapshot);
   const addPatchFromDirectory =
     useAddPatchToProjectSnapshotFromDirectory(projectSnapshot);
+  const addPatchFromTemplate =
+    useAddPatchToProjectSnapshotFromTemplate(projectSnapshot);
 
   const handleApplyPatch = useCallback(
     async (patch: Patch) => {
@@ -77,11 +81,17 @@ export default function PatchesTab({
       onOpenInEditor={() => Promise.resolve(undefined)}
       onRemove={handleRemovePatch}
       renderInfo={(patch) => <PatchesTabInfo patch={patch} />}
-      renderResourceAdditionDrawer={({ onClose }) => (
+      renderResourceAdditionFromFilesDrawer={({ onClose }) => (
         <PatchAdditionFromFilesDrawer
           onClose={onClose}
           onAddFromDirectory={addPatchFromDirectory}
           onAddFromFile={addPatchFromFile}
+        />
+      )}
+      renderResourceAdditionFromTemplateDrawer={({ onClose }) => (
+        <PatchAdditionFromTemplateDrawer
+          onClose={onClose}
+          onAdd={(name) => addPatchFromTemplate(name, collection)}
         />
       )}
       renderResourceSaveAsTemplateDrawer={({ onClose, resource }) => (

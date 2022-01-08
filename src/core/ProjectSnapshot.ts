@@ -5,6 +5,7 @@ import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
 import { $ErrorReport, ErrorReport } from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
 import { $Shell, Process } from '../utils/Shell';
+import Collection from './Collection';
 import Patch from './Patch';
 import Resource, { ResourceFields } from './Resource';
 import Toolchain from './Toolchain';
@@ -247,6 +248,46 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
       );
       if (patchOrError.isError) {
         const errorMessage = `${errorPrefix}: failed to create patch "${name}"`;
+        return patchOrError.error.extend(errorMessage);
+      }
+
+      this.patches.push(patchOrError.value);
+    },
+  );
+
+  addPatchFromTemplate = setter(
+    ['patches'],
+    async (
+      name: string,
+      collection: Collection,
+    ): Promise<ErrorReport | undefined> => {
+      let error: ErrorReport | undefined;
+      const errorPrefix = `${this.TypeName}.addPatchFromFile`;
+
+      const templatePath = await collection.getPatchPath(name);
+      const patchPath = await this.getSubPath(
+        ProjectSnapshot.PATCHES_DIR_NAME,
+        name,
+      );
+
+      if (patchPath === '') {
+        const errorMessage = `${errorPrefix}: patch with name "${name}" was not found`;
+        return $ErrorReport.make(errorMessage);
+      }
+
+      if ((error = await $FileSystem.validateNotExists(patchPath))) {
+        const errorMessage = `${errorPrefix}: a patch named "${name}" already exists`;
+        return error.extend(errorMessage);
+      }
+
+      if ((error = await $FileSystem.copyDirectory(templatePath, patchPath))) {
+        const errorMessage = `${errorPrefix}: failed to copy template patch "${name}"`;
+        return error.extend(errorMessage);
+      }
+
+      const patchOrError = await Patch.open(patchPath);
+      if (patchOrError.isError) {
+        const errorMessage = `${errorPrefix}: failed to open patch "${name}"`;
         return patchOrError.error.extend(errorMessage);
       }
 

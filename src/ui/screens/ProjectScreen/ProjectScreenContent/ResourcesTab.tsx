@@ -47,7 +47,10 @@ interface ResourcesTabProps<R extends Resource> {
   onOpenInEditor: (resource: R) => Promise<ErrorReport | undefined>;
 
   renderInfo: (resource: R | undefined) => ReactElement;
-  renderResourceAdditionDrawer: (params: {
+  renderResourceAdditionFromFilesDrawer: (params: {
+    onClose: () => void;
+  }) => ReactElement;
+  renderResourceAdditionFromTemplateDrawer: (params: {
     onClose: () => void;
   }) => ReactElement;
   renderResourceSaveAsTemplateDrawer: (params: {
@@ -73,7 +76,8 @@ export default function ResourcesTab<R extends Resource>({
   onRemove,
 
   renderInfo,
-  renderResourceAdditionDrawer,
+  renderResourceAdditionFromFilesDrawer,
+  renderResourceAdditionFromTemplateDrawer,
   renderResourceSaveAsTemplateDrawer,
 
   columns,
@@ -96,8 +100,15 @@ export default function ResourcesTab<R extends Resource>({
     number | undefined
   >(undefined);
 
-  const [isResourceAdditionDrawerVisible, setIsResourceAdditionDrawerVisible] =
-    useSafeState(false);
+  const [
+    isResourceAdditionFromFilesDrawerVisible,
+    setIsResourceAdditionFromFilesDrawerVisible,
+  ] = useSafeState(false);
+
+  const [
+    isResourceAdditionFromTemplateDrawerVisible,
+    setIsResourceAdditionFromTemplateDrawerVisible,
+  ] = useSafeState(false);
 
   const apply = useCallback(
     async (resource: R): Promise<OutputChunk[]> => {
@@ -277,8 +288,14 @@ export default function ResourcesTab<R extends Resource>({
               isDisabled={!canApply || isApplying || !rows.length}
             />
             <Button
-              label='Add'
-              onClick={() => setIsResourceAdditionDrawerVisible(true)}
+              label='Add new'
+              onClick={() => setIsResourceAdditionFromFilesDrawerVisible(true)}
+            />
+            <Button
+              label='Add from template'
+              onClick={() =>
+                setIsResourceAdditionFromTemplateDrawerVisible(true)
+              }
             />
           </HStack>
         </VStack>
@@ -329,9 +346,14 @@ export default function ResourcesTab<R extends Resource>({
         </VStack>
       </HStack>
 
-      {isResourceAdditionDrawerVisible &&
-        renderResourceAdditionDrawer({
-          onClose: () => setIsResourceAdditionDrawerVisible(false),
+      {isResourceAdditionFromFilesDrawerVisible &&
+        renderResourceAdditionFromFilesDrawer({
+          onClose: () => setIsResourceAdditionFromFilesDrawerVisible(false),
+        })}
+
+      {isResourceAdditionFromTemplateDrawerVisible &&
+        renderResourceAdditionFromTemplateDrawer({
+          onClose: () => setIsResourceAdditionFromTemplateDrawerVisible(false),
         })}
 
       {!!resourceToRemove && (
