@@ -2,7 +2,7 @@ import { getter, setter } from '../utils/Accessors';
 import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
 import ErrorReport from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
-import Patch from './Patch';
+import Patch, { PatchInfo } from './Patch';
 import ProjectSnapshot from './ProjectSnapshot';
 
 export default class Collection {
@@ -237,32 +237,24 @@ export default class Collection {
 
   addPatchFromDirectory = setter(
     ['patchNames'],
-    async ({
-      name,
-      author,
-      version,
-      sourceDirPath,
-      mainFileRelativePath,
-    }: {
-      name: string;
-      author: string;
-      version: string;
-      sourceDirPath: string;
-      mainFileRelativePath: string;
-    }): Promise<ErrorReport | undefined> => {
+    async (
+      sourceDirectoryPath: string,
+      info: PatchInfo,
+    ): Promise<ErrorReport | undefined> => {
       const errorPrefix = `Collection.addPatchFromDirectory`;
 
-      if (this._patchNames.some((patchName) => patchName === name)) {
-        const errorMessage = `${errorPrefix}: patch with name "${name}" already exists`;
+      if (this._patchNames.some((patchName) => patchName === info.name)) {
+        const errorMessage = `${errorPrefix}: patch with name "${info.name}" already exists`;
         return ErrorReport.from(errorMessage);
       }
 
       const patchOrError = await Patch.createFromDirectory(
         await this.getSubPath(Collection.PATCHES_DIR_NAME),
-        { name, author, version, sourceDirPath, mainFileRelativePath },
+        sourceDirectoryPath,
+        info,
       );
       if (patchOrError.isError) {
-        const errorMessage = `${errorPrefix}: failed to create patch "${name}"`;
+        const errorMessage = `${errorPrefix}: failed to create patch "${info.name}"`;
         return patchOrError.error.extend(errorMessage);
       }
 
@@ -272,30 +264,24 @@ export default class Collection {
 
   addPatchFromFile = setter(
     ['patches'],
-    async ({
-      name,
-      author,
-      version,
-      filePath,
-    }: {
-      name: string;
-      author: string;
-      version: string;
-      filePath: string;
-    }): Promise<ErrorReport | undefined> => {
+    async (
+      sourceDirectoryPath: string,
+      info: PatchInfo,
+    ): Promise<ErrorReport | undefined> => {
       const errorPrefix = `Collection.addPatchFromFile`;
 
-      if (this._patchNames.some((patchName) => patchName === name)) {
-        const errorMessage = `${errorPrefix}: patch with name "${name}" already exists`;
+      if (this._patchNames.some((patchName) => patchName === info.name)) {
+        const errorMessage = `${errorPrefix}: patch with name "${info.name}" already exists`;
         return ErrorReport.from(errorMessage);
       }
 
       const patchOrError = await Patch.createFromFile(
         await this.getSubPath(Collection.PATCHES_DIR_NAME),
-        { name, author, version, filePath },
+        sourceDirectoryPath,
+        info,
       );
       if (patchOrError.isError) {
-        const errorMessage = `${errorPrefix}: failed to create patch "${name}"`;
+        const errorMessage = `${errorPrefix}: failed to create patch "${info.name}"`;
         return patchOrError.error.extend(errorMessage);
       }
 
@@ -305,7 +291,7 @@ export default class Collection {
 
   addPatchFromExisting = setter(
     ['patchNames'],
-    async (patch: Patch): Promise<ErrorReport | undefined> => {
+    async (patch: Patch, info: PatchInfo): Promise<ErrorReport | undefined> => {
       const errorPrefix = 'Collection.addPatchFromExisting';
       let error: ErrorReport | undefined;
 
@@ -324,6 +310,8 @@ export default class Collection {
         const errorMessage = `${errorPrefix}: failed to save patch as template`;
         return error.extend(errorMessage);
       }
+
+      // TODO: Update patch info.
 
       this._patchNames.push(patch.getInfo().name);
     },

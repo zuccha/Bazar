@@ -5,8 +5,7 @@ import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
 import ErrorReport from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
 import { $Shell, Process } from '../utils/Shell';
-import Collection from './Collection';
-import Patch from './Patch';
+import Patch, { PatchInfo } from './Patch';
 import Resource, { ResourceFields } from './Resource';
 import Toolchain from './Toolchain';
 
@@ -189,29 +188,21 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
 
   addPatchFromDirectory = setter(
     ['patches'],
-    async ({
-      name,
-      author,
-      version,
-      sourceDirPath,
-      mainFileRelativePath,
-    }: {
-      name: string;
-      author: string;
-      version: string;
-      sourceDirPath: string;
-      mainFileRelativePath: string;
-    }): Promise<ErrorReport | undefined> => {
+    async (
+      sourceDirectoryPath: string,
+      info: PatchInfo,
+    ): Promise<ErrorReport | undefined> => {
       const errorPrefix = `${this.TypeName}.addPatchFromDirectory`;
 
-      if (this.patches.some((patch) => patch.getInfo().name === name)) {
-        const errorMessage = `${errorPrefix}: patch with name "${name}" already exists`;
+      if (this.patches.some((patch) => patch.getInfo().name === info.name)) {
+        const errorMessage = `${errorPrefix}: patch with name "${info.name}" already exists`;
         return ErrorReport.from(errorMessage);
       }
 
       const patchOrError = await Patch.createFromDirectory(
         await this.getSubPath(ProjectSnapshot.PATCHES_DIR_NAME),
-        { name, author, version, sourceDirPath, mainFileRelativePath },
+        sourceDirectoryPath,
+        info,
       );
       if (patchOrError.isError) {
         const errorMessage = `${errorPrefix}: failed to create patch "${name}"`;
@@ -224,27 +215,21 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
 
   addPatchFromFile = setter(
     ['patches'],
-    async ({
-      name,
-      author,
-      version,
-      filePath,
-    }: {
-      name: string;
-      author: string;
-      version: string;
-      filePath: string;
-    }): Promise<ErrorReport | undefined> => {
+    async (
+      sourceDirectoryPath: string,
+      info: PatchInfo,
+    ): Promise<ErrorReport | undefined> => {
       const errorPrefix = `${this.TypeName}.addPatchFromFile`;
 
-      if (this.patches.some((patch) => patch.getInfo().name === name)) {
-        const errorMessage = `${errorPrefix}: patch with name "${name}" already exists`;
+      if (this.patches.some((patch) => patch.getInfo().name === info.name)) {
+        const errorMessage = `${errorPrefix}: patch with name "${info.name}" already exists`;
         return ErrorReport.from(errorMessage);
       }
 
       const patchOrError = await Patch.createFromFile(
         await this.getSubPath(ProjectSnapshot.PATCHES_DIR_NAME),
-        { name, author, version, filePath },
+        sourceDirectoryPath,
+        info,
       );
       if (patchOrError.isError) {
         const errorMessage = `${errorPrefix}: failed to create patch "${name}"`;
@@ -255,16 +240,14 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
     },
   );
 
-  addPatchFromTemplate = setter(
+  addPatchFromExisting = setter(
     ['patches'],
-    async (
-      name: string,
-      collection: Collection,
-    ): Promise<ErrorReport | undefined> => {
+    async (patch: Patch, info: PatchInfo): Promise<ErrorReport | undefined> => {
       let error: ErrorReport | undefined;
       const errorPrefix = `${this.TypeName}.addPatchFromFile`;
 
-      const templatePath = await collection.getPatchPath(name);
+      const name = patch.getInfo().name;
+
       const patchPath = await this.getSubPath(
         ProjectSnapshot.PATCHES_DIR_NAME,
         name,
@@ -280,7 +263,9 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
         return error.extend(errorMessage);
       }
 
-      if ((error = await $FileSystem.copyDirectory(templatePath, patchPath))) {
+      if (
+        (error = await $FileSystem.copyDirectory(patch.getPath(), patchPath))
+      ) {
         const errorMessage = `${errorPrefix}: failed to copy template patch "${name}"`;
         return error.extend(errorMessage);
       }
@@ -290,6 +275,8 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
         const errorMessage = `${errorPrefix}: failed to open patch "${name}"`;
         return patchOrError.error.extend(errorMessage);
       }
+
+      // TODO: Update patch info.
 
       this.patches.push(patchOrError.value);
     },

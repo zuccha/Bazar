@@ -1,6 +1,6 @@
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import Collection from '../core/Collection';
-import Patch from '../core/Patch';
+import Patch, { PatchInfo } from '../core/Patch';
 import ProjectSnapshot from '../core/ProjectSnapshot';
 import { useGet, useGetAsync, useSetAsync } from '../hooks/useAccessors';
 import { AsyncResponse } from '../utils/Accessors';
@@ -72,7 +72,7 @@ export const useAddPatchToCollectionFromFile = (collection: Collection) => {
 
 export const useAddPatchToCollectionFromExisting = (
   collection: Collection,
-): ((patch: Patch) => Promise<ErrorReport | undefined>) => {
+): ((patch: Patch, info: PatchInfo) => Promise<ErrorReport | undefined>) => {
   return useSetAsync(collection, collection.addPatchFromExisting);
 };
 

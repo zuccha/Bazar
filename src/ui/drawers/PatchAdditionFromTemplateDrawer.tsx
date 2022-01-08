@@ -5,7 +5,7 @@ import {
   useCollectionPatchNames,
 } from '../../core-hooks/Collection';
 import { useCollection } from '../../core-hooks/Core';
-import Patch from '../../core/Patch';
+import Patch, { PatchInfo } from '../../core/Patch';
 import { useList } from '../../hooks/useAccessors';
 import useForm from '../../hooks/useForm';
 import useFormField from '../../hooks/useFormField';
@@ -19,7 +19,7 @@ import { PatchInfoFields, usePatchInfoFields } from '../forms/PatchInfoForm';
 
 interface PatchAdditionDrawerProps {
   onClose: () => void;
-  onAdd: (name: string) => Promise<ErrorReport | undefined>;
+  onAdd: (name: string, info: PatchInfo) => Promise<ErrorReport | undefined>;
 }
 
 export default function PatchAdditionFromTemplateDrawer({
@@ -48,7 +48,13 @@ export default function PatchAdditionFromTemplateDrawer({
 
   const form = useForm({
     fields: [templateNameField],
-    onSubmit: () => onAdd(templateNameField.value),
+    onSubmit: () =>
+      onAdd(templateNameField.value, {
+        name: infoFields.nameField.value.trim(),
+        version: infoFields.versionField.value.trim(),
+        author: infoFields.authorField.value.trim(),
+        mainFileRelativePath: infoFields.mainFileRelativePathField.value.trim(),
+      }),
   });
 
   const templateNameOptions = useList(patchNames).map((patchName) => ({

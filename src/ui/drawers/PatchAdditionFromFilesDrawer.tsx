@@ -1,5 +1,6 @@
 import { Flex, HStack, VStack } from '@chakra-ui/react';
 import { ReactElement, useState } from 'react';
+import { PatchInfo } from '../../core/Patch';
 import useForm from '../../hooks/useForm';
 import useFormField from '../../hooks/useFormField';
 import Button from '../../ui-atoms/Button';
@@ -16,19 +17,14 @@ type Source = 'file' | 'directory';
 
 interface PatchAdditionFromFilesDrawerProps {
   onClose: () => void;
-  onAddFromDirectory: (args: {
-    name: string;
-    author: string;
-    version: string;
-    sourceDirPath: string;
-    mainFileRelativePath: string;
-  }) => Promise<ErrorReport | undefined>;
-  onAddFromFile: (args: {
-    name: string;
-    author: string;
-    version: string;
-    filePath: string;
-  }) => Promise<ErrorReport | undefined>;
+  onAddFromDirectory: (
+    sourceDirectoryPath: string,
+    info: PatchInfo,
+  ) => Promise<ErrorReport | undefined>;
+  onAddFromFile: (
+    sourceDirectoryPath: string,
+    info: PatchInfo,
+  ) => Promise<ErrorReport | undefined>;
 }
 
 export default function PatchAdditionFromFilesDrawer({
@@ -87,22 +83,25 @@ export default function PatchAdditionFromFilesDrawer({
     {
       file: {
         fields: [nameField, singleFilePathField],
-        onSubmit: () =>
-          onAddFromFile({
+        onSubmit: () => {
+          const singleFilePath = singleFilePathField.value.trim();
+          const sourceDirectoryPath = $FileSystem.dirpath(singleFilePath);
+          const mainFileRelativePath = $FileSystem.basename(singleFilePath);
+          return onAddFromFile(sourceDirectoryPath, {
             name: nameField.value.trim(),
             author: authorField.value.trim(),
             version: versionField.value.trim(),
-            filePath: singleFilePathField.value.trim(),
-          }),
+            mainFileRelativePath,
+          });
+        },
       },
       directory: {
         fields: [nameField, mainFileRelativePathField, sourceDirPathField],
         onSubmit: () =>
-          onAddFromDirectory({
+          onAddFromDirectory(sourceDirPathField.value.trim(), {
             name: nameField.value.trim(),
             author: authorField.value.trim(),
             version: versionField.value.trim(),
-            sourceDirPath: sourceDirPathField.value.trim(),
             mainFileRelativePath: mainFileRelativePathField.value.trim(),
           }),
       },

@@ -51,7 +51,7 @@ export default function PatchesTab({
 
   const handleRemovePatch = useRemovePatchFromProjectSnapshot(projectSnapshot);
 
-  const addPatchFromExisting = useAddPatchToCollectionFromExisting(collection);
+  const saveAsTemplate = useAddPatchToCollectionFromExisting(collection);
 
   const columns: TableColumn<Patch>[] = useMemo(() => {
     return [
@@ -91,14 +91,19 @@ export default function PatchesTab({
       renderResourceAdditionFromTemplateDrawer={({ onClose }) => (
         <PatchAdditionFromTemplateDrawer
           onClose={onClose}
-          onAdd={(name) => addPatchFromTemplate(name, collection)}
+          onAdd={async (name, info) => {
+            const errorOrPatch = await collection.getPatch(name);
+            return errorOrPatch.isError
+              ? errorOrPatch.error
+              : addPatchFromTemplate(errorOrPatch.value, info);
+          }}
         />
       )}
       renderResourceSaveAsTemplateDrawer={({ onClose, resource }) => (
         <PatchTemplateAdditionDrawer
           patch={resource}
           onClose={onClose}
-          onAdd={() => addPatchFromExisting(resource)}
+          onAdd={(info) => saveAsTemplate(resource, info)}
         />
       )}
       columns={columns}

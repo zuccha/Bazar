@@ -30,33 +30,22 @@ export default class Patch extends Resource<PatchInfo> {
 
   static async createFromDirectory(
     directoryPath: string,
-    {
-      name,
-      author,
-      version,
-      sourceDirPath,
-      mainFileRelativePath,
-    }: {
-      name: string;
-      author: string;
-      version: string;
-      sourceDirPath: string;
-      mainFileRelativePath: string;
-    },
+    sourceDirectoryPath: string,
+    info: PatchInfo,
   ): Promise<EitherErrorOr<Patch>> {
     const errorPrefix = 'Patch.createFromDirectory';
     let error: ErrorReport | undefined;
 
     // Source directory
-    if ((error = await $FileSystem.validateExistsDir(sourceDirPath))) {
+    if ((error = await $FileSystem.validateExistsDir(sourceDirectoryPath))) {
       const errorMessage = `${errorPrefix}: source directory does not exist`;
       return $EitherErrorOr.error(error.extend(errorMessage));
     }
 
     // Main file
     const mainFilePath = await $FileSystem.join(
-      sourceDirPath,
-      mainFileRelativePath,
+      sourceDirectoryPath,
+      info.mainFileRelativePath,
     );
     if ((error = await $FileSystem.validateExistsFile(mainFilePath))) {
       const errorMessage = `${errorPrefix}: main file does not exist`;
@@ -66,7 +55,7 @@ export default class Patch extends Resource<PatchInfo> {
     // Main file in source directory
     if (
       (error = await $FileSystem.validateContainsFile(
-        sourceDirPath,
+        sourceDirectoryPath,
         mainFilePath,
       ))
     ) {
@@ -75,7 +64,7 @@ export default class Patch extends Resource<PatchInfo> {
     }
 
     // Resource
-    const info = { name, author, version, mainFileRelativePath };
+    const name = info.name;
     const patch = new Patch({ directoryPath, name, info });
     if ((error = await patch.save())) {
       const errorMessage = `${errorPrefix}: failed to create resource`;
@@ -84,7 +73,10 @@ export default class Patch extends Resource<PatchInfo> {
 
     // Copy files
     if (
-      (error = await $FileSystem.copyDirectory(sourceDirPath, patch.getPath()))
+      (error = await $FileSystem.copyDirectory(
+        sourceDirectoryPath,
+        patch.getPath(),
+      ))
     ) {
       patch.delete();
       const errorMessage = `${errorPrefix}: failed to copy patch files`;
@@ -97,30 +89,25 @@ export default class Patch extends Resource<PatchInfo> {
 
   static async createFromFile(
     directoryPath: string,
-    {
-      name,
-      author,
-      version,
-      filePath,
-    }: {
-      name: string;
-      author: string;
-      version: string;
-      filePath: string;
-    },
+    sourceDirectoryPath: string,
+    info: PatchInfo,
   ): Promise<EitherErrorOr<Patch>> {
     const errorPrefix = 'Patch.createFromFile';
     let error: ErrorReport | undefined;
 
+    const name = info.name;
+    const sourceFilePath = await $FileSystem.join(
+      sourceDirectoryPath,
+      info.mainFileRelativePath,
+    );
+
     // Main file
-    if ((error = await $FileSystem.validateExistsFile(filePath))) {
+    if ((error = await $FileSystem.validateExistsFile(sourceFilePath))) {
       const errorMessage = `${errorPrefix}: file does not exist`;
       return $EitherErrorOr.error(error.extend(errorMessage));
     }
 
     // Resource
-    const mainFileRelativePath = $FileSystem.basename(filePath);
-    const info = { name, author, version, mainFileRelativePath };
     const patch = new Patch({ directoryPath, name, info });
     if ((error = await patch.save())) {
       const errorMessage = `${errorPrefix}: failed to create resource`;
@@ -128,8 +115,8 @@ export default class Patch extends Resource<PatchInfo> {
     }
 
     // Copy main file
-    const mainFilePath = await patch.getSubPath(mainFileRelativePath);
-    if ((error = await $FileSystem.copyFile(filePath, mainFilePath))) {
+    const mainFilePath = await patch.getMainFilePath();
+    if ((error = await $FileSystem.copyFile(sourceFilePath, mainFilePath))) {
       await patch.delete();
       const errorMessage = `${errorPrefix}: failed to copy patch file`;
       return $EitherErrorOr.error(error.extend(errorMessage));
