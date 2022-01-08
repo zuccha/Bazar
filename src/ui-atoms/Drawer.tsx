@@ -42,7 +42,7 @@ export default function Drawer({
             {children}
           </Flex>
           <Flex flex={1} />
-          <Chakra.VStack>
+          <Chakra.VStack mt={4}>
             {info && <Alert status='info'>{info}</Alert>}
             {error && <FormError errorReport={error} />}
           </Chakra.VStack>
