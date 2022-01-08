@@ -62,6 +62,7 @@ export default function PatchTemplateAdditionDrawer({
       <VStack flex={1} h='100%'>
         <FormControl {...nameField.control}>
           <TextEditor
+            isDisabled
             onBlur={nameField.handleBlur}
             onChange={nameField.handleChange}
             placeholder={nameField.control.label}
