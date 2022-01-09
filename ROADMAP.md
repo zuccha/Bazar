@@ -218,7 +218,7 @@ There is not necessarily an order of completion. Features will be implemented at
 
 ## Templates
 
-- [ ] Projects
+- [x] Projects
   - [x] List project templates
   - [x] Save project as template
   - [x] Delete project template
@@ -239,14 +239,14 @@ There is not necessarily an order of completion. Features will be implemented at
   - [ ] Delete music template
   - [ ] Rename music template
   - [ ] Edit music template
-- [ ] Patch
+- [x] Patch
   - [x] List patch templates
   - [x] Add patch as template
-  - [ ] Add patch as template with custom info
+  - [x] Add patch as template with custom info
   - [x] Save patch as template
   - [x] Delete patch template
   - [x] Rename patch template
-  - [ ] Edit patch template
+  - [x] Edit patch template
 - [ ] Sprite
   - [ ] List sprite templates
   - [ ] Add sprite as template
