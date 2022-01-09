@@ -1,27 +1,32 @@
-import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
+import { DeleteIcon } from '@chakra-ui/icons';
+import { Flex } from '@chakra-ui/react';
 import { ReactElement, useMemo, useState } from 'react';
 import {
   useCollectionProjectSnapshotNames,
   useDeleteProjectSnapshotFromCollection,
-  useEditProjectSnapshotInCollection,
 } from '../../../../../core-hooks/Collection';
 import { useCollection } from '../../../../../core-hooks/Core';
 import { useList } from '../../../../../hooks/useAccessors';
 import useAsyncCallback from '../../../../../hooks/useAsyncCallback';
 import useToast from '../../../../../hooks/useToast';
 import DialogWithIrreversibleAction from '../../../../../ui-atoms/DialogWithIrreversibleAction';
+import Header from '../../../../../ui-atoms/Header';
 import Table, {
   TableAction,
   TableColumn,
   TableRow,
 } from '../../../../../ui-atoms/Table';
-import ProjectTemplateEditorDrawer from '../../../../drawers/ProjectTemplateEditorDrawer';
+import ProjectsCollectionPageInfo from './PatchesCollectionPageInfo';
 
 export default function ProjectsCollectionPage(): ReactElement {
   const toast = useToast();
 
   const collection = useCollection();
   const projectSnapshotNames = useCollectionProjectSnapshotNames(collection);
+
+  const [selectedNameIndex, setSelectedNameIndex] = useState<
+    number | undefined
+  >(undefined);
 
   const [nameToDelete, setNameToDelete] = useState<string | undefined>();
   const deleteProjectSnapshot =
@@ -34,33 +39,10 @@ export default function ProjectsCollectionPage(): ReactElement {
     }
   }, [toast, nameToDelete, deleteProjectSnapshot]);
 
-  const [nameToEdit, setNameToEdit] = useState<string | undefined>();
-  const editProjectSnapshot = useEditProjectSnapshotInCollection(collection);
-  const handleEdit = useAsyncCallback(
-    async (name: string) => {
-      if (nameToEdit) {
-        const error = await editProjectSnapshot(nameToEdit, name);
-        if (error) toast.failure('Failed to edit project', error);
-        return error;
-      }
-    },
-    [toast, nameToEdit, editProjectSnapshot],
-  );
-
-  const isDisabled =
-    !!nameToEdit ||
-    !!nameToDelete ||
-    handleEdit.isLoading ||
-    handleDelete.isLoading;
+  const isDisabled = !!nameToDelete || handleDelete.isLoading;
 
   const actions: TableAction<string>[] = useMemo(() => {
     return [
-      {
-        icon: <EditIcon />,
-        isDisabled: isDisabled,
-        label: `Edit project`,
-        onClick: (row) => setNameToEdit(row.data),
-      },
       {
         icon: <DeleteIcon />,
         isDisabled: isDisabled,
@@ -88,15 +70,35 @@ export default function ProjectsCollectionPage(): ReactElement {
     }),
   );
 
+  const selectedName =
+    selectedNameIndex !== undefined && projectSnapshotNames[selectedNameIndex];
+
   return (
     <>
-      <Table
-        actions={actions}
-        columns={columns}
-        rows={rows}
-        variant='minimal'
-        flex={1}
-      />
+      <Flex flexDir='column' flex={1} overflow='auto'>
+        <Table
+          actions={actions}
+          columns={columns}
+          rows={rows}
+          selectedRowIndex={selectedNameIndex}
+          onSelectRowIndex={setSelectedNameIndex}
+          variant='minimal'
+          flex={1}
+        />
+        {selectedName && (
+          <>
+            <Header
+              title='Info'
+              hideBorderLeft
+              hideBorderRight
+              variant='minimal'
+            />
+            <Flex p={4} width='100%' overflow='auto'>
+              <ProjectsCollectionPageInfo name={selectedName} />
+            </Flex>
+          </>
+        )}
+      </Flex>
 
       {!!nameToDelete && (
         <DialogWithIrreversibleAction
@@ -105,14 +107,6 @@ export default function ProjectsCollectionPage(): ReactElement {
           onClose={() => setNameToDelete(undefined)}
           onDelete={handleDelete.call}
           title={`Delete ${nameToDelete}?`}
-        />
-      )}
-
-      {!!nameToEdit && (
-        <ProjectTemplateEditorDrawer
-          name={nameToEdit}
-          onClose={() => setNameToEdit(undefined)}
-          onEdit={handleEdit.call}
         />
       )}
     </>
