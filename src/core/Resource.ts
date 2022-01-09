@@ -101,11 +101,6 @@ export default abstract class Resource<Info> {
       return error.extend(errorMessage);
     }
 
-    if ((error = await $FileSystem.validateExistsDir(this._directoryPath))) {
-      const errorMessage = `${errorPrefix}: destination directory does not exist`;
-      return error.extend(errorMessage);
-    }
-
     if ((error = await $FileSystem.validateNotExists(this._path))) {
       const errorMessage = `${errorPrefix}: resource with this name already exists in destination directory`;
       return error.extend(errorMessage);
