@@ -78,6 +78,10 @@ export const $FileSystem = {
     targetPath: string,
   ): Promise<ErrorReport | undefined> => {
     try {
+      const directoryPath = $FileSystem.dirpath(targetPath);
+      if (!(await $FileSystem.exists(directoryPath))) {
+        $FileSystem.createDirectory(directoryPath);
+      }
       await FS.copyFile(sourcePath, targetPath);
     } catch (error) {
       const errorMessage = `FileSystem.copyFile: failed to copy file from "${sourcePath}" to "${targetPath}"`;
