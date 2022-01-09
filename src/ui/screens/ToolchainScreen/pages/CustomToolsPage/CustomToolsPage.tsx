@@ -46,7 +46,10 @@ export default function ToolchainScreen(): ReactElement {
       alignItems='flex-start'
       p={4}
     >
-      <Text pb={2}>These are tools of your personal choice.</Text>
+      <Text pb={2}>
+        These are tools of your personal choice, used to modify resources that
+        Bazar doesn't handle directly.
+      </Text>
       <CustomToolItem
         description='The editor is used to open source code files (e.g., patches and blocks).'
         exePath={editor.exePath}
