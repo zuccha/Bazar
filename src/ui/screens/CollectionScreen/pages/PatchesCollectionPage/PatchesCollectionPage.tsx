@@ -1,6 +1,6 @@
 import { AddIcon, DeleteIcon, ExternalLinkIcon } from '@chakra-ui/icons';
 import { Flex } from '@chakra-ui/react';
-import { ReactElement, useLayoutEffect, useMemo, useState } from 'react';
+import { ReactElement, useMemo, useState } from 'react';
 import {
   useAddPatchToCollectionFromDirectory,
   useAddPatchToCollectionFromFile,
@@ -8,13 +8,11 @@ import {
   useDeletePatchFromCollection,
 } from '../../../../../core-hooks/Collection';
 import { useCollection } from '../../../../../core-hooks/Core';
-import Patch from '../../../../../core/Patch';
-import { useList } from '../../../../../hooks/useAccessors';
+import { useGetAsync, useList } from '../../../../../hooks/useAccessors';
 import useAsyncCallback from '../../../../../hooks/useAsyncCallback';
 import useToast from '../../../../../hooks/useToast';
 import useSafeState from '../../../../../hooks/usSafeState';
 import DialogWithIrreversibleAction from '../../../../../ui-atoms/DialogWithIrreversibleAction';
-import Frame from '../../../../../ui-atoms/Frame';
 import Header from '../../../../../ui-atoms/Header';
 import Table, {
   TableAction,
@@ -22,6 +20,8 @@ import Table, {
   TableHeaderAction,
   TableRow,
 } from '../../../../../ui-atoms/Table';
+import { getter } from '../../../../../utils/Accessors';
+import { $EitherErrorOr } from '../../../../../utils/EitherErrorOr';
 import PatchAdditionFromFilesDrawer from '../../../../drawers/PatchAdditionFromFilesDrawer';
 import PatchesCollectionPageInfo from './PatchesCollectionPageInfo';
 
@@ -38,26 +38,26 @@ export default function PatchesCollectionPage(): ReactElement {
     number | undefined
   >(undefined);
 
-  const [selectedPatch, setSelectedPatch] = useState<Patch | undefined>(
-    undefined,
+  const selectedPatch = useGetAsync(
+    collection,
+    useMemo(
+      () =>
+        getter(collection.getPatchNames.deps, async () => {
+          if (selectedPatchIndex !== undefined) {
+            const patchName = patchNames[selectedPatchIndex];
+            if (patchName) {
+              const errorOrPatch = await collection.getPatch(patchName);
+              if (errorOrPatch.isError) {
+                toast.failure('Failed to select patch', errorOrPatch.error);
+              }
+              return errorOrPatch;
+            }
+          }
+          return $EitherErrorOr.value(undefined);
+        }),
+      [collection, selectedPatchIndex, patchNames],
+    ),
   );
-
-  useLayoutEffect(() => {
-    if (selectedPatchIndex !== undefined) {
-      const patchName = patchNames[selectedPatchIndex];
-      if (patchName) {
-        collection.getPatch(patchName).then((errorOrPatch) => {
-          if (errorOrPatch.isError)
-            toast.failure('Failed to select patch', errorOrPatch.error);
-          errorOrPatch.isError
-            ? setSelectedPatch(undefined)
-            : setSelectedPatch(errorOrPatch.value);
-        });
-      }
-    } else {
-      setSelectedPatch(undefined);
-    }
-  }, [collection, selectedPatchIndex]);
 
   const addPatchFromDirectory =
     useAddPatchToCollectionFromDirectory(collection);
@@ -134,7 +134,7 @@ export default function PatchesCollectionPage(): ReactElement {
           flex={1}
           minHeight='200px'
         />
-        {selectedPatch && (
+        {selectedPatch.value && (
           <>
             <Header
               title='Info'
@@ -143,7 +143,7 @@ export default function PatchesCollectionPage(): ReactElement {
               variant='minimal'
             />
             <Flex p={4} width='100%' overflow='auto'>
-              <PatchesCollectionPageInfo patch={selectedPatch} />
+              <PatchesCollectionPageInfo patch={selectedPatch.value} />
             </Flex>
           </>
         )}

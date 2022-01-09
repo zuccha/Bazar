@@ -5,6 +5,7 @@ import {
   useAddPatchToProjectSnapshotFromDirectory,
   useAddPatchToProjectSnapshotFromFile,
   useAddPatchToProjectSnapshotFromTemplate,
+  useEditPatchInProjectSnapshot,
   useProjectSnapshotPatches,
   useRemovePatchFromProjectSnapshot,
 } from '../../../../../../core-hooks/ProjectSnapshot';
@@ -20,7 +21,10 @@ import PatchAdditionFromFilesDrawer from '../../../../../drawers/PatchAdditionFr
 import PatchAdditionFromTemplateDrawer from '../../../../../drawers/PatchAdditionFromTemplateDrawer';
 import PatchTemplateAdditionDrawer from '../../../../../drawers/PatchTemplateAdditionDrawer';
 import ResourcesTab from '../../ResourcesTab';
-import PatchesTabInfo from './PatchesTabInfo';
+import {
+  PatchesTabInfoWithoutPatch,
+  PatchesTabInfoWithPatch,
+} from './PatchesTabInfo';
 
 interface PatchesTabProps {
   projectSnapshot: ProjectSnapshot;
@@ -42,6 +46,7 @@ export default function PatchesTab({
     useAddPatchToProjectSnapshotFromDirectory(projectSnapshot);
   const addPatchFromTemplate =
     useAddPatchToProjectSnapshotFromTemplate(projectSnapshot);
+  const editPatch = useEditPatchInProjectSnapshot(projectSnapshot);
 
   const handleApplyPatch = useCallback(
     async (patch: Patch) => {
@@ -83,7 +88,16 @@ export default function PatchesTab({
       onApply={handleApplyPatch}
       onOpenInEditor={() => Promise.resolve(undefined)}
       onRemove={handleRemovePatch}
-      renderInfo={(patch) => <PatchesTabInfo patch={patch} />}
+      renderInfo={(patch) =>
+        patch ? (
+          <PatchesTabInfoWithPatch
+            patch={patch}
+            onEditInfo={(info) => editPatch(patch, info)}
+          />
+        ) : (
+          <PatchesTabInfoWithoutPatch />
+        )
+      }
       renderResourceAdditionFromFilesDrawer={({ onClose }) => (
         <PatchAdditionFromFilesDrawer
           onClose={onClose}

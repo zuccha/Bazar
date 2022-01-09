@@ -119,6 +119,7 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
       }
       patches.push(patchOrError.value);
     }
+    patches.sort(Patch.compareLt);
 
     // Return snapshot
     projectSnapshot.patches = patches;
@@ -210,6 +211,7 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
       }
 
       this.patches.push(patchOrError.value);
+      this.patches.sort(Patch.compareLt);
     },
   );
 
@@ -237,6 +239,7 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
       }
 
       this.patches.push(patchOrError.value);
+      this.patches.sort(Patch.compareLt);
     },
   );
 
@@ -284,6 +287,7 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
       }
 
       this.patches.push(patchOrError.value);
+      this.patches.sort(Patch.compareLt);
     },
   );
 
@@ -311,6 +315,23 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
       this.patches.splice(patchIndex, 1);
     },
   );
+
+  editPatch = setter(['patches'], async (patch: Patch, info: PatchInfo) => {
+    const errorPrefix = 'ProjectSnapshot.editPatch';
+    let error: ErrorReport | undefined;
+
+    if (!this.patches.includes(patch)) {
+      const errorMessage = `${errorPrefix}: a template patch named "${name}" was not found`;
+      return ErrorReport.from(errorMessage);
+    }
+
+    if ((error = await patch.renameAndSetInfo(info))) {
+      const errorMessage = `${errorPrefix}: failed to remove patch "${name}"`;
+      return error.extend(errorMessage);
+    }
+
+    this.patches.sort(Patch.compareLt);
+  });
 
   applyPatch = setter(
     [],

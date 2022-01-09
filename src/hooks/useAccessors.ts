@@ -119,29 +119,27 @@ export const useGetAsync = <T extends Item, Return>(
   item: T,
   getter: Getter<[], Promise<EitherErrorOr<Return>>>,
 ): AsyncResponse<Return> => {
-  const [, setRenderCount] = useState(0);
   const [response, setResponse] = useState<AsyncResponse<Return>>({
     error: undefined,
     isLoading: false,
     value: undefined,
   });
 
-  useLayoutEffect(() => {
-    const render = () => setRenderCount((renderCount) => renderCount + 1);
-    const unsubscribe = subscribeToProperty(item, getter.deps, render);
-    return unsubscribe;
+  const update = useCallback(async () => {
+    setResponse((prevResponse) => ({ ...prevResponse, isLoading: true }));
+    const errorOrValue = await getter();
+    setResponse({
+      error: errorOrValue.isError ? errorOrValue.error : undefined,
+      value: errorOrValue.isValue ? errorOrValue.value : undefined,
+      isLoading: false,
+    });
   }, [item, getter]);
 
   useLayoutEffect(() => {
-    setResponse((prevResponse) => ({ ...prevResponse, isLoading: true }));
-    getter().then((errorOrValue) => {
-      setResponse({
-        error: errorOrValue.isError ? errorOrValue.error : undefined,
-        value: errorOrValue.isValue ? errorOrValue.value : undefined,
-        isLoading: false,
-      });
-    });
-  }, [item, getter]);
+    update();
+    const unsubscribe = subscribeToProperty(item, getter.deps, update);
+    return unsubscribe;
+  }, [item, getter.deps, update]);
 
   return response;
 };

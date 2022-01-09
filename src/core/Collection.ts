@@ -2,6 +2,7 @@ import { getter, setter } from '../utils/Accessors';
 import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
 import ErrorReport from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
+import { $String } from '../utils/String';
 import Patch, { PatchInfo } from './Patch';
 import ProjectSnapshot from './ProjectSnapshot';
 
@@ -44,6 +45,7 @@ export default class Collection {
         const projectNames = await $FileSystem.getDirNames(
           projectSnapshotsDirectory,
         );
+        projectNames.sort($String.compareLt);
         this._projectSnapshotNames = projectNames;
       }
 
@@ -52,6 +54,7 @@ export default class Collection {
       );
       if (await $FileSystem.exists(patchesDirectory)) {
         const patchesNames = await $FileSystem.getDirNames(patchesDirectory);
+        patchesNames.sort($String.compareLt);
         this._patchNames = patchesNames;
       }
     },
@@ -115,6 +118,7 @@ export default class Collection {
       }
 
       this._projectSnapshotNames.push(name);
+      this._projectSnapshotNames.sort($String.compareLt);
     },
   );
 
@@ -192,6 +196,7 @@ export default class Collection {
       }
 
       this._projectSnapshotNames[index] = nextName;
+      this._projectSnapshotNames.sort($String.compareLt);
     },
   );
 
@@ -259,11 +264,12 @@ export default class Collection {
       }
 
       this._patchNames.push(patchOrError.value.getInfo().name);
+      this._patchNames.sort($String.compareLt);
     },
   );
 
   addPatchFromFile = setter(
-    ['patches'],
+    ['patchNames'],
     async (
       sourceDirectoryPath: string,
       info: PatchInfo,
@@ -286,6 +292,7 @@ export default class Collection {
       }
 
       this._patchNames.push(patchOrError.value.getInfo().name);
+      this._patchNames.sort($String.compareLt);
     },
   );
 
@@ -325,6 +332,7 @@ export default class Collection {
       }
 
       this._patchNames.push(info.name);
+      this._patchNames.sort($String.compareLt);
     },
   );
 
@@ -376,7 +384,7 @@ export default class Collection {
     const index = this._patchNames.indexOf(name);
 
     if (index === -1) {
-      const errorMessage = `${errorPrefix}: a template patch with this name was not found`;
+      const errorMessage = `${errorPrefix}: a template patch named "${name}" was not found`;
       return ErrorReport.from(errorMessage);
     }
 
@@ -393,6 +401,7 @@ export default class Collection {
     }
 
     this._patchNames[index] = info.name;
+    this._patchNames.sort($String.compareLt);
   });
 
   // #endregion Patch

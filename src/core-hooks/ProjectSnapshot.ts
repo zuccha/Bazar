@@ -57,3 +57,7 @@ export const useRemovePatchFromProjectSnapshot = (
 ) => {
   return useSetAsync(snapshot, snapshot.removePatch);
 };
+
+export const useEditPatchInProjectSnapshot = (snapshot: ProjectSnapshot) => {
+  return useSetAsync(snapshot, snapshot.editPatch);
+};

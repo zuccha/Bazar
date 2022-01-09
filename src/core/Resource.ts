@@ -49,6 +49,18 @@ export default abstract class Resource<Info> {
     }
   }
 
+  static compareLt<Info>(resource1: Resource<Info>, resource2: Resource<Info>) {
+    if (resource1.getName() < resource2.getName()) return -1;
+    if (resource1.getName() > resource2.getName()) return 1;
+    return 0;
+  }
+
+  static compareGt<Info>(resource1: Resource<Info>, resource2: Resource<Info>) {
+    if (resource1.getName() < resource2.getName()) return 1;
+    if (resource1.getName() > resource2.getName()) return -1;
+    return 0;
+  }
+
   constructor({ path, directoryPath, name, info }: ResourceFields<Info>) {
     this._path = path ?? '';
     this._directoryPath = directoryPath;
