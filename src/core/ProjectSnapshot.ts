@@ -25,7 +25,7 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
   private patches!: Patch[];
 
   private static ROM_FILE_NAME = 'rom.smc';
-  private static PATCHES_DIR_NAME = 'patches';
+  private static PATCHES_DIR_NAME = 'resources/patches';
 
   private constructor(props: ResourceFields<ProjectSnapshotInfo>) {
     super(props);
