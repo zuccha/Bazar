@@ -29,6 +29,19 @@ const $ToolchainSettingsStore = $SettingsStore.create({
 
 // #region Types
 
+export type Asset =
+  | {
+      path: string;
+      status: 'present';
+    }
+  | {
+      status: 'not-present';
+    };
+
+interface AssetOptions {
+  name: string;
+}
+
 export interface ToolCustom {
   exePath: string;
 }
@@ -58,7 +71,9 @@ interface ToolEmbeddedOptions {
 
 // #region Constants
 
-// const TOOLCHAIN_DIR_PATH = await $FileSystem.getDataPath('toolchain');
+const VANILLA_ROM_OPTIONS: AssetOptions = {
+  name: 'vanilla.sfc',
+};
 
 const EDITOR_OPTIONS: ToolCustomOptions = {
   name: 'editor',
@@ -122,8 +137,21 @@ const UBER_ASM_OPTIONS: ToolEmbeddedOptions = {
 
 // #region Utils
 
+const getAssetsDirPath = (): Promise<string> =>
+  $FileSystem.getDataPath('assets');
+
 const getToolchainDirPath = (): Promise<string> =>
   $FileSystem.getDataPath('toolchain');
+
+const readAsset = async (options: AssetOptions): Promise<Asset> => {
+  const assetPath = await $FileSystem.join(
+    await getAssetsDirPath(),
+    options.name,
+  );
+  return (await $FileSystem.exists(assetPath))
+    ? { path: assetPath, status: 'present' }
+    : { status: 'not-present' };
+};
 
 const readCustom = async (
   options: ToolCustomOptions,
@@ -152,6 +180,7 @@ const readEmbedded = async ({
 
 // #endregion Utils
 
+export type ToolchainAsset = 'vanillaRom';
 export type ToolchainCustom = 'editor' | 'emulator';
 export type ToolchainEmbedded =
   | 'lunarMagic'
@@ -164,6 +193,8 @@ export type ToolchainEmbedded =
 export default class Toolchain {
   public readonly TypeName = 'Toolchain';
 
+  private vanillaRom: Asset;
+
   private editor: ToolCustom;
   private emulator: ToolCustom;
 
@@ -175,6 +206,7 @@ export default class Toolchain {
   private uberAsm: ToolEmbedded;
 
   private constructor({
+    vanillaRom,
     editor,
     emulator,
     lunarMagic,
@@ -184,6 +216,7 @@ export default class Toolchain {
     pixi,
     uberAsm,
   }: {
+    vanillaRom: Asset;
     editor: ToolCustom;
     emulator: ToolCustom;
     lunarMagic: ToolEmbedded;
@@ -193,6 +226,7 @@ export default class Toolchain {
     pixi: ToolEmbedded;
     uberAsm: ToolEmbedded;
   }) {
+    this.vanillaRom = vanillaRom;
     this.editor = editor;
     this.emulator = emulator;
     this.lunarMagic = lunarMagic;
@@ -205,6 +239,7 @@ export default class Toolchain {
 
   static create(): Toolchain {
     return new Toolchain({
+      vanillaRom: { status: 'not-present' },
       editor: { exePath: '' },
       emulator: { exePath: '' },
       lunarMagic: { status: 'not-installed' },
@@ -218,6 +253,7 @@ export default class Toolchain {
 
   load = setter(
     [
+      'vanillaRom',
       'editor',
       'emulator',
       'lunarMagic',
@@ -228,10 +264,13 @@ export default class Toolchain {
       'uberAsm',
     ],
     async (): Promise<ErrorReport | undefined> => {
+      const vanillaRom = await readAsset(VANILLA_ROM_OPTIONS);
+
       const editorOrError = await readCustom(EDITOR_OPTIONS);
       if (editorOrError.isError) return editorOrError.error;
       const emulatorOrError = await readCustom(EMULATOR_OPTIONS);
       if (emulatorOrError.isError) return emulatorOrError.error;
+
       const lunarMagicOrError = await readEmbedded(LUNAR_MAGIC_OPTIONS);
       if (lunarMagicOrError.isError) return lunarMagicOrError.error;
       const asarOrError = await readEmbedded(ASAR_OPTIONS);
@@ -245,6 +284,7 @@ export default class Toolchain {
       const uberAsmOrError = await readEmbedded(UBER_ASM_OPTIONS);
       if (uberAsmOrError.isError) return uberAsmOrError.error;
 
+      this.vanillaRom = vanillaRom;
       this.editor = editorOrError.value;
       this.emulator = emulatorOrError.value;
       this.lunarMagic = lunarMagicOrError.value;
@@ -255,6 +295,39 @@ export default class Toolchain {
       this.uberAsm = uberAsmOrError.value;
     },
   );
+
+  setupAsset = async (
+    asset: ToolchainAsset,
+    path: string,
+  ): Promise<ErrorReport | undefined> => {
+    const { name } = {
+      vanillaRom: VANILLA_ROM_OPTIONS,
+    }[asset];
+
+    let error: ErrorReport | undefined;
+    const errorPrefix = `Toolchain.editCustom(${asset})`;
+
+    const targetPath = await $FileSystem.join(await getAssetsDirPath(), name);
+
+    if ((error = await $FileSystem.validateExistsFile(path))) {
+      const errorMessage = `${errorPrefix}: the given asset does not exist`;
+      return error.extend(errorMessage);
+    }
+
+    if (await $FileSystem.exists(targetPath)) {
+      if ((error = await $FileSystem.removeFile(targetPath))) {
+        const errorMessage = `${errorPrefix}: failed to override the asset`;
+        return error.extend(errorMessage);
+      }
+    }
+
+    if ((error = await $FileSystem.copyFile(path, targetPath))) {
+      const errorMessage = `${errorPrefix}: failed to copy asset`;
+      return error.extend(errorMessage);
+    }
+
+    this[asset] = { path: targetPath, status: 'present' };
+  };
 
   editCustom = async (
     toolCustom: ToolchainCustom,
@@ -325,7 +398,7 @@ export default class Toolchain {
   uninstallEmbedded = async (
     toolEmbedded: ToolchainEmbedded,
   ): Promise<ErrorReport | undefined> => {
-    const { directoryName, exeName, version, downloadUrl } = {
+    const { directoryName, version } = {
       lunarMagic: LUNAR_MAGIC_OPTIONS,
       asar: ASAR_OPTIONS,
       flips: FLIPS_OPTIONS,
@@ -342,7 +415,6 @@ export default class Toolchain {
       toolchainDirPath,
       directoryName,
     );
-    const versionPath = await $FileSystem.join(directoryPath, version);
 
     if (await $FileSystem.exists(directoryPath)) {
       error = await $FileSystem.removeDir(directoryPath);
@@ -353,6 +425,10 @@ export default class Toolchain {
     }
 
     this[toolEmbedded] = { status: 'not-installed' };
+  };
+
+  getAsset = (propertyName: ToolchainAsset): Asset => {
+    return this[propertyName];
   };
 
   getCustom = (propertyName: ToolchainCustom): ToolCustom => {
