@@ -42,6 +42,7 @@ export enum SettingsRouteName {
 export enum ToolchainRouteName {
   Custom = 'Custom',
   Embedded = 'Embedded',
+  Assets = 'Assets',
 }
 
 export default class Navigation {

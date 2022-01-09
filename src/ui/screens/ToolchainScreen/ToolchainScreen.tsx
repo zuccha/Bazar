@@ -7,6 +7,7 @@ import {
 import { ToolchainRouteName } from '../../../navigation/Navigation';
 import Header from '../../../ui-atoms/Header';
 import NavigatorWithList from '../../../ui-atoms/NavigatorWithList';
+import AssetsPage from './pages/AssetsPage';
 import CustomToolsPage from './pages/CustomToolsPage';
 import EmbeddedToolsPage from './pages/EmbeddedToolsPage';
 
@@ -20,6 +21,11 @@ const pages = [
     id: ToolchainRouteName.Custom,
     label: 'Custom',
     content: <CustomToolsPage />,
+  },
+  {
+    id: ToolchainRouteName.Assets,
+    label: 'Assets',
+    content: <AssetsPage />,
   },
 ];
 
