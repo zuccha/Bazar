@@ -10,6 +10,7 @@ import ComingSoon from '../../../../ui-atoms/ComingSoon';
 import NavigatorWithTabs from '../../../../ui-atoms/NavigatorWithTabs';
 import BackupsTab from './tabs/BackupsTab/BackupsTab';
 import PatchesTab from './tabs/PatchesTab';
+import ReleasesTab from './tabs/ReleasesTab';
 
 interface ProjectScreenContent {
   project: Project;
@@ -74,8 +75,7 @@ export default function ProjectScreenContent({
       {
         id: ProjectRouteName.Releases,
         label: 'Releases',
-        content: <ComingSoon title='Releases' />,
-        isDisabled: true,
+        content: <ReleasesTab project={project} />,
       },
     ],
     [latestSnapshot],

@@ -24,8 +24,8 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
 
   private patches!: Patch[];
 
-  private static ROM_FILE_NAME = 'rom.smc';
-  private static PATCHES_DIR_NAME = 'resources/patches';
+  public static ROM_FILE_NAME = 'rom.smc';
+  public static PATCHES_DIR_NAME = 'resources/patches';
 
   private constructor(props: ResourceFields<ProjectSnapshotInfo>) {
     super(props);
@@ -127,6 +127,14 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
   }
 
   // #endregion Constructors
+
+  // #region Properties
+
+  getRomFilePath = () => {
+    return this.getSubPath(ProjectSnapshot.ROM_FILE_NAME);
+  };
+
+  // #endregion Properties
 
   // #region Generic
 

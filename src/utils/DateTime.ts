@@ -6,6 +6,7 @@ const ISO_DATE_REGEXP =
 export enum DateTimeFormat {
   NumericShort = 'yyyy-MM-dd',
   NumericLong = 'yyyy-MM-dd, HH:mm:ss',
+  Timestamp = 'yyyyMMddHHmmss',
 }
 
 export const $DateTime = {
@@ -25,8 +26,17 @@ export const $DateTime = {
     return typeof date === 'string' && ISO_DATE_REGEXP.test(date);
   },
 
+  isTimestamp: (maybeTimestamp: string): boolean => {
+    const date = DateFNS.parse(
+      maybeTimestamp,
+      DateTimeFormat.Timestamp,
+      new Date(),
+    );
+    return !isNaN(date.getTime());
+  },
+
   timestamp: () => {
-    return DateFNS.format(new Date(), 'yyyyMMddHHmmss');
+    return DateFNS.format(new Date(), DateTimeFormat.Timestamp);
   },
 
   formatDate: (date: Date, format: DateTimeFormat) => {
@@ -34,11 +44,11 @@ export const $DateTime = {
   },
 
   formatTimestamp: (timestamp: string, format: DateTimeFormat) => {
-    const date = DateFNS.parse(timestamp, 'yyyyMMddHHmmss', new Date());
+    const date = DateFNS.parse(timestamp, DateTimeFormat.Timestamp, new Date());
     return isNaN(date.getTime()) ? '-' : DateFNS.format(date, format);
   },
 
   fromTimestamp: (timestamp: string): Date => {
-    return DateFNS.parse(timestamp, 'yyyyMMddHHmmss', new Date());
+    return DateFNS.parse(timestamp, DateTimeFormat.Timestamp, new Date());
   },
 };

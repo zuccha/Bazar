@@ -4,6 +4,7 @@ import { useAddProjectSnapshotToCollection } from '../../../../core-hooks/Collec
 import { useCollection, useToolchain } from '../../../../core-hooks/Core';
 import {
   useCreateProjectBackup,
+  useCreateProjectRelease,
   useProjectLatestSnapshot,
 } from '../../../../core-hooks/Project';
 import {
@@ -20,6 +21,8 @@ import useAsyncCallback from '../../../../hooks/useAsyncCallback';
 import useSafeState from '../../../../hooks/usSafeState';
 import Button from '../../../../ui-atoms/Button';
 import useToast from '../../../../hooks/useToast';
+import ReleaseCreationDrawer from '../../../drawers/ReleaseCreationDrawer';
+import { ReleaseInfo } from '../../../../core/Release';
 
 interface ProjectScreenSidebarActionsProps {
   project: Project;
@@ -34,6 +37,9 @@ export default function ProjectScreenSidebarActions({
     isProjectTemplateAdditionDrawerVisible,
     setIsProjectTemplateAdditionDrawerVisible,
   ] = useSafeState(false);
+
+  const [isReleaseCreationDrawerVisible, setIsReleaseCreationDrawerVisible] =
+    useSafeState(false);
 
   const collection = useCollection();
   const snapshot = useProjectLatestSnapshot(project);
@@ -61,6 +67,16 @@ export default function ProjectScreenSidebarActions({
     toast('Backup created!', 'Failed to create backup', error);
     return error;
   }, [createBackup, toast]);
+
+  const createRelease = useCreateProjectRelease(project);
+  const handleCreateRelease = useAsyncCallback(
+    async (info: ReleaseInfo) => {
+      const error = await createRelease(info);
+      toast('Release created!', 'Failed to create release', error);
+      return error;
+    },
+    [createRelease, toast],
+  );
 
   const addProjectSnapshotToCollection =
     useAddProjectSnapshotToCollection(collection);
@@ -101,7 +117,12 @@ export default function ProjectScreenSidebarActions({
           onClick={handleCreateBackup.call}
           w='100%'
         />
-        <Button label='Create BPS' onClick={() => null} w='100%' isDisabled />
+        <Button
+          isDisabled={handleCreateRelease.isLoading}
+          label='Create release'
+          onClick={() => setIsReleaseCreationDrawerVisible(true)}
+          w='100%'
+        />
         <Button
           isDisabled={handleAddProjectSnapshotToCollection.isLoading}
           label='Save as template'
@@ -114,6 +135,14 @@ export default function ProjectScreenSidebarActions({
         <ProjectTemplateAdditionDrawer
           onClose={() => setIsProjectTemplateAdditionDrawerVisible(false)}
           onAdd={handleAddProjectSnapshotToCollection.call}
+        />
+      )}
+
+      {isReleaseCreationDrawerVisible && (
+        <ReleaseCreationDrawer
+          onClose={() => setIsReleaseCreationDrawerVisible(false)}
+          onCreate={handleCreateRelease.call}
+          project={project}
         />
       )}
     </>

@@ -1,5 +1,6 @@
 import Project, { ProjectInfo } from '../core/Project';
 import ProjectSnapshot from '../core/ProjectSnapshot';
+import Release, { ReleaseInfo } from '../core/Release';
 import { useGet, useSetAsync } from '../hooks/useAccessors';
 import ErrorReport from '../utils/ErrorReport';
 
@@ -37,4 +38,29 @@ export const useRestoreProjectBackup = (
   project: Project,
 ): ((backup: string) => Promise<ErrorReport | undefined>) => {
   return useSetAsync(project, project.restoreBackup);
+};
+
+export const useProjectReleases = (project: Project): Release[] => {
+  return useGet(project, project.getReleases);
+};
+
+export const useCreateProjectRelease = (
+  project: Project,
+): ((info: ReleaseInfo) => Promise<ErrorReport | undefined>) => {
+  return useSetAsync(project, project.createRelease);
+};
+
+export const useDeleteProjectRelease = (
+  project: Project,
+): ((release: Release) => Promise<ErrorReport | undefined>) => {
+  return useSetAsync(project, project.deleteRelease);
+};
+
+export const useEditProjectRelease = (
+  project: Project,
+): ((
+  release: Release,
+  info: ReleaseInfo,
+) => Promise<ErrorReport | undefined>) => {
+  return useSetAsync(project, project.editRelease);
 };

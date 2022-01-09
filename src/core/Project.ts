@@ -5,6 +5,7 @@ import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
 import ErrorReport from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
 import ProjectSnapshot from './ProjectSnapshot';
+import Release, { ReleaseInfo } from './Release';
 import Resource, { ResourceFields } from './Resource';
 
 // #region Info
@@ -23,9 +24,11 @@ export default class Project extends Resource<ProjectInfo> {
 
   private latest!: ProjectSnapshot;
   private backups!: string[];
+  private releases!: Release[];
 
   private static LATEST_DIR_NAME = 'latest';
   private static BACKUPS_DIR_NAME = 'backups';
+  private static RELEASES_DIR_NAME = 'releases';
 
   private constructor(props: ResourceFields<ProjectInfo>) {
     super(props);
@@ -69,9 +72,21 @@ export default class Project extends Resource<ProjectInfo> {
       return $EitherErrorOr.error(error.extend(errorMessage));
     }
 
+    // Create releases
+    const releasesDirectory = await project.getSubPath(
+      Project.RELEASES_DIR_NAME,
+    );
+    const releases: Release[] = [];
+    if ((error = await $FileSystem.createDirectory(releasesDirectory))) {
+      await project.delete();
+      const errorMessage = `${errorPrefix}: failed to create releases directory`;
+      return $EitherErrorOr.error(error.extend(errorMessage));
+    }
+
     // Create project
     project.latest = errorOrLatest.value;
     project.backups = backups;
+    project.releases = releases;
     return $EitherErrorOr.value(project);
   }
 
@@ -121,9 +136,21 @@ export default class Project extends Resource<ProjectInfo> {
       return $EitherErrorOr.error(error.extend(errorMessage));
     }
 
+    // Create releases
+    const releasesDirectory = await project.getSubPath(
+      Project.RELEASES_DIR_NAME,
+    );
+    const releases: Release[] = [];
+    if ((error = await $FileSystem.createDirectory(releasesDirectory))) {
+      await project.delete();
+      const errorMessage = `${errorPrefix}: failed to create releases directory`;
+      return $EitherErrorOr.error(error.extend(errorMessage));
+    }
+
     // Create project
     project.latest = errorOrLatest.value;
     project.backups = backups;
+    project.releases = releases;
     return $EitherErrorOr.value(project);
   }
 
@@ -149,14 +176,38 @@ export default class Project extends Resource<ProjectInfo> {
     const backupsDirectoryPath = await project.getSubPath(
       Project.BACKUPS_DIR_NAME,
     );
-    const fileNames = await $FileSystem.getFileNames(backupsDirectoryPath);
-    const backups: string[] = fileNames
+    const backupFileNames = await $FileSystem.getFileNames(
+      backupsDirectoryPath,
+    );
+    const backups: string[] = backupFileNames
       .filter((fileName) => fileName.endsWith('.zip'))
       .map((fileName) => fileName.slice(0, -4))
       .sort($DateTime.compareTimestampsGt);
 
+    const releasesDirectoryPath = await project.getSubPath(
+      Project.RELEASES_DIR_NAME,
+    );
+    const releaseDirectoryNames = await $FileSystem.getDirNames(
+      releasesDirectoryPath,
+    );
+    const releases: Release[] = [];
+    console.log(releaseDirectoryNames);
+    for (const releaseDirectoryName of releaseDirectoryNames) {
+      const errorOrRelease = await Release.openFromId(
+        releasesDirectoryPath,
+        releaseDirectoryName,
+      );
+      if (errorOrRelease.isValue) {
+        releases.push(errorOrRelease.value);
+      } else {
+        console.log(errorOrRelease.error);
+      }
+    }
+    releases.sort(Release.compareGt);
+
     project.latest = errorOrLatest.value;
     project.backups = backups;
+    project.releases = releases;
     return $EitherErrorOr.value(project);
   }
 
@@ -279,6 +330,83 @@ export default class Project extends Resource<ProjectInfo> {
   );
 
   // #endregion
+
+  // #region Releases
+
+  // getReleases
+
+  getReleases = getter(['releases'], (): Release[] => this.releases);
+
+  createRelease = setter(
+    ['releases'],
+    async (info: ReleaseInfo): Promise<ErrorReport | undefined> => {
+      // TODO: Call Flips.
+      const romFilePath = await this.latest.getSubPath(
+        ProjectSnapshot.ROM_FILE_NAME,
+      );
+
+      const errorOrRelease = await Release.createFromFiles(
+        await this.getSubPath(Project.RELEASES_DIR_NAME),
+        { romFilePath },
+        info,
+      );
+
+      if (errorOrRelease.isError) {
+        const errorMessage = `${this.TypeName}.createRelease: failed to create release`;
+        return errorOrRelease.error.extend(errorMessage);
+      }
+
+      this.releases.push(errorOrRelease.value);
+      this.releases.sort(Release.compareGt);
+    },
+  );
+
+  deleteRelease = setter(
+    ['releases'],
+    async (release: Release): Promise<ErrorReport | undefined> => {
+      const errorPrefix = `${this.TypeName}.deleteRelease`;
+      let error: ErrorReport | undefined;
+
+      const releaseIndex = this.releases.indexOf(release);
+      if (releaseIndex === -1) {
+        const errorMessage = `${errorPrefix}: release not found`;
+        return ErrorReport.from(errorMessage);
+      }
+
+      if ((error = await release.delete())) {
+        const errorMessage = `${errorPrefix}: failed to remove release`;
+        return error.extend(errorMessage);
+      }
+
+      this.releases.splice(releaseIndex, 1);
+    },
+  );
+
+  editRelease = setter(
+    ['releases'],
+    async (
+      release: Release,
+      info: ReleaseInfo,
+    ): Promise<ErrorReport | undefined> => {
+      const errorPrefix = `${this.TypeName}.editRelease`;
+      let error: ErrorReport | undefined;
+
+      const releaseIndex = this.releases.indexOf(release);
+      if (releaseIndex === -1) {
+        const errorMessage = `${errorPrefix}: release not found`;
+        return ErrorReport.from(errorMessage);
+      }
+
+      if ((error = await release.setInfo(info))) {
+        const errorMessage = `${errorPrefix}: failed to edit release`;
+        return error.extend(errorMessage);
+      }
+
+      this.releases.sort(Release.compareGt);
+    },
+  );
+
+  // #endregion Releases
 
   // #region Latest
 
