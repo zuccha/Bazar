@@ -69,14 +69,7 @@ export default function ProjectScreenSidebarActions({
   }, [createBackup, toast]);
 
   const createRelease = useCreateProjectRelease(project);
-  const handleCreateRelease = useAsyncCallback(
-    async (info: ReleaseInfo) => {
-      const error = await createRelease(info);
-      toast('Release created!', 'Failed to create release', error);
-      return error;
-    },
-    [createRelease, toast],
-  );
+  const handleCreateRelease = useAsyncCallback(createRelease, [createRelease]);
 
   const addProjectSnapshotToCollection =
     useAddProjectSnapshotToCollection(collection);

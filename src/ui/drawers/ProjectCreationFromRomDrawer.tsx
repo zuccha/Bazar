@@ -12,6 +12,7 @@ import { $FileSystem } from '../../utils/FileSystem';
 import useForm from '../../hooks/useForm';
 import useFormField from '../../hooks/useFormField';
 import ErrorReport from '../../utils/ErrorReport';
+import NameVersionFields from '../forms/NameVersionFields';
 
 interface ProjectCreationFromSourceProps {
   onClose: () => void;
@@ -30,6 +31,14 @@ export default function ProjectCreationFromRomDrawer({
     isRequired: true,
     label: 'Project name',
     onValidate: $FileSystem.validateIsValidName,
+  });
+
+  const versionField = useFormField({
+    infoMessage: 'Version of the project',
+    initialValue: '0.1.0',
+    isRequired: true,
+    label: 'Version',
+    onValidate: $FileSystem.validateIsValidVersion,
   });
 
   const defaultAuthor = useSetting(settings, 'newProjectDefaultAuthor');
@@ -67,12 +76,13 @@ export default function ProjectCreationFromRomDrawer({
   });
 
   const form = useForm({
-    fields: [nameField, romFilePathField, locationDirPathField],
+    fields: [nameField, versionField, romFilePathField, locationDirPathField],
     onSubmit: async () => {
       const errorOrProject = await Project.createFromRom(
         locationDirPathField.value.trim(),
         {
           name: nameField.value.trim(),
+          version: versionField.value.trim(),
           author: authorField.value.trim(),
         },
         romFilePathField.value.trim(),
@@ -110,15 +120,11 @@ export default function ProjectCreationFromRomDrawer({
     >
       <Flex direction='column' flex={1}>
         <VStack width='100%' spacing={4} flex={1}>
-          <FormControl {...nameField.control}>
-            <TextEditor
-              isDisabled={form.isSubmitting}
-              onBlur={nameField.handleBlur}
-              onChange={nameField.handleChange}
-              placeholder={nameField.control.label}
-              value={nameField.value}
-            />
-          </FormControl>
+          <NameVersionFields
+            isDisabled={form.isSubmitting}
+            nameField={nameField}
+            versionField={versionField}
+          />
 
           <FormControl {...authorField.control}>
             <TextEditor

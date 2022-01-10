@@ -13,6 +13,7 @@ import Resource, { ResourceFields } from './Resource';
 const infoSchema = z.object({
   name: z.string(),
   author: z.string(),
+  version: z.string(),
 });
 
 export type ProjectInfo = z.infer<typeof infoSchema>;
@@ -38,15 +39,14 @@ export default class Project extends Resource<ProjectInfo> {
 
   static async createFromRom(
     directoryPath: string,
-    { name, author }: ProjectInfo,
+    info: ProjectInfo,
     romFilePath: string,
   ): Promise<EitherErrorOr<Project>> {
     const errorPrefix = 'Project.createFromSource';
     let error: ErrorReport | undefined;
 
     // Resource
-    const info = { name, author };
-    const project = new Project({ directoryPath, name, info });
+    const project = new Project({ directoryPath, name: info.name, info });
     if ((error = await project.save())) {
       const errorMessage = `${errorPrefix}: failed to create resource`;
       return $EitherErrorOr.error(error.extend(errorMessage));
@@ -92,7 +92,7 @@ export default class Project extends Resource<ProjectInfo> {
 
   static async createFromTemplate(
     directoryPath: string,
-    { name, author }: ProjectInfo,
+    info: ProjectInfo,
     templatePath: string,
   ): Promise<EitherErrorOr<Project>> {
     const errorPrefix = 'Project.createFromSource';
@@ -100,13 +100,12 @@ export default class Project extends Resource<ProjectInfo> {
 
     const latestPath = await $FileSystem.join(
       directoryPath,
-      name,
+      info.name,
       Project.LATEST_DIR_NAME,
     );
 
     // Resource
-    const info = { name, author };
-    const project = new Project({ directoryPath, name, info });
+    const project = new Project({ directoryPath, name: info.name, info });
     if ((error = await project.save())) {
       const errorMessage = `${errorPrefix}: failed to create resource`;
       return $EitherErrorOr.error(error.extend(errorMessage));

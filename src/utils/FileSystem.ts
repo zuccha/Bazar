@@ -368,6 +368,19 @@ export const $FileSystem = {
       : undefined;
   },
 
+  validateIsValidVersion: async (
+    version: string,
+  ): Promise<ErrorReport | undefined> => {
+    const errorPrefix = 'FileSystem.validateIsValidVersion';
+    return !version
+      ? ErrorReport.from(`${errorPrefix}: version is empty`)
+      : !/^[a-zA-Z0-9_.-]+$/.test(version)
+      ? ErrorReport.from(
+          `${errorPrefix}: version "${version}" contains invalid characters`,
+        )
+      : undefined;
+  },
+
   validateNotExists: async (path: string): Promise<ErrorReport | undefined> => {
     const errorPrefix = 'FileSystem.validateNotExists';
     return !path

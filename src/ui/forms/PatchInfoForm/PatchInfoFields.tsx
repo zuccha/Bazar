@@ -1,4 +1,4 @@
-import { HStack, VStack } from '@chakra-ui/react';
+import { VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 import { PatchInfo } from '../../../core/Patch';
 import useFormField, { FormField } from '../../../hooks/useFormField';
@@ -6,6 +6,7 @@ import FormControl from '../../../ui-atoms/FormControl';
 import SelectorOfFiles from '../../../ui-atoms/SelectorOfFiles';
 import TextEditor from '../../../ui-atoms/TextEditor';
 import { $FileSystem } from '../../../utils/FileSystem';
+import NameVersionFields from '../NameVersionFields';
 
 export const usePatchInfoFields = (info: PatchInfo) => {
   const nameField = useFormField({
@@ -19,7 +20,9 @@ export const usePatchInfoFields = (info: PatchInfo) => {
   const versionField = useFormField({
     infoMessage: 'Version of the patch',
     initialValue: info.version,
+    isRequired: true,
     label: 'Version',
+    onValidate: $FileSystem.validateIsValidVersion,
   });
 
   const authorField = useFormField({
@@ -73,24 +76,12 @@ export default function PatchInfoFields({
 
   return (
     <VStack spacing={2} w={width}>
-      <HStack w='100%' alignItems='flex-start'>
-        <FormControl {...nameField.control} {...formControl}>
-          <TextEditor
-            isDisabled={isTurnedOff || isDisabled}
-            onChange={nameField.handleChange}
-            placeholder='Name'
-            value={nameField.value}
-          />
-        </FormControl>
-        <FormControl {...versionField.control} {...formControl} width={150}>
-          <TextEditor
-            isDisabled={isTurnedOff || isDisabled}
-            onChange={versionField.handleChange}
-            placeholder='Version'
-            value={versionField.value}
-          />
-        </FormControl>
-      </HStack>
+      <NameVersionFields
+        isDisabled={isDisabled}
+        {...formControl}
+        nameField={nameField}
+        versionField={versionField}
+      />
       <FormControl {...authorField.control} {...formControl}>
         <TextEditor
           isDisabled={isTurnedOff || isDisabled}

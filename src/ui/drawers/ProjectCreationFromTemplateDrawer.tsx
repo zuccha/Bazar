@@ -1,4 +1,4 @@
-import { Flex, VStack } from '@chakra-ui/react';
+import { Flex, HStack, VStack } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 import Project from '../../core/Project';
 import { useCollection, useSettings } from '../../core-hooks/Core';
@@ -15,6 +15,7 @@ import ErrorReport from '../../utils/ErrorReport';
 import Selector from '../../ui-atoms/Selector';
 import { useCollectionProjectSnapshotNames } from '../../core-hooks/Collection';
 import { useList } from '../../hooks/useAccessors';
+import NameVersionFields from '../forms/NameVersionFields';
 
 interface ProjectCreationFromSourceProps {
   onClose: () => void;
@@ -36,6 +37,14 @@ export default function ProjectCreationFromRomDrawer({
     isRequired: true,
     label: 'Project name',
     onValidate: $FileSystem.validateIsValidName,
+  });
+
+  const versionField = useFormField({
+    infoMessage: 'This will be the version of the project',
+    initialValue: '0.1.0',
+    isRequired: true,
+    label: 'Version',
+    onValidate: $FileSystem.validateIsValidVersion,
   });
 
   const defaultAuthor = useSetting(settings, 'newProjectDefaultAuthor');
@@ -67,9 +76,10 @@ export default function ProjectCreationFromRomDrawer({
   });
 
   const form = useForm({
-    fields: [nameField, templateNameField, locationDirPathField],
+    fields: [nameField, versionField, templateNameField, locationDirPathField],
     onSubmit: async () => {
       const name = nameField.value.trim();
+      const version = versionField.value.trim();
       const author = authorField.value.trim();
       const templateName = templateNameField.value.trim();
       const templatePath = await collection.getProjectSnapshotPath(
@@ -77,7 +87,7 @@ export default function ProjectCreationFromRomDrawer({
       );
       const errorOrProject = await Project.createFromTemplate(
         locationDirPathField.value.trim(),
-        { name, author },
+        { name, version, author },
         templatePath,
       );
       if (errorOrProject.isError) return errorOrProject.error;
@@ -120,15 +130,11 @@ export default function ProjectCreationFromRomDrawer({
     >
       <Flex direction='column' flex={1}>
         <VStack width='100%' spacing={4} flex={1}>
-          <FormControl {...nameField.control}>
-            <TextEditor
-              isDisabled={form.isSubmitting}
-              onBlur={nameField.handleBlur}
-              onChange={nameField.handleChange}
-              placeholder={nameField.control.label}
-              value={nameField.value}
-            />
-          </FormControl>
+          <NameVersionFields
+            isDisabled={form.isSubmitting}
+            nameField={nameField}
+            versionField={versionField}
+          />
 
           <FormControl {...authorField.control}>
             <TextEditor

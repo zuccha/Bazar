@@ -32,11 +32,10 @@ export default function ReleaseCreationDrawer({
 
   const versionField = useFormField({
     infoMessage: 'Version of the release',
-    initialValue: '', // TODO: project.getVersion(),
+    initialValue: project.getInfo().version,
     isRequired: true,
     label: 'Version',
-    onValidate: async (version) =>
-      version == '' ? ErrorReport.from('Version is required') : undefined,
+    onValidate: $FileSystem.validateIsValidName,
   });
 
   const form = useForm({

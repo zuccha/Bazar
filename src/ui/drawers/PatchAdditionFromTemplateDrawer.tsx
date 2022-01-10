@@ -47,7 +47,11 @@ export default function PatchAdditionFromTemplateDrawer({
   );
 
   const form = useForm({
-    fields: [templateNameField],
+    fields: [
+      templateNameField,
+      infoFields.versionField,
+      infoFields.mainFileRelativePathField,
+    ],
     onSubmit: () =>
       onAdd(templateNameField.value, {
         name: infoFields.nameField.value.trim(),

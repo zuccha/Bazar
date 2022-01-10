@@ -9,6 +9,7 @@ import FormControl from '../../ui-atoms/FormControl';
 import TextEditor from '../../ui-atoms/TextEditor';
 import ErrorReport from '../../utils/ErrorReport';
 import { $FileSystem } from '../../utils/FileSystem';
+import NameVersionFields from '../forms/NameVersionFields';
 
 interface ProjectSnapshotInfoEditorDrawerProps {
   info: ProjectInfo;
@@ -29,6 +30,14 @@ export default function ProjectSnapshotInfoEditorDrawer({
     onValidate: $FileSystem.validateIsValidName,
   });
 
+  const versionField = useFormField({
+    infoMessage: 'This is the version of the project',
+    initialValue: info.version,
+    isRequired: true,
+    label: 'Version',
+    onValidate: $FileSystem.validateIsValidVersion,
+  });
+
   const authorField = useFormField({
     infoMessage: 'Author of the project',
     initialValue: info.author,
@@ -37,9 +46,13 @@ export default function ProjectSnapshotInfoEditorDrawer({
   });
 
   const form = useForm({
-    fields: [nameField],
+    fields: [nameField, versionField],
     onSubmit: () =>
-      onEdit({ name: nameField.value, author: authorField.value }),
+      onEdit({
+        name: nameField.value,
+        version: versionField.value,
+        author: authorField.value,
+      }),
   });
 
   return (
@@ -69,17 +82,15 @@ export default function ProjectSnapshotInfoEditorDrawer({
       title='Edit config'
     >
       <VStack flex={1}>
-        <FormControl {...nameField.control}>
-          <TextEditor
-            onBlur={nameField.handleBlur}
-            onChange={nameField.handleChange}
-            placeholder={nameField.control.label}
-            value={nameField.value}
-          />
-        </FormControl>
+        <NameVersionFields
+          isDisabled={form.isSubmitting}
+          nameField={nameField}
+          versionField={versionField}
+        />
 
         <FormControl {...authorField.control}>
           <TextEditor
+            isDisabled={form.isSubmitting}
             onBlur={authorField.handleBlur}
             onChange={authorField.handleChange}
             placeholder={authorField.control.label}

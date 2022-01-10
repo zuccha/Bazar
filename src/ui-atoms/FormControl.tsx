@@ -8,6 +8,7 @@ import FormLabel from './FormLabel';
 interface FormControlProps {
   children: ReactNode;
   errorReport?: ErrorReport;
+  hideError?: boolean;
   infoMessage?: string;
   isDisabled?: boolean;
   isInvalid?: boolean;
@@ -21,6 +22,7 @@ interface FormControlProps {
 export default function FormControl({
   children,
   errorReport,
+  hideError = false,
   infoMessage,
   isDisabled,
   isInvalid,
@@ -40,7 +42,7 @@ export default function FormControl({
     >
       {!isSuccinct && <FormLabel label={label} infoMessage={infoMessage} />}
       {children}
-      {errorReport && !isTurnedOff && (
+      {errorReport && !isTurnedOff && !hideError && (
         <>
           <Flex h={2} />
           <FormError errorReport={errorReport} />

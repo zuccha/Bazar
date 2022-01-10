@@ -39,7 +39,12 @@ export default function ProjectScreenSidebarInfo({
         </Flex>
 
         <VStack spacing={1} alignItems='flex-start'>
-          <Text fontSize={14}>Author: {info.author || '-'}</Text>
+          <Text fontSize={14}>
+            <b>Author:</b> {info.author || '-'}
+          </Text>
+          <Text fontSize={14}>
+            <b>Version:</b> {info.version || '-'}
+          </Text>
         </VStack>
       </VStack>
 

@@ -20,7 +20,11 @@ export default function PatchTemplateAdditionDrawer({
   const infoFields = usePatchInfoFields(patch.getInfo());
 
   const form = useForm({
-    fields: [infoFields.nameField, infoFields.mainFileRelativePathField],
+    fields: [
+      infoFields.nameField,
+      infoFields.versionField,
+      infoFields.mainFileRelativePathField,
+    ],
     onSubmit: () =>
       onAdd({
         name: infoFields.nameField.value.trim(),

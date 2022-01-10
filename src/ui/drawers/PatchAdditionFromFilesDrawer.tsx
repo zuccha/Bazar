@@ -12,6 +12,7 @@ import TextEditor from '../../ui-atoms/TextEditor';
 import TextEditorOfPath from '../../ui-atoms/TextEditorOfPath';
 import ErrorReport from '../../utils/ErrorReport';
 import { $FileSystem } from '../../utils/FileSystem';
+import NameVersionFields from '../forms/NameVersionFields';
 
 type Source = 'file' | 'directory';
 
@@ -45,7 +46,9 @@ export default function PatchAdditionFromFilesDrawer({
   const versionField = useFormField({
     infoMessage: 'Version of the patch',
     initialValue: '',
+    isRequired: true,
     label: 'Version',
+    onValidate: $FileSystem.validateIsValidVersion,
   });
 
   const authorField = useFormField({
@@ -82,7 +85,7 @@ export default function PatchAdditionFromFilesDrawer({
   const form = useForm(
     {
       file: {
-        fields: [nameField, singleFilePathField],
+        fields: [nameField, versionField, singleFilePathField],
         onSubmit: () => {
           const singleFilePath = singleFilePathField.value.trim();
           const sourceDirectoryPath = $FileSystem.dirpath(singleFilePath);
@@ -96,7 +99,12 @@ export default function PatchAdditionFromFilesDrawer({
         },
       },
       directory: {
-        fields: [nameField, mainFileRelativePathField, sourceDirPathField],
+        fields: [
+          nameField,
+          versionField,
+          mainFileRelativePathField,
+          sourceDirPathField,
+        ],
         onSubmit: () =>
           onAddFromDirectory(sourceDirPathField.value.trim(), {
             name: nameField.value.trim(),
@@ -136,26 +144,11 @@ export default function PatchAdditionFromFilesDrawer({
     >
       <Flex direction='column' flex={1}>
         <VStack w='100%' spacing={4} flex={1}>
-          <HStack w='100%' alignItems='flex-start'>
-            <FormControl {...nameField.control}>
-              <TextEditor
-                isDisabled={form.isSubmitting}
-                onBlur={nameField.handleBlur}
-                onChange={nameField.handleChange}
-                placeholder={nameField.control.label}
-                value={nameField.value}
-              />
-            </FormControl>
-            <FormControl {...versionField.control} width={150}>
-              <TextEditor
-                isDisabled={form.isSubmitting}
-                onBlur={versionField.handleBlur}
-                onChange={versionField.handleChange}
-                placeholder={versionField.control.label}
-                value={versionField.value}
-              />
-            </FormControl>
-          </HStack>
+          <NameVersionFields
+            isDisabled={form.isSubmitting}
+            nameField={nameField}
+            versionField={versionField}
+          />
 
           <FormControl {...authorField.control}>
             <TextEditor
