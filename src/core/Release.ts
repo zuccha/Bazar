@@ -14,6 +14,7 @@ export default class Release {
   private _path: string;
 
   private _info: ReleaseInfo;
+  private _credits: string;
 
   static compareLt(release1: Release, release2: Release) {
     if (release1._info.creationDate < release2._info.creationDate) return -1;
@@ -27,15 +28,21 @@ export default class Release {
     return 0;
   }
 
-  private constructor(directoryPath: string, info: ReleaseInfo) {
+  private constructor(
+    directoryPath: string,
+    info: ReleaseInfo,
+    credits: string,
+  ) {
     this._path = directoryPath;
     this._info = info;
+    this._credits = credits;
   }
 
   static async createFromFiles(
     directoryPath: string,
     files: { romFilePath: string },
     info: ReleaseInfo,
+    credits: string,
   ): Promise<EitherErrorOr<Release>> {
     let error: ErrorReport | undefined;
 
@@ -47,6 +54,7 @@ export default class Release {
     const name = `${timestamp}-${info.version}`;
     const path = await $FileSystem.join(directoryPath, name);
     const romFilePath = await $FileSystem.join(path, `${info.name}.bps`);
+    const creditsFilePath = await $FileSystem.join(path, `credits.txt`);
 
     if (!(await $FileSystem.exists(files.romFilePath))) {
       const errorMessage = `Release.createFromFiles: file "${files.romFilePath}" does not exist`;
@@ -58,12 +66,25 @@ export default class Release {
       return $EitherErrorOr.error(ErrorReport.from(errorMessage));
     }
 
+    if ((error = await $FileSystem.createDirectory(path))) {
+      const errorMessage = `Release.createFromFiles: failed to create release directory`;
+      return $EitherErrorOr.error(ErrorReport.from(errorMessage));
+    }
+
+    // TODO: Invoke Flips instead of copying the ROM file.
     if ((error = await $FileSystem.copyFile(files.romFilePath, romFilePath))) {
+      await $FileSystem.removeDir(path);
       const errorMessage = `Release.createFromFiles: failed to copy "${files.romFilePath}" to "${romFilePath}"`;
       return $EitherErrorOr.error(ErrorReport.from(errorMessage));
     }
 
-    const release = new Release(path, info);
+    if ((error = await $FileSystem.writeFile(creditsFilePath, credits))) {
+      await $FileSystem.removeDir(path);
+      const errorMessage = `Release.createFromFiles: failed to create credits`;
+      return $EitherErrorOr.error(ErrorReport.from(errorMessage));
+    }
+
+    const release = new Release(path, info, credits);
     return $EitherErrorOr.value(release);
   }
 
@@ -71,31 +92,48 @@ export default class Release {
     directoryPath: string,
     id: string,
   ): Promise<EitherErrorOr<Release>> {
+    const errorPrefix = `Release.openFromId:`;
+
     const path = await $FileSystem.join(directoryPath, id);
     const [timestamp, version] = id.split('-');
 
     if (!timestamp || !version) {
-      const errorMessage = `Release.openFromId: invalid file name "${id}"`;
+      const errorMessage = `${errorPrefix}: invalid file name "${id}"`;
       return $EitherErrorOr.error(ErrorReport.from(errorMessage));
     }
 
     if (!$DateTime.isTimestamp(timestamp)) {
-      const errorMessage = `Release.openFromId: invalid timestamp "${timestamp}"`;
+      const errorMessage = `${errorPrefix}: invalid timestamp "${timestamp}"`;
       return $EitherErrorOr.error(ErrorReport.from(errorMessage));
     }
 
     const fileNames = await $FileSystem.getFileNames(path);
-    const fileName = fileNames.find((fileName) => fileName.endsWith('.bps'));
-    if (!fileName) {
-      const errorMessage = `Release.openFromId: no BPS file found`;
+    const bpsFileName = fileNames.find((fileName) => fileName.endsWith('.bps'));
+    if (!bpsFileName) {
+      const errorMessage = `${errorPrefix}: no BPS file found`;
       return $EitherErrorOr.error(ErrorReport.from(errorMessage));
     }
 
-    const release = new Release(path, {
-      name: fileName.slice(0, -4),
-      creationDate: $DateTime.fromTimestamp(timestamp),
-      version,
-    });
+    const creditsFilePath = await $FileSystem.join(path, 'credits.txt');
+    let credits: string = '';
+    if (await $FileSystem.exists(creditsFilePath)) {
+      const errorOrCredits = await $FileSystem.readFile(creditsFilePath);
+      if (errorOrCredits.isError) {
+        const errorMessage = `${errorPrefix}: failed to read credits file`;
+        return $EitherErrorOr.error(errorOrCredits.error.extend(errorMessage));
+      }
+      credits = errorOrCredits.value;
+    }
+
+    const release = new Release(
+      path,
+      {
+        name: bpsFileName.slice(0, -4),
+        creationDate: $DateTime.fromTimestamp(timestamp),
+        version,
+      },
+      credits,
+    );
     return $EitherErrorOr.value(release);
   }
 

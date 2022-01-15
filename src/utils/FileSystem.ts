@@ -225,6 +225,16 @@ export const $FileSystem = {
     }
   },
 
+  readFile: async (path: string): Promise<EitherErrorOr<string>> => {
+    try {
+      const content = await FS.readTextFile(path);
+      return $EitherErrorOr.value(content);
+    } catch {
+      const errorMessage = `FileSystem.readFile: failed to read file "${path}"`;
+      return $EitherErrorOr.error(ErrorReport.from(errorMessage));
+    }
+  },
+
   removeFile: async (filePath: string): Promise<ErrorReport | undefined> => {
     try {
       await FS.removeFile(filePath);
@@ -404,6 +414,22 @@ export const $FileSystem = {
       return undefined;
     } catch {
       const errorMessage = `FileSystem.zip: failed to zip directory "${dirPath}"`;
+      return ErrorReport.from(errorMessage);
+    }
+  },
+
+  writeFile: async (
+    path: string,
+    contents: string,
+  ): Promise<ErrorReport | undefined> => {
+    try {
+      const directoryPath = $FileSystem.dirpath(path);
+      if (!(await $FileSystem.exists(directoryPath)))
+        $FileSystem.createDirectory(directoryPath);
+
+      await FS.writeFile({ path, contents });
+    } catch (error) {
+      const errorMessage = `FileSystem.writeFile: failed to write file "${path}"`;
       return ErrorReport.from(errorMessage);
     }
   },

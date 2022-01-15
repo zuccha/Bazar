@@ -1,3 +1,4 @@
+import * as Tauri from '@tauri-apps/api';
 import { z } from 'zod';
 import { getter, setter } from '../utils/Accessors';
 import { $DateTime } from '../utils/DateTime';
@@ -130,8 +131,19 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
 
   // #region Properties
 
-  getRomFilePath = () => {
+  getRomFilePath = (): Promise<string> => {
     return this.getSubPath(ProjectSnapshot.ROM_FILE_NAME);
+  };
+
+  getCredits = (): string => {
+    const EOL = Tauri.os.EOL;
+
+    let credits = '';
+
+    credits += `Patches:${EOL}`;
+    credits += this.patches.map((patch) => patch.getCredits()).join(EOL);
+
+    return credits;
   };
 
   // #endregion Properties

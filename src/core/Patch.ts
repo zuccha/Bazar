@@ -140,6 +140,11 @@ export default class Patch extends Resource<PatchInfo> {
     return $EitherErrorOr.value(patch);
   }
 
+  getCredits = (): string => {
+    const { name, author } = this.getInfo();
+    return `${name} - ${author || 'unknown'}`;
+  };
+
   renameAndSetInfo = setter(
     ['info'],
     async ({

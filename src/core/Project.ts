@@ -1,3 +1,4 @@
+import * as Tauri from '@tauri-apps/api';
 import { z } from 'zod';
 import { getter, setter } from '../utils/Accessors';
 import { $DateTime } from '../utils/DateTime';
@@ -212,6 +213,23 @@ export default class Project extends Resource<ProjectInfo> {
 
   // #endregion Constructors
 
+  // #region Utils
+
+  getCredits = (): string => {
+    const EOL = Tauri.os.EOL;
+    const { name, author } = this.getInfo();
+
+    let credits = `${name}${EOL}`;
+    if (this.getInfo().author) credits += `by ${author}${EOL}`;
+    credits += EOL;
+
+    credits += this.latest.getCredits();
+
+    return credits;
+  };
+
+  // #endregion Utils
+
   // #region Backups
 
   getBackups = getter(['backups'], (): string[] => this.backups);
@@ -339,7 +357,6 @@ export default class Project extends Resource<ProjectInfo> {
   createRelease = setter(
     ['releases'],
     async (info: ReleaseInfo): Promise<ErrorReport | undefined> => {
-      // TODO: Call Flips.
       const romFilePath = await this.latest.getSubPath(
         ProjectSnapshot.ROM_FILE_NAME,
       );
@@ -348,6 +365,7 @@ export default class Project extends Resource<ProjectInfo> {
         await this.getSubPath(Project.RELEASES_DIR_NAME),
         { romFilePath },
         info,
+        this.getCredits(),
       );
 
       if (errorOrRelease.isError) {
