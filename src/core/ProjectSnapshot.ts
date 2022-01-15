@@ -353,15 +353,5 @@ export default class ProjectSnapshot extends Resource<ProjectSnapshotInfo> {
     this.patches.sort(Patch.compareLt);
   });
 
-  applyPatch = setter(
-    [],
-    async (patch: Patch, asarPath: string): Promise<EitherErrorOr<Process>> => {
-      const romPath = await this.getSubPath(ProjectSnapshot.ROM_FILE_NAME);
-      const patchPath = await patch.getMainFilePath();
-      const process = await $Shell.execute(asarPath, [patchPath, romPath]);
-      return $EitherErrorOr.value(process);
-    },
-  );
-
   // #endregion Patches
 }

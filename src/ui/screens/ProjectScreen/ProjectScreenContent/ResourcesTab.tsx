@@ -42,7 +42,7 @@ interface ResourcesTabProps<R extends Resource> {
   canOpenInEditor: boolean;
   canSaveAsTemplate: boolean;
 
-  onApply: (resource: R) => Promise<EitherErrorOr<Process>>;
+  onApply: (resources: R[]) => Promise<EitherErrorOr<Process[]>>;
   onRemove: (resource: R) => Promise<ErrorReport | undefined>;
   onOpenInEditor: (resource: R) => Promise<ErrorReport | undefined>;
 
@@ -111,50 +111,64 @@ export default function ResourcesTab<R extends Resource>({
   ] = useSafeState(false);
 
   const apply = useCallback(
-    async (resource: R): Promise<OutputChunk[]> => {
-      const newOutputChunk: OutputChunk = [];
-
-      newOutputChunk.push({
-        text: `Applying ${name} "${resource.getInfo().name}"`,
-        type: 'info',
-        isBold: true,
-      });
-
-      const processOrError = await onApply(resource);
-      if (processOrError.isError) {
-        newOutputChunk.push({
+    async (resources: R[]): Promise<OutputChunk[]> => {
+      const processesOrError = await onApply(resources);
+      if (processesOrError.isError) {
+        const chunk = {
           text: `Failed to apply ${name}`,
           type: 'failure',
           isBold: true,
-        });
-        return [newOutputChunk];
+        } as const;
+        return [[chunk]];
       }
 
-      if (processOrError.value.stdout) {
-        newOutputChunk.push({
-          text: processOrError.value.stdout,
-          type: 'plain',
-        });
-      }
-      if (processOrError.value.stderr) {
-        newOutputChunk.push({
-          text: processOrError.value.stderr,
-          type: 'failure',
-        });
-        newOutputChunk.push({
-          text: `Failed to apply ${name}`,
-          type: 'failure',
+      const newOutputChunks: OutputChunk[] = [];
+
+      const processes = processesOrError.value;
+      for (let i = 0; i < processes.length; i++) {
+        const process = processes[i];
+        const resource = resources[i];
+
+        if (!process || !resource) {
+          continue;
+        }
+
+        const chunk: OutputChunk = [];
+
+        chunk.push({
+          text: `Applying ${name} "${resource.getInfo().name}"`,
+          type: 'info',
           isBold: true,
         });
-      } else {
-        newOutputChunk.push({
-          text: `${$String.capitalize(name)} applied successfully`,
-          type: 'success',
-          isBold: true,
-        });
+
+        if (process.stdout) {
+          chunk.push({
+            text: process.stdout,
+            type: 'plain',
+          });
+        }
+        if (process.stderr) {
+          chunk.push({
+            text: process.stderr,
+            type: 'failure',
+          });
+          chunk.push({
+            text: `Failed to apply ${name}`,
+            type: 'failure',
+            isBold: true,
+          });
+        } else {
+          chunk.push({
+            text: `${$String.capitalize(name)} applied successfully`,
+            type: 'success',
+            isBold: true,
+          });
+        }
+
+        newOutputChunks.push(chunk);
       }
 
-      return [newOutputChunk];
+      return newOutputChunks;
     },
     [onApply],
   );
@@ -168,7 +182,7 @@ export default function ResourcesTab<R extends Resource>({
         return error;
       }
 
-      const newOutputChunks = await apply(resource);
+      const newOutputChunks = await apply([resource]);
       setOutputChunks(newOutputChunks);
     },
     [apply, canApply, toast],
@@ -184,10 +198,7 @@ export default function ResourcesTab<R extends Resource>({
       return error;
     }
 
-    const newOutputChunks: OutputChunk[] = [];
-    for (const resource of resources) {
-      newOutputChunks.push(...(await apply(resource)));
-    }
+    const newOutputChunks = await apply(resources);
     setOutputChunks(newOutputChunks);
   }, [apply, canApply, toast, resources]);
 

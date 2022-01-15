@@ -15,8 +15,12 @@ import ProjectSnapshot from '../../../../../../core/ProjectSnapshot';
 import { useList } from '../../../../../../hooks/useAccessors';
 import useToast from '../../../../../../hooks/useToast';
 import { TableColumn, TableRow } from '../../../../../../ui-atoms/Table';
-import { $EitherErrorOr } from '../../../../../../utils/EitherErrorOr';
+import {
+  $EitherErrorOr,
+  EitherErrorOr,
+} from '../../../../../../utils/EitherErrorOr';
 import ErrorReport from '../../../../../../utils/ErrorReport';
+import { Process } from '../../../../../../utils/Shell';
 import PatchAdditionFromFilesDrawer from '../../../../../drawers/PatchAdditionFromFilesDrawer';
 import PatchAdditionFromTemplateDrawer from '../../../../../drawers/PatchAdditionFromTemplateDrawer';
 import PatchTemplateAdditionDrawer from '../../../../../drawers/PatchTemplateAdditionDrawer';
@@ -48,13 +52,14 @@ export default function PatchesTab({
     useAddPatchToProjectSnapshotFromTemplate(projectSnapshot);
   const editPatch = useEditPatchInProjectSnapshot(projectSnapshot);
 
-  const handleApplyPatch = useCallback(
-    async (patch: Patch) => {
-      return asar.status === 'installed'
-        ? await projectSnapshot.applyPatch(patch, asar.exePath)
-        : $EitherErrorOr.error(ErrorReport.from('asar not installed'));
+  const handleApplyPatches = useCallback(
+    async (patches: Patch[]): Promise<EitherErrorOr<Process[]>> => {
+      return toolchain.applyPatches(
+        await projectSnapshot.getRomFilePath(),
+        patches,
+      );
     },
-    [projectSnapshot.applyPatch],
+    [toolchain.applyPatches],
   );
 
   const handleRemovePatch = useRemovePatchFromProjectSnapshot(projectSnapshot);
@@ -85,7 +90,7 @@ export default function PatchesTab({
       canOpenInEditor={false}
       canRemove
       canSaveAsTemplate
-      onApply={handleApplyPatch}
+      onApply={handleApplyPatches}
       onOpenInEditor={() => Promise.resolve(undefined)}
       onRemove={handleRemovePatch}
       renderInfo={(patch) =>

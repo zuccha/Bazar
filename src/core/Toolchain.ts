@@ -4,6 +4,8 @@ import { $EitherErrorOr, EitherErrorOr } from '../utils/EitherErrorOr';
 import ErrorReport from '../utils/ErrorReport';
 import { $FileSystem } from '../utils/FileSystem';
 import { $SettingsStore } from '../utils/SettingsStore';
+import { $Shell, Process } from '../utils/Shell';
+import Patch from './Patch';
 
 // #region Settings
 
@@ -437,5 +439,26 @@ export default class Toolchain {
 
   getEmbedded = (propertyName: ToolchainEmbedded): ToolEmbedded => {
     return this[propertyName];
+  };
+
+  applyPatches = async (
+    romPath: string,
+    patches: Patch[],
+  ): Promise<EitherErrorOr<Process[]>> => {
+    if (this.asar.status !== 'installed') {
+      const errorMessage = `Toolchain.applyPatches: Asar is not installed`;
+      return $EitherErrorOr.error(ErrorReport.from(errorMessage));
+    }
+
+    const processes = [];
+    for (const patch of patches) {
+      const process = await $Shell.execute(this.asar.exePath, [
+        await patch.getMainFilePath(),
+        romPath,
+      ]);
+      processes.push(process);
+    }
+
+    return $EitherErrorOr.value(processes);
   };
 }
