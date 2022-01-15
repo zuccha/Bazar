@@ -58,6 +58,8 @@ interface ResourcesTabProps<R extends Resource> {
     onClose: () => void;
   }) => ReactElement;
 
+  removeConfirmationMessage: string;
+
   columns: TableColumn<R>[];
   rows: TableRow<R>[];
 }
@@ -79,6 +81,8 @@ export default function ResourcesTab<R extends Resource>({
   renderResourceAdditionFromFilesDrawer,
   renderResourceAdditionFromTemplateDrawer,
   renderResourceSaveAsTemplateDrawer,
+
+  removeConfirmationMessage,
 
   columns,
   rows,
@@ -370,6 +374,7 @@ export default function ResourcesTab<R extends Resource>({
       {!!resourceToRemove && (
         <DialogWithIrreversibleAction
           action='Remove'
+          description={removeConfirmationMessage}
           isDisabled={handleRemove.isLoading}
           onClose={() => setResourceToRemove(undefined)}
           onDelete={() => handleRemove.call(resourceToRemove)}

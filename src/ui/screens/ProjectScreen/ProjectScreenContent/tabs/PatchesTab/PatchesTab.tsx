@@ -15,11 +15,7 @@ import ProjectSnapshot from '../../../../../../core/ProjectSnapshot';
 import { useList } from '../../../../../../hooks/useAccessors';
 import useToast from '../../../../../../hooks/useToast';
 import { TableColumn, TableRow } from '../../../../../../ui-atoms/Table';
-import {
-  $EitherErrorOr,
-  EitherErrorOr,
-} from '../../../../../../utils/EitherErrorOr';
-import ErrorReport from '../../../../../../utils/ErrorReport';
+import { EitherErrorOr } from '../../../../../../utils/EitherErrorOr';
 import { Process } from '../../../../../../utils/Shell';
 import PatchAdditionFromFilesDrawer from '../../../../../drawers/PatchAdditionFromFilesDrawer';
 import PatchAdditionFromTemplateDrawer from '../../../../../drawers/PatchAdditionFromTemplateDrawer';
@@ -93,6 +89,7 @@ export default function PatchesTab({
       onApply={handleApplyPatches}
       onOpenInEditor={() => Promise.resolve(undefined)}
       onRemove={handleRemovePatch}
+      removeConfirmationMessage="Are you sure you want to remove this patch? If the patch has already been applied, removing it from the list won't restore the changes."
       renderInfo={(patch) =>
         patch ? (
           <PatchesTabInfoWithPatch
